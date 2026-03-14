@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Room Management</title>
+  <!-- Tailwind via CDN + Font Awesome 6 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* exact same dropdown styles from index2.html */
+    .transition-side { transition: all 0.2s ease; }
+    .dropdown-arrow { transition: transform 0.2s; }
+    details[open] .dropdown-arrow { transform: rotate(90deg); }
+    details > summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+  </style>
+</head>
+<body class="bg-white font-sans antialiased">
+
+  <!-- APP CONTAINER: flex row (sidebar + main) -->
+  <div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- ========== SIDEBAR (exact copy from index2.html) ========== -->
+    <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm lg:min-h-screen shrink-0 overflow-y-auto">
+      <!-- brand -->
+      <div class="px-5 py-6 border-b border-slate-100 flex items-center gap-2">
+        <i class="fa-solid fa-utensils text-amber-600 text-xl"></i>
+        <i class="fa-solid fa-bed text-amber-600 text-xl"></i>
+        <span class="font-semibold text-lg tracking-tight text-slate-800">Lùcas<span class="text-amber-600">.admin</span></span>
+      </div>
+
+      <!-- admin badge -->
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50/60">
+        <div class="h-9 w-9 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold">A</div>
+        <div>
+          <p class="font-medium text-sm">Andreo Reyes</p>
+          <p class="text-xs text-slate-500">general manager</p>
+        </div>
+      </div>
+
+      <!-- ===== SIDEBAR MENU (grouped with dropdowns) ===== -->
+      <nav class="p-4 space-y-2 text-sm">
+
+        <!-- Dashboard -->
+        <a href="../Dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition">
+          <i class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- HOTEL MANAGEMENT GROUP (dropdown) - open with Room Management highlighted -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-amber-800 bg-amber-50 cursor-pointer transition-side">
+            <i class="fa-solid fa-hotel w-5 text-amber-600"></i>
+            <span class="font-medium">HOTEL MANAGEMENT</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-amber-600"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-200">
+            <a href="../hotel_management/front_desk_reception.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-reception w-4 text-slate-400"></i> Front Desk / Reception</a>
+            <a href="../Hotel_management/room_management.html" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100/50 text-amber-700 font-medium"><i class="fa-solid fa-bed w-4 text-amber-600"></i> Room Management</a>
+            <a href="../hotel_management/reservation_&_booking.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
+            <a href="../hotel_management/housekeeping_&_maintenance.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-broom w-4 text-slate-400"></i> Housekeeping & Maintenance</a>
+            <a href="../hotel_management/event_&_conference.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
+          </div>
+        </details>
+
+        <!-- RESTAURANT MANAGEMENT GROUP -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-solid fa-utensils w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">RESTAURANT MANAGEMENT</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../restaurant_&_management/table_reservation.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-clock w-4"></i> Table Reservation</a>
+            <a href="../restaurant_&_management/menu_management.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-bars w-4"></i> Menu Management</a>
+            <a href="../restaurant_&_management/orders_POS.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-cash-register w-4"></i> Orders / POS</a>
+            <a href="../restaurant_&_management/kitchen_orders.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-fire w-4"></i> Kitchen Orders (KOT)</a>
+            <a href="../restaurant_&_management/wait_staff_management.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-user w-4"></i> Wait Staff Management</a>
+          </div>
+        </details>
+
+        <!-- CUSTOMER MANAGEMENT -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-regular fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">CUSTOMER MANAGEMENT</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../customer_management/guest_relationship.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-handshake w-4"></i> Guest Relationship (CRM)</a>
+            <a href="../customer_management/loyalty_rewards.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-star w-4"></i> Loyalty & Rewards</a>
+            <a href="../customer_management/customer_feedback&reviews.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
+          </div>
+        </details>
+
+        <!-- OPERATIONS -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-solid fa-gears w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">OPERATIONS</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../operations/inventory_&_stocks.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-boxes w-4"></i> Inventory & Stock</a>
+            <a href="../operations/billing_and_payments.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-credit-card w-4"></i> Billing & Payments</a>
+            <a href="../operations/payment_gateway.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-wifi w-4"></i> Payment Gateway</a>
+          </div>
+        </details>
+
+        <!-- MARKETING -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-solid fa-megaphone w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">MARKETING</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../marketing/hotelmarketing_&_promotions.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-gem w-4"></i> Hotel Marketing & Promotions</a>
+            <a href="../marketing/online_ordering_integration.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-cart-shopping w-4"></i> Online Ordering Integration</a>
+          </div>
+        </details>
+
+        <!-- REPORTS & ANALYTICS -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-solid fa-chart-simple w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">REPORTS & ANALYTICS</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../reports_&_analytics/sales_report.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-chart-line w-4"></i> Sales Reports</a>
+            <a href="../reports_&_analytics/booking_reports.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-regular fa-calendar w-4"></i> Booking Reports</a>
+            <a href="../reports_&_analytics/analytics_dashboard.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-chart-pie w-4"></i> Analytics Dashboard</a>
+          </div>
+        </details>
+
+        <!-- SYSTEM -->
+        <details class="group" open>
+          <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
+            <i class="fa-solid fa-computer w-5 text-slate-400 group-open:text-amber-600"></i>
+            <span class="font-medium">SYSTEM</span>
+            <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
+          </summary>
+          <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
+            <a href="../System/channel_management.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-code-branch w-4"></i> Channel Management</a>
+            <a href="../System/door_lock_integration.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-lock w-4"></i> Door Lock Integration</a>
+            <a href="../System/settings.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-sliders w-4"></i> Settings</a>
+          </div>
+        </details>
+
+        <!-- logout -->
+        <div class="border-t border-slate-200 pt-3 mt-3">
+          <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700">
+            <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ========== MAIN CONTENT (ROOM MANAGEMENT) ========== -->
+    <main class="flex-1 p-5 lg:p-8 overflow-y-auto bg-white">
+
+      <!-- header with title and date -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Room Management</h1>
+          <p class="text-sm text-slate-500 mt-0.5">view and manage all rooms, statuses, and maintenance</p>
+        </div>
+        <div class="flex gap-3 text-sm">
+          <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate">May 21, 2025</span></span>
+          <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50" id="notificationBell"><i class="fa-regular fa-bell"></i></span>
+        </div>
+      </div>
+
+      <!-- ===== ROOM STATISTICS CARDS ===== -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p class="text-xs text-slate-500">Total rooms</p>
+          <p class="text-2xl font-semibold" id="totalRooms">48</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p class="text-xs text-slate-500">Available</p>
+          <p class="text-2xl font-semibold text-green-600" id="availableRooms">16</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p class="text-xs text-slate-500">Occupied</p>
+          <p class="text-2xl font-semibold text-blue-600" id="occupiedRooms">27</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p class="text-xs text-slate-500">Dirty / cleaning</p>
+          <p class="text-2xl font-semibold text-amber-600" id="dirtyRooms">3</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <p class="text-xs text-slate-500">Out of order</p>
+          <p class="text-2xl font-semibold text-rose-600" id="outOfOrderRooms">2</p>
+        </div>
+      </div>
+
+      <!-- ===== FILTER AND SEARCH BAR ===== -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-6 flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex gap-2 flex-wrap" id="filterButtons">
+          <button class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm filter-btn" data-filter="all">all rooms</button>
+          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 filter-btn" data-filter="available">available</button>
+          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 filter-btn" data-filter="occupied">occupied</button>
+          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 filter-btn" data-filter="dirty">dirty</button>
+          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 filter-btn" data-filter="out of order">maintenance</button>
+        </div>
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="searchInput" placeholder="search room..." class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
+        </div>
+      </div>
+
+      <!-- ===== ROOMS TABLE / GRID VIEW ===== -->
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="roomsTable">
+            <thead class="bg-slate-50 text-slate-500 text-xs border-b">
+              <tr>
+                <td class="p-4">Room</td>
+                <td class="p-4">Type</td>
+                <td class="p-4">Floor</td>
+                <td class="p-4">Status</td>
+                <td class="p-4">Housekeeping</td>
+                <td class="p-4">Guest</td>
+                <td class="p-4">Actions</td>
+              </tr>
+            </thead>
+            <tbody class="divide-y" id="tableBody">
+              <!-- rows will be populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t border-slate-200 flex items-center justify-between">
+          <span class="text-xs text-slate-500" id="paginationInfo">Showing 1-8 of 48 rooms</span>
+          <div class="flex gap-2" id="paginationControls">
+            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm" id="prevPage">Previous</button>
+            <button class="bg-amber-600 text-white px-3 py-1 rounded-lg text-sm page-btn" data-page="1">1</button>
+            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm page-btn" data-page="2">2</button>
+            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm page-btn" data-page="3">3</button>
+            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm" id="nextPage">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== BOTTOM: MAINTENANCE SCHEDULE & QUICK ACTIONS ===== -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- upcoming maintenance -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
+          <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fa-solid fa-wrench text-amber-600"></i> Scheduled maintenance</h2>
+          <div class="space-y-3" id="maintenanceList">
+            <!-- maintenance items will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- quick actions -->
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+          <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fa-regular fa-bolt text-amber-600"></i> quick actions</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="bg-white border border-slate-200 rounded-xl p-3 text-sm hover:bg-amber-100" onclick="showNotification('Feature: Add new room')">add new room</button>
+            <button class="bg-white border border-slate-200 rounded-xl p-3 text-sm hover:bg-amber-100" onclick="showNotification('Feature: Bulk update')">bulk update</button>
+            <button class="bg-white border border-slate-200 rounded-xl p-3 text-sm hover:bg-amber-100" onclick="showNotification('Feature: Maintenance log')">maintenance log</button>
+            <button class="bg-white border border-slate-200 rounded-xl p-3 text-sm hover:bg-amber-100" onclick="showNotification('Feature: Room types')">room types</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast notification (hidden by default) -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg transform transition-transform translate-y-20 opacity-0" style="transition: all 0.3s ease;">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script>
+    // Room data
+    let rooms = [
+      { id: 1, number: '101', type: 'Superior', floor: 1, status: 'available', housekeeping: 'clean', guest: null },
+      { id: 2, number: '102', type: 'Superior', floor: 1, status: 'occupied', housekeeping: 'clean', guest: 'Cruz, M.' },
+      { id: 3, number: '201', type: 'Deluxe', floor: 2, status: 'dirty', housekeeping: 'pending', guest: null },
+      { id: 4, number: '202', type: 'Deluxe', floor: 2, status: 'occupied', housekeeping: 'clean', guest: 'Kim, J.' },
+      { id: 5, number: '305', type: 'Twin', floor: 3, status: 'out of order', housekeeping: 'maintenance', guest: null },
+      { id: 6, number: '306', type: 'Twin', floor: 3, status: 'available', housekeeping: 'clean', guest: null },
+      { id: 7, number: '1204', type: 'Suite', floor: 12, status: 'occupied', housekeeping: 'clean', guest: 'Reyes, P.' },
+      { id: 8, number: '1205', type: 'Suite', floor: 12, status: 'dirty', housekeeping: 'pending', guest: null },
+      // Additional rooms to reach 48 total
+      ...Array.from({ length: 40 }, (_, i) => ({
+        id: i + 9,
+        number: `${Math.floor(i/4) + 4}0${i%4 + 1}`,
+        type: ['Standard', 'Superior', 'Deluxe', 'Twin', 'Suite'][Math.floor(Math.random() * 5)],
+        floor: Math.floor(i/4) + 4,
+        status: ['available', 'occupied', 'dirty', 'out of order'][Math.floor(Math.random() * 4)],
+        housekeeping: ['clean', 'pending', 'maintenance'][Math.floor(Math.random() * 3)],
+        guest: Math.random() > 0.7 ? 'Guest Name' : null
+      }))
+    ];
+
+    let maintenanceItems = [
+      { room: '305', task: 'AC repair', time: 'today 2:00 PM', status: 'pending' },
+      { room: '410', task: 'plumbing', time: 'tomorrow 10:00 AM', status: 'scheduled' },
+      { room: '812', task: 'painting', time: 'May 25, 9:00 AM', status: 'scheduled' }
+    ];
+
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentPage = 1;
+    const rowsPerPage = 8;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      updateDate();
+      renderTable();
+      renderMaintenance();
+      updateStatistics();
+      setupEventListeners();
+    });
+
+    function updateDate() {
+      const date = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options);
+    }
+
+    function setupEventListeners() {
+      // Search input
+      document.getElementById('searchInput').addEventListener('input', function(e) {
+        currentSearch = e.target.value.toLowerCase();
+        currentPage = 1;
+        renderTable();
+      });
+
+      // Filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('bg-amber-600', 'text-white');
+            b.classList.add('border', 'border-slate-200', 'hover:bg-slate-50');
+          });
+          this.classList.remove('border', 'border-slate-200', 'hover:bg-slate-50');
+          this.classList.add('bg-amber-600', 'text-white');
+          
+          currentFilter = this.dataset.filter;
+          currentPage = 1;
+          renderTable();
+        });
+      });
+
+      // Pagination
+      document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', function() {
+        const filteredRooms = getFilteredRooms();
+        const totalPages = Math.ceil(filteredRooms.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+        }
+      });
+
+      document.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentPage = parseInt(this.dataset.page);
+          renderTable();
+        });
+      });
+
+      // Notification bell
+      document.getElementById('notificationBell').addEventListener('click', function() {
+        showNotification('No new notifications');
+      });
+    }
+
+    function getFilteredRooms() {
+      return rooms.filter(room => {
+        // Apply status filter
+        if (currentFilter !== 'all' && room.status !== currentFilter) {
+          return false;
+        }
+        
+        // Apply search filter
+        if (currentSearch) {
+          return room.number.toLowerCase().includes(currentSearch) ||
+                 room.type.toLowerCase().includes(currentSearch) ||
+                 (room.guest && room.guest.toLowerCase().includes(currentSearch));
+        }
+        
+        return true;
+      });
+    }
+
+    function renderTable() {
+      const filteredRooms = getFilteredRooms();
+      const totalPages = Math.ceil(filteredRooms.length / rowsPerPage);
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageRooms = filteredRooms.slice(start, end);
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      pageRooms.forEach(room => {
+        const row = document.createElement('tr');
+        
+        // Status badge colors
+        const statusColors = {
+          'available': 'bg-green-100 text-green-700',
+          'occupied': 'bg-blue-100 text-blue-700',
+          'dirty': 'bg-amber-100 text-amber-700',
+          'out of order': 'bg-rose-100 text-rose-700'
+        };
+
+        const housekeepingColors = {
+          'clean': 'bg-green-100 text-green-700',
+          'pending': 'bg-amber-100 text-amber-700',
+          'maintenance': 'bg-rose-100 text-rose-700'
+        };
+
+        row.innerHTML = `
+          <td class="p-4 font-medium">${room.number}</td>
+          <td class="p-4">${room.type}</td>
+          <td class="p-4">${room.floor}</td>
+          <td class="p-4"><span class="${statusColors[room.status]} px-2 py-0.5 rounded-full text-xs">${room.status}</span></td>
+          <td class="p-4"><span class="${housekeepingColors[room.housekeeping]} px-2 py-0.5 rounded-full text-xs">${room.housekeeping}</span></td>
+          <td class="p-4 ${room.guest ? '' : 'text-slate-400'}">${room.guest || '—'}</td>
+          <td class="p-4">
+            <button class="text-amber-700 hover:underline text-xs mr-2" onclick="editRoom('${room.number}')">edit</button>
+            <button class="text-slate-400 hover:text-slate-600 text-xs" onclick="showRoomDetails('${room.number}')">${room.guest ? 'details' : 'assign'}</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Update pagination info
+      document.getElementById('paginationInfo').textContent = 
+        `Showing ${start + 1}-${Math.min(end, filteredRooms.length)} of ${filteredRooms.length} rooms`;
+
+      // Update page buttons
+      document.querySelectorAll('.page-btn').forEach((btn, index) => {
+        const pageNum = index + 1;
+        if (pageNum <= totalPages) {
+          btn.style.display = 'inline-block';
+          btn.classList.toggle('bg-amber-600', pageNum === currentPage);
+          btn.classList.toggle('text-white', pageNum === currentPage);
+          btn.classList.toggle('border', pageNum !== currentPage);
+          btn.classList.toggle('border-slate-200', pageNum !== currentPage);
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+
+      // Update statistics
+      updateStatistics();
+    }
+
+    function renderMaintenance() {
+      const maintenanceList = document.getElementById('maintenanceList');
+      maintenanceList.innerHTML = '';
+
+      maintenanceItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'flex justify-between items-center border-b pb-2';
+        div.innerHTML = `
+          <div><span class="font-medium">Room ${item.room}</span><p class="text-xs text-slate-500">${item.task} · ${item.time}</p></div>
+          <span class="bg-${item.status === 'pending' ? 'yellow' : 'green'}-100 text-${item.status === 'pending' ? 'yellow' : 'green'}-700 text-xs px-2 py-0.5 rounded-full">${item.status}</span>
+        `;
+        maintenanceList.appendChild(div);
+      });
+    }
+
+    function updateStatistics() {
+      const total = rooms.length;
+      const available = rooms.filter(r => r.status === 'available').length;
+      const occupied = rooms.filter(r => r.status === 'occupied').length;
+      const dirty = rooms.filter(r => r.status === 'dirty').length;
+      const outOfOrder = rooms.filter(r => r.status === 'out of order').length;
+
+      document.getElementById('totalRooms').textContent = total;
+      document.getElementById('availableRooms').textContent = available;
+      document.getElementById('occupiedRooms').textContent = occupied;
+      document.getElementById('dirtyRooms').textContent = dirty;
+      document.getElementById('outOfOrderRooms').textContent = outOfOrder;
+    }
+
+    // Action functions
+    function editRoom(roomNumber) {
+      showNotification(`Editing room ${roomNumber}`);
+    }
+
+    function showRoomDetails(roomNumber) {
+      showNotification(`Viewing details for room ${roomNumber}`);
+    }
+
+    // Toast notification function
+    function showNotification(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      toastMessage.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // Auto-refresh statistics every 30 seconds (simulate real-time updates)
+    setInterval(() => {
+      // Randomly update some room statuses to simulate real-time changes
+      const randomIndex = Math.floor(Math.random() * rooms.length);
+      const statuses = ['available', 'occupied', 'dirty', 'out of order'];
+      const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      if (rooms[randomIndex].status !== newStatus) {
+        rooms[randomIndex].status = newStatus;
+        renderTable();
+        showNotification(`Room ${rooms[randomIndex].number} status updated to ${newStatus}`);
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
