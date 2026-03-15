@@ -1,0 +1,8 @@
+use this in every query who have(for db connection):
+<?php
+
+require_once '../../Class/Database.php';
+$config = require_once '../../config/config.php';
+$db = new Database($config['database']);
+
+?>

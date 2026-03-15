@@ -1,0 +1,460 @@
+<?php require_once '../../controller/customer/get/reviews.php' ?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews · Customer Portal</title>
+    <!-- Tailwind via CDN + Font Awesome 6 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+      .review-card {
+        transition: box-shadow 0.2s;
+      }
+
+      .rating-star {
+        cursor: pointer;
+        transition: color 0.1s;
+      }
+
+      .hover-scale:hover {
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+
+  <body class="bg-slate-50 font-sans antialiased">
+
+    <!-- main flex wrapper (sidebar + content) -->
+    <div class="min-h-screen flex flex-col lg:flex-row">
+
+      <!-- ========== SIDEBAR (customer portal) ========== -->
+      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
+        <div class="px-6 py-7 border-b border-slate-100">
+          <div class="flex items-center gap-2 text-amber-700">
+            <i class="fa-solid fa-utensils text-xl"></i>
+            <i class="fa-solid fa-bed text-xl"></i>
+            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
+                class="text-amber-600">.stay</span></span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">customer portal · reviews</p>
+        </div>
+
+        <!-- user summary -->
+        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
+          <div
+            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
+            <?php echo htmlspecialchars($initials); ?>
+          </div>
+          <div>
+            <p class="font-medium text-slate-800"><?php echo htmlspecialchars($user['full_name']); ?></p>
+            <p class="text-xs text-slate-500 flex items-center gap-1">
+              <i class="fa-regular fa-gem text-[11px]"></i>
+              <?php
+              if ($points >= 500)
+                echo 'platinum member';
+              elseif ($points >= 200)
+                echo 'gold member';
+              elseif ($points >= 50)
+                echo 'silver member';
+              else
+                echo 'bronze member';
+              ?> · <span id="loyaltyPoints"><?php echo $points; ?></span> pts
+            </p>
+          </div>
+        </div>
+
+        <!-- navigation -->
+        <nav class="p-4 space-y-1.5 text-sm">
+          <a href="./index.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
+          <a href="./my_profile.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
+          <a href="./hotel_booking.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
+              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
+          <a href="./my_reservation.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
+          <a href="./restaurant_reservation.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
+          <a href="./order_food.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
+          <a href="./payments.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
+          <a href="./loyalty_rewards.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
+          <a href="./notifications.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
+              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
+              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
+          <div class="border-t border-slate-200 pt-3 mt-3">
+            <a href="../../controller/auth/logout.php"
+              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
+                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- ========== MAIN CONTENT (REVIEWS PAGE) ========== -->
+      <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
+
+        <!-- header -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Reviews & Feedback</h1>
+            <p class="text-sm text-slate-500 mt-0.5">share your experience and read past reviews</p>
+          </div>
+          <div
+            class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
+            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <?php echo date('l, d F Y'); ?>
+          </div>
+        </div>
+
+        <?php require_once '../message.php'; ?>
+
+        <!-- ===== LEAVE A REVIEW SECTION ===== -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
+          <h2 class="font-semibold text-xl flex items-center gap-2 mb-4">
+            <i class="fa-regular fa-pen-to-square text-amber-600"></i>
+            <span id="formTitle">write a new review</span>
+          </h2>
+
+          <form method="POST" action="../../controller/customer/post/reviews.php" id="reviewForm">
+            <input type="hidden" name="action" id="formAction" value="add_review">
+            <input type="hidden" name="review_id" id="reviewId" value="">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">select experience *</label>
+                <select name="experience" id="reviewExperience"
+                  class="w-full border <?php echo isset($_SESSION['error']['experience']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm bg-white">
+                  <option value="">Select an experience</option>
+                  <option value="Hotel stay · Deluxe Twin">Hotel stay · Deluxe Twin</option>
+                  <option value="Hotel stay · Ocean Suite">Hotel stay · Ocean Suite</option>
+                  <option value="Restaurant · Azure">Restaurant · Azure</option>
+                  <option value="Room service">Room service</option>
+                  <option value="Spa & Wellness">Spa & Wellness</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-500 mb-1">your rating *</label>
+                <div class="flex items-center gap-1 text-3xl text-slate-300" id="ratingStars">
+                  <i class="fa-regular fa-star rating-star" data-value="1"></i>
+                  <i class="fa-regular fa-star rating-star" data-value="2"></i>
+                  <i class="fa-regular fa-star rating-star" data-value="3"></i>
+                  <i class="fa-regular fa-star rating-star" data-value="4"></i>
+                  <i class="fa-regular fa-star rating-star" data-value="5"></i>
+                  <input type="hidden" name="rating" id="ratingValue" value="0">
+                  <span class="text-sm text-slate-500 ml-3" id="ratingDisplay">0/5</span>
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs text-slate-500 mb-1">your review *</label>
+                <textarea name="review_text" id="reviewText" rows="4" placeholder="Tell us about your experience..."
+                  class="w-full border <?php echo isset($_SESSION['error']['review_text']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm"><?php echo htmlspecialchars($_SESSION['form_data']['review_text'] ?? ''); ?></textarea>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs text-slate-500 mb-1">additional details (optional)</label>
+                <input type="text" name="detail" id="reviewDetail"
+                  value="<?php echo htmlspecialchars($_SESSION['form_data']['detail'] ?? ''); ?>"
+                  placeholder="e.g., room number, specific dish, etc."
+                  class="w-full border border-slate-200 rounded-xl p-3 text-sm">
+              </div>
+            </div>
+
+            <div class="flex gap-3 mt-4">
+              <button type="submit"
+                class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-medium transition"
+                id="submitBtn">submit review</button>
+              <button type="button"
+                class="border border-slate-300 px-6 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition"
+                id="cancelEditBtn" style="display: none;">cancel</button>
+              <button type="reset"
+                class="border border-slate-300 px-6 py-3 rounded-xl text-slate-700 hover:bg-slate-50 transition">clear</button>
+            </div>
+          </form>
+
+          <p class="text-xs text-green-600 mt-3 flex items-center gap-1" id="pointsHint">
+            <i class="fa-regular fa-circle-check"></i> earn 20 loyalty points per review!
+          </p>
+        </div>
+
+        <!-- ===== MY PAST REVIEWS ===== -->
+        <h2 class="font-semibold text-xl mb-4 flex items-center gap-2">
+          <i class="fa-regular fa-clock-rotate-left text-amber-600"></i> my past reviews
+        </h2>
+
+        <div id="myReviewsContainer" class="space-y-4 mb-8">
+          <?php if (empty($myReviews)): ?>
+            <div class="text-slate-400 text-center py-8 bg-white rounded-2xl border border-slate-200">
+              You haven't written any reviews yet.
+            </div>
+          <?php else: ?>
+            <?php foreach ($myReviews as $review): ?>
+              <div class="bg-white rounded-2xl border border-slate-200 p-5 review-card"
+                data-review-id="<?php echo $review['id']; ?>">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                  <div class="flex gap-3">
+                    <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+                      <i class="fa-solid <?php echo $review['icon'] ?? 'fa-pen'; ?>"></i>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-semibold"><?php echo htmlspecialchars($review['experience']); ?></h3>
+                        <div class="flex text-sm">
+                          <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <span class="<?php echo $i <= $review['rating'] ? 'text-yellow-400' : 'text-slate-300'; ?>">
+                              <?php echo $i <= $review['rating'] ? '★' : '☆'; ?>
+                            </span>
+                          <?php endfor; ?>
+                        </div>
+                        <span class="text-xs text-slate-400"><?php echo $review['rating']; ?>.0</span>
+                      </div>
+                      <p class="text-xs text-slate-500">
+                        <?php echo date('M d, Y', strtotime($review['created_at'])); ?>
+                        <?php if (!empty($review['detail'])): ?>·
+                          <?php echo htmlspecialchars($review['detail']); ?>
+                        <?php endif; ?>
+                      </p>
+                      <p class="text-sm mt-2">"<?php echo htmlspecialchars($review['review_text']); ?>"</p>
+                      <div class="flex items-center gap-3 mt-2">
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">published</span>
+                        <button type="button" class="text-xs text-amber-700 hover:underline edit-review"
+                          data-id="<?php echo $review['id']; ?>"
+                          data-experience="<?php echo htmlspecialchars($review['experience']); ?>"
+                          data-rating="<?php echo $review['rating']; ?>"
+                          data-text="<?php echo htmlspecialchars($review['review_text']); ?>"
+                          data-detail="<?php echo htmlspecialchars($review['detail'] ?? ''); ?>">
+                          edit
+                        </button>
+                        <form method="POST" action="../../controller/customer/post/reviews.php" style="display: inline;"
+                          onsubmit="return confirm('Delete this review?');">
+                          <input type="hidden" name="action" value="delete_review">
+                          <input type="hidden" name="review_id" value="<?php echo $review['id']; ?>">
+                          <button type="submit" class="text-xs text-rose-600 hover:underline">delete</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+
+        <!-- ===== RECENT REVIEWS FROM OTHER GUESTS ===== -->
+        <h2 class="font-semibold text-xl mb-4 flex items-center gap-2">
+          <i class="fa-regular fa-comments text-amber-600"></i> recent guest reviews
+        </h2>
+
+        <div id="guestReviewsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <?php if (empty($guestReviews)): ?>
+            <div class="text-slate-400 text-center py-8 bg-white rounded-2xl border border-slate-200 md:col-span-2">
+              No guest reviews yet.
+            </div>
+          <?php else: ?>
+            <?php foreach ($guestReviews as $review): ?>
+              <div class="bg-white border border-slate-200 rounded-2xl p-4 hover-scale transition">
+                <div class="flex items-center gap-2 mb-2">
+                  <div
+                    class="h-8 w-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold uppercase">
+                    <?php echo substr($review['user_name'], 0, 1); ?>
+                  </div>
+                  <div>
+                    <p class="font-medium text-sm"><?php echo htmlspecialchars($review['user_name']); ?></p>
+                    <div class="flex text-xs">
+                      <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <span class="<?php echo $i <= $review['rating'] ? 'text-yellow-400' : 'text-slate-300'; ?>">
+                          <?php echo $i <= $review['rating'] ? '★' : '☆'; ?>
+                        </span>
+                      <?php endfor; ?>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-sm">"<?php echo htmlspecialchars($review['review_text']); ?>"</p>
+                <p class="text-xs text-slate-400 mt-2">
+                  <?php echo time_elapsed_string($review['created_at']); ?> ·
+                  <?php echo htmlspecialchars($review['experience']); ?>
+                </p>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+
+        <!-- bottom hint -->
+        <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
+          ✅ Share your experience and earn loyalty points!
+        </div>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        // DOM elements
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const ratingDisplay = document.getElementById('ratingDisplay');
+        const ratingValue = document.getElementById('ratingValue');
+        const reviewForm = document.getElementById('reviewForm');
+        const formAction = document.getElementById('formAction');
+        const formTitle = document.getElementById('formTitle');
+        const reviewId = document.getElementById('reviewId');
+        const reviewExperience = document.getElementById('reviewExperience');
+        const reviewText = document.getElementById('reviewText');
+        const reviewDetail = document.getElementById('reviewDetail');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+        let currentRating = <?php echo $_SESSION['form_data']['rating'] ?? 0; ?>;
+
+        // Initialize stars from session if available
+        if (currentRating > 0) {
+          ratingStars.forEach((star, idx) => {
+            if (idx < currentRating) {
+              star.classList.remove('fa-regular', 'text-slate-300');
+              star.classList.add('fa-solid', 'text-yellow-400');
+            }
+          });
+          ratingDisplay.innerText = currentRating + '/5';
+          ratingValue.value = currentRating;
+        }
+
+        // Star rating setup
+        ratingStars.forEach(star => {
+          star.addEventListener('click', () => {
+            const val = parseInt(star.dataset.value);
+            currentRating = val;
+
+            ratingStars.forEach((s, idx) => {
+              if (idx < val) {
+                s.classList.remove('fa-regular', 'text-slate-300');
+                s.classList.add('fa-solid', 'text-yellow-400');
+              } else {
+                s.classList.remove('fa-solid', 'text-yellow-400');
+                s.classList.add('fa-regular', 'text-slate-300');
+              }
+            });
+
+            ratingDisplay.innerText = val + '/5';
+            ratingValue.value = val;
+          });
+        });
+
+        // Edit review
+        document.querySelectorAll('.edit-review').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const id = this.dataset.id;
+            const experience = this.dataset.experience;
+            const rating = parseInt(this.dataset.rating);
+            const text = this.dataset.text;
+            const detail = this.dataset.detail;
+
+            // Set form to edit mode
+            formAction.value = 'update_review';
+            reviewId.value = id;
+            formTitle.innerText = 'edit review';
+            submitBtn.innerText = 'update review';
+
+            // Populate form
+            for (let i = 0; i < reviewExperience.options.length; i++) {
+              if (reviewExperience.options[i].value === experience) {
+                reviewExperience.selectedIndex = i;
+                break;
+              }
+            }
+
+            reviewText.value = text;
+            reviewDetail.value = detail;
+
+            // Set stars
+            currentRating = rating;
+            ratingStars.forEach((s, idx) => {
+              if (idx < rating) {
+                s.classList.remove('fa-regular', 'text-slate-300');
+                s.classList.add('fa-solid', 'text-yellow-400');
+              } else {
+                s.classList.remove('fa-solid', 'text-yellow-400');
+                s.classList.add('fa-regular', 'text-slate-300');
+              }
+            });
+            ratingDisplay.innerText = rating + '/5';
+            ratingValue.value = rating;
+
+            // Show cancel button
+            cancelEditBtn.style.display = 'inline-block';
+
+            // Scroll to form
+            reviewForm.scrollIntoView({
+              behavior: 'smooth'
+            });
+          });
+        });
+
+        // Cancel edit
+        cancelEditBtn.addEventListener('click', function () {
+          resetForm();
+        });
+
+        // Reset form
+        function resetForm() {
+          formAction.value = 'add_review';
+          reviewId.value = '';
+          formTitle.innerText = 'write a new review';
+          submitBtn.innerText = 'submit review';
+          reviewForm.reset();
+
+          // Reset stars
+          currentRating = 0;
+          ratingStars.forEach(s => {
+            s.classList.remove('fa-solid', 'text-yellow-400');
+            s.classList.add('fa-regular', 'text-slate-300');
+          });
+          ratingDisplay.innerText = '0/5';
+          ratingValue.value = '0';
+
+          // Hide cancel button
+          cancelEditBtn.style.display = 'none';
+        }
+
+        // Clear form on reset
+        document.querySelector('button[type="reset"]').addEventListener('click', resetForm);
+      })();
+    </script>
+
+    <?php
+    // Helper function for time elapsed
+    function time_elapsed_string($datetime)
+    {
+      $now = new DateTime;
+      $ago = new DateTime($datetime);
+      $diff = $now->diff($ago);
+
+      if ($diff->y > 0)
+        return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
+      if ($diff->m > 0)
+        return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
+      if ($diff->d > 0)
+        return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+      if ($diff->h > 0)
+        return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+      if ($diff->i > 0)
+        return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+      return 'just now';
+    }
+    ?>
+  </body>
+
+</html>

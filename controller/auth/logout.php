@@ -1,0 +1,20 @@
+<?php
+session_start();
+
+$_SESSION = [];
+
+if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time() - 3600, '/');
+}
+
+if (isset($_COOKIE['remember_token'])) {
+    setcookie('remember_token', '', time() - 3600, '/');
+}
+if (isset($_COOKIE['user_email'])) {
+    setcookie('user_email', '', time() - 3600, '/');
+}
+
+session_destroy();
+
+header('Location: ../../index.php');
+exit();
