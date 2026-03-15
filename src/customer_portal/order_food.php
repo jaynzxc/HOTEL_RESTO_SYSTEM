@@ -32,8 +32,8 @@
           <div class="flex items-center gap-2 text-amber-700">
             <i class="fa-solid fa-utensils text-xl"></i>
             <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
+            <span class="font-semibold text-xl tracking-tight text-slate-800">Hotel and<span
+                class="text-amber-600"> Restaurant</span></span>
           </div>
           <p class="text-xs text-slate-500 mt-1">customer portal · menu / order</p>
         </div>
@@ -44,7 +44,7 @@
             class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
             MC</div>
           <div>
-            <p class="font-medium text-slate-800">Mia Cruz</p>
+            <p class="font-medium text-slate-800">Customer Name</p>
             <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-gem text-[11px]"></i> gold
               member · 1,240 pts</p>
           </div>
@@ -59,8 +59,8 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
           <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
           <a href="./my_reservation.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
@@ -68,8 +68,8 @@
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
           <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
+              class="fa-solid fa-bag-shopping w-5 text-amber-600"></i>Menu / Order Food</a>
           <a href="./payments.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
@@ -289,11 +289,6 @@
                 points</button>
             </div>
           </div>
-        </div>
-
-        <!-- bottom hint -->
-        <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
-          ✅ Menu / Order Food module — fully functional cart, starts empty. Add items to begin.
         </div>
       </main>
     </div>
