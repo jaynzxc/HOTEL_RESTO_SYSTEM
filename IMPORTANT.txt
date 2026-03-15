@@ -5,4 +5,9 @@ require_once '../../Class/Database.php';
 $config = require_once '../../config/config.php';
 $db = new Database($config['database']);
 
+$id = 1;
+
+$db->query('SELECT * FROM users WHERE id = ?', [$id])->find(); //return array pag find ginamit
+$db->query('SELECT * FROM users WHERE id = ?', [$id])->fetch_one(); //return yung value pag fetch_one() ginamit
+
 ?>
