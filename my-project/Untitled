@@ -1,0 +1,2 @@
+npm create vite@latest my-project
+cd my-project
