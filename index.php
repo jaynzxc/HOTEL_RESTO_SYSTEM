@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,15 +53,30 @@
                             class="text-slate-600 hover:text-amber-700 transition font-medium">Contact</a>
                     </div>
 
+
                     <!-- Auth Buttons -->
                     <div class="flex items-center space-x-4">
-                        <a href="#" class="hidden md:block text-slate-600 hover:text-amber-700 transition font-medium">
-                            <i class="fa-regular fa-circle-user mr-1"></i> Login
-                        </a>
-                        <a href="#"
-                            class="bg-amber-600 text-white px-6 py-2 rounded-xl hover:bg-amber-700 transition shadow-sm hover:shadow font-medium">
-                            Sign Up
-                        </a>
+                        <?php if (isset($_SESSION['user_id']) && $_SESSION['logged_in'] === true): ?>
+                            <!-- User is logged in - Show user name and logout -->
+                            <span class="hidden md:block text-slate-600">
+                                <i class="fa-regular fa-circle-user mr-1"></i>
+                                <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>
+                            </span>
+                            <a href="../../controller/auth/logout.php"
+                                class="bg-red-500 text-white px-6 py-2 rounded-xl hover:bg-red-600 transition shadow-sm hover:shadow font-medium">
+                                <i class="fa-solid fa-sign-out-alt mr-1"></i> Logout
+                            </a>
+                        <?php else: ?>
+                            <!-- User is not logged in - Show Login and Sign Up -->
+                            <a href="./src/login-register/login_form.php"
+                                class="hidden md:block text-slate-600 hover:text-amber-700 transition font-medium">
+                                <i class="fa-regular fa-circle-user mr-1"></i> Login
+                            </a>
+                            <a href="./src/login-register/register_form.php"
+                                class="bg-amber-600 text-white px-6 py-2 rounded-xl hover:bg-amber-700 transition shadow-sm hover:shadow font-medium">
+                                Sign Up
+                            </a>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Mobile Menu Button -->

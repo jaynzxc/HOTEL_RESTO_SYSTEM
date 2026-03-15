@@ -173,7 +173,8 @@ $_SESSION['old'] ??= [];
 
         <!-- Login link -->
         <p class="text-center text-sm text-slate-500 mt-6">
-          Already have an account? <a href="login.php" class="text-amber-600 font-medium hover:underline">Sign in</a>
+          Already have an account? <a href="./login_form.php" class="text-amber-600 font-medium hover:underline">Sign
+            in</a>
         </p>
       </div>
 

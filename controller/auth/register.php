@@ -4,24 +4,19 @@ require_once '../../Class/Database.php';
 $config = require_once '../../config/config.php';
 $db = new Database($config['database']);
 
-// Start session for potential error/success messages
 session_start();
 
-// Initialize session arrays if they don't exist
 $_SESSION['error'] ??= [];
 $_SESSION['success'] ??= [];
 $_SESSION['old'] ??= [];
 
-// Check if form was submitted
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location:' . $_SERVER['HTTP_REFERER'] ?? '/');
     exit();
 }
 
-// Initialize error array
 $errors = [];
 
-// Sanitize and validate inputs
 $full_name = trim(filter_input(INPUT_POST, 'full_name', FILTER_SANITIZE_STRING));
 $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
 $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING));
@@ -29,7 +24,6 @@ $password = $_POST['password'] ?? '';
 $confirm_password = $_POST['confirm_password'] ?? '';
 $terms = isset($_POST['terms']) ? true : false;
 
-// Validate full name
 if (empty($full_name)) {
     $errors['full_name'] = 'Full name is required';
 } elseif (strlen($full_name) < 2 || strlen($full_name) > 100) {
@@ -38,7 +32,6 @@ if (empty($full_name)) {
     $errors['full_name'] = 'Full name can only contain letters and spaces';
 }
 
-// Validate email
 if (empty($email)) {
     $errors['email'] = 'Email is required';
 } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -47,14 +40,12 @@ if (empty($email)) {
     $errors['email'] = 'Email must not exceed 100 characters';
 }
 
-// Validate phone (Philippines format)
 if (empty($phone)) {
     $errors['phone'] = 'Phone number is required';
 } elseif (!preg_match("/^(\+63|0)[0-9]{10}$/", preg_replace('/\s+/', '', $phone))) {
     $errors['phone'] = 'Invalid Philippine phone number format (e.g., +639123456789 or 09123456789)';
 }
 
-// Validate password
 if (empty($password)) {
     $errors['password'] = 'Password is required';
 } elseif (strlen($password) < 8) {
@@ -63,17 +54,14 @@ if (empty($password)) {
     $errors['password'] = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
 }
 
-// Validate password confirmation
 if ($password !== $confirm_password) {
     $errors['confirm_password'] = 'Passwords do not match';
 }
 
-// Validate terms
 if (!$terms) {
     $errors['terms'] = 'You must agree to the Terms of Service and Privacy Policy';
 }
 
-// If there are errors, redirect back with error messages
 if (!empty($errors)) {
     $_SESSION['error'] = $errors;
     $_SESSION['old'] = [
@@ -86,7 +74,6 @@ if (!empty($errors)) {
 }
 
 try {
-    // Check if email already exists using your Database class
     $existingEmail = $db->query("SELECT id FROM users WHERE email = :email", [
         'email' => $email
     ])->fetch_one();
@@ -101,7 +88,6 @@ try {
         exit();
     }
 
-    // Check if phone already exists using your Database class
     $existingPhone = $db->query("SELECT id FROM users WHERE phone = :phone", [
         'phone' => $phone
     ])->fetch_one();
@@ -116,13 +102,11 @@ try {
         exit();
     }
 
-    // Hash the password
     $hashed_password = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
 
-    // Insert user into database using your Database class
     $db->query(
         "INSERT INTO users (full_name, email, phone, password, created_at) 
-         VALUES (:full_name, :email, :phone, :password, NOW())",
+        VALUES (:full_name, :email, :phone, :password, NOW())",
         [
             'full_name' => $full_name,
             'email' => $email,
@@ -131,18 +115,14 @@ try {
         ]
     );
 
-    // Get the new user ID using your Database class method
     $user_id = $db->lastInsertId();
 
-    // Registration successful
     $_SESSION['success'][] = 'Registration successful! Please login.';
 
-    // Redirect to login page
     header('Location:' . $_SERVER['HTTP_REFERER'] ?? '/');
     exit();
 
 } catch (Exception $e) {
-    // Log error (in production, log to file instead of displaying)
     error_log("Registration error: " . $e->getMessage());
 
     $_SESSION['error']['database'] = 'Registration failed. Please try again later.';
