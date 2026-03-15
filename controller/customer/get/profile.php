@@ -48,6 +48,8 @@ if (empty($user['member_tier'])) {
     }
 }
 
+
+
 // Get user initials for avatar
 $first_name = $user['first_name'] ?? '';
 $last_name = $user['last_name'] ?? '';
