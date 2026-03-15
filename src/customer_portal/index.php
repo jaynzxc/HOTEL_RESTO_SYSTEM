@@ -327,11 +327,6 @@
             </div>
           </div>
         </div>
-
-        <!-- subtle footer -->
-        <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
-          <p>✅ customer portal dashboard — all modules ready for real data</p>
-        </div>
       </main>
     </div>
 
