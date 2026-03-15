@@ -42,4 +42,26 @@ class Database
     {
         return $this->statement->rowCount();
     }
+
+
+    public function beginTransaction()
+    {
+        return $this->connection->beginTransaction();
+    }
+
+    public function commit()
+    {
+        return $this->connection->commit();
+    }
+
+    public function rollBack()
+    {
+        return $this->connection->rollBack();
+    }
+
+    public function inTransaction()
+    {
+        return $this->connection->inTransaction();
+    }
+
 }
