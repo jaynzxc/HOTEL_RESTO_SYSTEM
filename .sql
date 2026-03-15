@@ -3,18 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Mar 15, 2026 at 09:38 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
-
-CREATE DATABASE hotelrestaurant;
-
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1:3307
--- Generation Time: Mar 15, 2026 at 10:47 AM
+-- Generation Time: Mar 15, 2026 at 03:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -89,9 +78,33 @@ INSERT INTO `reviews` (`id`, `user_id`, `experience`, `rating`, `review_text`, `
 CREATE TABLE `users` (
   `id` int(10) UNSIGNED NOT NULL,
   `full_name` varchar(100) NOT NULL,
+  `first_name` varchar(50) DEFAULT NULL,
+  `last_name` varchar(50) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
+  `alternative_phone` varchar(20) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` enum('male','female','prefer not to say') DEFAULT NULL,
+  `nationality` varchar(50) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
+  `country` varchar(50) DEFAULT 'Philippines',
+  `preferred_language` varchar(30) DEFAULT 'English',
   `loyalty_points` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `role` enum('customer','admin','staff') NOT NULL DEFAULT 'customer',
+  `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
+  `email_verified` tinyint(1) DEFAULT 0,
+  `email_verification_token` varchar(64) DEFAULT NULL,
+  `email_verification_expires` datetime DEFAULT NULL,
+  `phone_verified` tinyint(1) DEFAULT 0,
+  `notify_email` tinyint(1) DEFAULT 1,
+  `notify_sms` tinyint(1) DEFAULT 1,
+  `notify_promo` tinyint(1) DEFAULT 0,
+  `notify_loyalty` tinyint(1) DEFAULT 1,
+  `avatar` varchar(255) DEFAULT NULL,
+  `member_tier` enum('bronze','silver','gold','platinum') DEFAULT 'bronze',
+  `join_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `password` varchar(255) NOT NULL,
   `remember_token` varchar(64) DEFAULT NULL,
   `token_expires` datetime DEFAULT NULL,
@@ -103,9 +116,9 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `full_name`, `email`, `phone`, `loyalty_points`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`) VALUES
-(4, 'Dolo', 'janzeldols@gmail.com', '+639565819961', 3760, '$2y$12$/SKO9LWmv5yeun1lmKzy4uhW8ACUJ6SyjjTMjrqw1qi1WPhV6riQ2', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-15 09:41:34'),
-(5, 'Janzel', 'janzeldols1@gmail.com', '+639565819962', 0, '$2y$12$u0dSR8ysUZ8qE8sWigLBo.eCHxREWFLVs4w5il8iWAE71YcModD3.', NULL, NULL, '2026-03-15 09:44:16', '2026-03-15 09:44:16');
+INSERT INTO `users` (`id`, `full_name`, `first_name`, `last_name`, `email`, `phone`, `alternative_phone`, `date_of_birth`, `gender`, `nationality`, `address`, `city`, `postal_code`, `country`, `preferred_language`, `loyalty_points`, `role`, `status`, `email_verified`, `email_verification_token`, `email_verification_expires`, `phone_verified`, `notify_email`, `notify_sms`, `notify_promo`, `notify_loyalty`, `avatar`, `member_tier`, `join_date`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`) VALUES
+(4, 'Dolo', 'Dolo', '', 'janzeldols@gmail.com', '+639565819961', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 3760, 'customer', 'active', 1, NULL, NULL, 1, 1, 1, 0, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$/SKO9LWmv5yeun1lmKzy4uhW8ACUJ6SyjjTMjrqw1qi1WPhV6riQ2', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-15 13:43:57'),
+(5, 'Janzel', 'Janzel', '', 'janzeldols1@gmail.com', '+639565819962', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 0, 'customer', 'active', 1, NULL, NULL, 1, 1, 1, 0, 1, NULL, 'bronze', '2026-03-15 09:44:16', '$2y$12$u0dSR8ysUZ8qE8sWigLBo.eCHxREWFLVs4w5il8iWAE71YcModD3.', NULL, NULL, '2026-03-15 09:44:16', '2026-03-15 13:43:57');
 
 --
 -- Indexes for dumped tables
