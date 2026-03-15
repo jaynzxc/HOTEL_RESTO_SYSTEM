@@ -63,7 +63,7 @@ CREATE TABLE `bookings` (
 
 INSERT INTO `bookings` (`id`, `booking_reference`, `user_id`, `guest_first_name`, `guest_last_name`, `guest_email`, `guest_phone`, `booking_type`, `check_in`, `check_out`, `nights`, `room_id`, `room_name`, `room_price`, `adults`, `children`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `payment_method`, `payment_date`, `special_requests`, `payment_id`, `created_at`, `updated_at`) VALUES
 (1, 'HOT-202603-51A05E', 4, 'Dolo', 'dols', 'janzeldols@gmail.com', '+639565819961', 'hotel', '2026-03-16', '2026-03-18', 2, '204', 'Family Room', 5500.00, 2, 2, 11000.00, 1320.00, 12320.00, 'pending', 'unpaid', NULL, NULL, 'hi there', NULL, '2026-03-15 15:26:45', '2026-03-15 15:26:45');
-
+(6, 'roldan rexis tiu', 'roldan rexis', 'tiu', 'roldantiu@gmail.com', '0000000000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 0, 'customer', 'active', 0, NULL, NULL, 0, 1, 1, 0, 1, NULL, 'bronze', '2026-03-15 16:14:49', '$2y$12$PLACEHOLDER_HASH_FOR_Testing123', NULL, NULL, '2026-03-15 16:14:49', '2026-03-15 16:14:49'),
 -- --------------------------------------------------------
 
 --
@@ -369,6 +369,70 @@ ALTER TABLE `restaurant_reservations`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- Table structure for table `hotel_bookings`
+--
+
+CREATE TABLE `hotel_bookings` (
+  `booking_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `booking_reference` varchar(50) NOT NULL,
+  `room_type` varchar(100) NOT NULL,
+  `room_number` varchar(20) DEFAULT NULL,
+  `check_in_date` date NOT NULL,
+  `check_out_date` date NOT NULL,
+  `number_of_guests` int(11) NOT NULL DEFAULT 1,
+  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `special_requests` text DEFAULT NULL,
+  `booking_status` enum('pending','confirmed','checked_in','checked_out','cancelled') NOT NULL DEFAULT 'pending',
+  `payment_status` enum('pending','completed','refunded','failed') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `hotel_bookings`
+--
+
+INSERT INTO `hotel_bookings` (`booking_id`, `user_id`, `booking_reference`, `room_type`, `room_number`, `check_in_date`, `check_out_date`, `number_of_guests`, `total_amount`, `special_requests`, `booking_status`, `payment_status`, `created_at`, `updated_at`) VALUES
+(1, 6, 'HL-ROLDAN-001', 'Deluxe Room', '305', '2026-03-20', '2026-03-22', 2, 6500.00, 'High floor room if possible.', 'cancelled', 'completed', '2026-03-15 16:16:42', '2026-03-15 17:03:12'),
+(2, 6, 'HL-ROLDAN-PEND-001', 'Deluxe Room', '305', '2026-03-25', '2026-03-27', 2, 6500.00, 'Late check-in around 9 PM.', 'pending', 'pending', '2026-03-15 17:01:38', '2026-03-15 17:01:38');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `hotel_bookings`
+--
+ALTER TABLE `hotel_bookings`
+  ADD PRIMARY KEY (`booking_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `hotel_bookings`
+--
+ALTER TABLE `hotel_bookings`
+  MODIFY `booking_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `hotel_bookings`
+--
+ALTER TABLE `hotel_bookings`
+  ADD CONSTRAINT `hotel_bookings_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

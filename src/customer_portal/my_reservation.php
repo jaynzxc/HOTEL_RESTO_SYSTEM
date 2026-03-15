@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../Class/Database.php';
 $config = require __DIR__ . '/../../config/config.php';
 $db = new Database($config['database']);
 
-// For local/testing: allow direct access without login using user_id from query string or session
+// For local/testing: allow direct access without login using user_id from query string or session (paki palitan to ng authentication from before di kase ako maka login)
 $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : ($_SESSION['user_id'] ?? 0);
 
 // Build a lightweight current user array compatible with this page
