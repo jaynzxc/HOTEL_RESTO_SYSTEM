@@ -75,31 +75,31 @@
 
         <!-- navigation -->
         <nav class="p-4 space-y-1.5 text-sm">
-          <a href="../get/dashboard.php"
+          <a href="../customer_portal/dashboard.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="../get/my_profile.php"
+          <a href="../customer_portal/my_profile.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="../get/hotel_booking.php"
+          <a href="../customer_portal/hotel_booking.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-          <a href="../get/my_reservation.php"
+          <a href="../customer_portal/my_reservation.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="../get/restaurant_reservation.php"
+          <a href="../customer_portal/restaurant_reservation.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="../get/order_food.php"
+          <a href="../customer_portal/order_food.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="../get/payments.php"
+          <a href="../customer_portal/payments.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="../get/loyalty_rewards.php"
+          <a href="../customer_portal/loyalty_rewards.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
               class="fa-regular fa-star w-5 text-amber-600"></i>Loyalty Rewards</a>
-          <a href="../get/notifications.php"
+          <a href="../customer_portal/notifications.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
               class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
               class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
@@ -209,7 +209,8 @@
             data-points="240">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-mug-hot"></i></div>
+              <i class="fa-regular fa-mug-hot"></i>
+            </div>
             <h3 class="font-semibold">Free Coffee / Tea</h3>
             <p class="text-xs text-slate-500 mt-1">any hot beverage at Azure Lounge</p>
             <div class="flex items-center justify-between mt-4">
@@ -224,7 +225,8 @@
             data-points="480">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-bowl-food"></i></div>
+              <i class="fa-regular fa-bowl-food"></i>
+            </div>
             <h3 class="font-semibold">Complimentary Breakfast</h3>
             <p class="text-xs text-slate-500 mt-1">for one person at Azure Restaurant</p>
             <div class="flex items-center justify-between mt-4">
@@ -239,7 +241,8 @@
             data-points="600">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-clock"></i></div>
+              <i class="fa-regular fa-clock"></i>
+            </div>
             <h3 class="font-semibold">Late Check-out (2pm)</h3>
             <p class="text-xs text-slate-500 mt-1">subject to availability</p>
             <div class="flex items-center justify-between mt-4">
@@ -254,7 +257,8 @@
             data-points="360">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-wine-glass"></i></div>
+              <i class="fa-regular fa-wine-glass"></i>
+            </div>
             <h3 class="font-semibold">Welcome Drink (2 pax)</h3>
             <p class="text-xs text-slate-500 mt-1">signature cocktail or mocktail</p>
             <div class="flex items-center justify-between mt-4">
@@ -269,7 +273,8 @@
             data-points="1200">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-hotel"></i></div>
+              <i class="fa-regular fa-hotel"></i>
+            </div>
             <h3 class="font-semibold">Room Upgrade (next stay)</h3>
             <p class="text-xs text-slate-500 mt-1">deluxe to suite (subject to availability)</p>
             <div class="flex items-center justify-between mt-4">
@@ -284,7 +289,8 @@
             data-points="800">
             <div
               class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-tag"></i></div>
+              <i class="fa-regular fa-tag"></i>
+            </div>
             <h3 class="font-semibold">₱500 Discount</h3>
             <p class="text-xs text-slate-500 mt-1">on any hotel booking</p>
             <div class="flex items-center justify-between mt-4">
