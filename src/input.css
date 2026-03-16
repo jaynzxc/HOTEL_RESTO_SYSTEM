@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/* Active state (when $current_page matches) */
+.active-link {
+    background-color: #fffbeb;  /* bg-amber-50 */
+    color: #92400e;              /* text-amber-800 */
+    font-weight: 500;            /* font-medium */
+}
+
+.active-link i {
+    color: #d97706;              /* text-amber-600 */
+}
+
+/* Inactive state (default) */
+.inactive-link {
+    color: #334155;              /* text-slate-700 */
+}
+
+.inactive-link:hover {
+    background-color: #fffbeb;    /* hover:bg-amber-50 */
+}
+
+.inactive-link i {
+    color: #94a3b8;              /* text-slate-400 */
+}
