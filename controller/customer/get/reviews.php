@@ -35,7 +35,3 @@ $points = $user['loyalty_points'] ?? 0;
 
 $name_parts = explode(' ', $user['full_name']);
 $initials = strtoupper(substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? substr($name_parts[1], 0, 1) : ''));
-
-unset($_SESSION['error']);
-unset($_SESSION['success']);
-unset($_SESSION['form_data']);

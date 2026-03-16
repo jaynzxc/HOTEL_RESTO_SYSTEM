@@ -1,5 +1,6 @@
-<!DOCTYPE php>
-<php lang="en">
+<?php require_once '../../controller/customer/get/profile.php' ?>
+<!DOCTYPE html>
+<html lang="en">
 
   <head>
     <meta charset="UTF-8">
@@ -43,27 +44,41 @@
           </div>
           <p class="text-xs text-slate-500 mt-1">customer portal · my profile</p>
         </div>
+
+        <!-- User Summary from Database -->
         <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80" id="userSummary">
           <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-            MC</div>
+            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg overflow-hidden">
+            <?php if (!empty($user['avatar'])): ?>
+              <img src="../../../<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar"
+                class="w-full h-full object-cover">
+            <?php else: ?>
+              <?php echo htmlspecialchars($initials); ?>
+            <?php endif; ?>
+          </div>
           <div>
-            <p class="font-medium text-slate-800 user-name">Mia Cruz</p>
-            <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-gem text-[11px]"></i> gold
-              member · <span class="user-points">1,240</span> pts</p>
+            <p class="font-medium text-slate-800 user-name">
+              <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
+            </p>
+            <p class="text-xs text-slate-500 flex items-center gap-1">
+              <i class="fa-regular fa-gem text-[11px]"></i>
+              <?php echo htmlspecialchars($user['member_tier'] ?? 'bronze'); ?> member ·
+              <span class="user-points"><?php echo number_format($user['loyalty_points'] ?? 0); ?></span> pts
+            </p>
           </div>
         </div>
 
+        <!-- Navigation -->
         <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./index.php"
+          <a href="./dashboard.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
           <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
+              class="fa-regular fa-user w-5 text-amber-600"></i>My Profile</a>
+          <a href="./hotel_booking.php"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
+              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
           <a href="./my_reservation.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
@@ -79,12 +94,16 @@
           <a href="./loyalty_rewards.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
               class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./Notifications.php"
+          <a href="./notifications.php"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
+              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications
+            <?php if ($unread_count > 0): ?>
+              <span
+                class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full"><?php echo $unread_count; ?></span>
+            <?php endif; ?>
+          </a>
           <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="./login_form.php"
+            <a href="../../controller/auth/logout.php"
               class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
                 class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
           </div>
@@ -101,9 +120,30 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDateTime"></span>
+            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <span id="currentDateTime"></span>
           </div>
         </div>
+
+        <!-- Display Messages from Session -->
+        <?php if (!empty($_SESSION['success'])): ?>
+          <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
+            <?php foreach ($_SESSION['success'] as $message): ?>
+              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              </p>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['error'])): ?>
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
+            <ul class="list-disc list-inside text-sm">
+              <?php foreach ($_SESSION['error'] as $field => $message): ?>
+                <li><?php echo htmlspecialchars($message); ?></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+        <?php endif; ?>
 
         <!-- Profile Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -113,29 +153,56 @@
             <div class="bg-white rounded-2xl border border-slate-200 p-6 text-center">
               <div class="relative inline-block">
                 <div
-                  class="h-28 w-28 rounded-full bg-amber-200 mx-auto flex items-center justify-center text-amber-800 font-bold text-4xl border-4 border-white shadow-md"
-                  id="userInitials">MC</div>
-                <button onclick="changePhoto()"
-                  class="absolute bottom-1 right-1 bg-white rounded-full p-2 shadow-md border border-slate-200 hover:bg-slate-50 transition"
-                  title="change photo">
-                  <i class="fa-solid fa-camera text-slate-600 text-sm"></i>
-                </button>
+                  class="h-28 w-28 rounded-full bg-amber-200 mx-auto flex items-center justify-center text-amber-800 font-bold text-4xl border-4 border-white shadow-md overflow-hidden"
+                  id="userInitials">
+                  <?php if (!empty($user['avatar'])): ?>
+                    <img src="../../../<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar"
+                      class="w-full h-full object-cover">
+                  <?php else: ?>
+                    <?php echo htmlspecialchars($initials); ?>
+                  <?php endif; ?>
+                </div>
+                <form action="  " method="POST" enctype="multipart/form-data" id="avatarForm">
+                  <input type="hidden" name="action" value="upload_avatar">
+                  <input type="file" name="avatar" id="avatarInput" accept="image/*" class="hidden"
+                    onchange="document.getElementById('avatarForm').submit()">
+                  <button type="button" onclick="document.getElementById('avatarInput').click()"
+                    class="absolute bottom-1 right-1 bg-white rounded-full p-2 shadow-md border border-slate-200 hover:bg-slate-50 transition"
+                    title="change photo">
+                    <i class="fa-solid fa-camera text-slate-600 text-sm"></i>
+                  </button>
+                </form>
               </div>
-              <h2 class="font-semibold text-xl mt-3 user-name">Mia Cruz</h2>
-              <p class="text-sm text-slate-500">member since march 2024</p>
+              <h2 class="font-semibold text-xl mt-3 user-name">
+                <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
+              </h2>
+              <p class="text-sm text-slate-500">member since
+                <?php echo strtolower($user['member_since'] ?? date('F Y')); ?>
+              </p>
               <div class="flex justify-center gap-2 mt-3">
-                <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full flex items-center gap-1"><i
-                    class="fa-regular fa-gem"></i> <span class="user-membership">gold</span> tier</span>
-                <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full"><span
-                    class="user-points">1,240</span> pts</span>
+                <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                  <i class="fa-regular fa-gem"></i> <span
+                    class="user-membership"><?php echo $user['member_tier']; ?></span> tier
+                </span>
+                <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full">
+                  <span class="user-points"><?php echo number_format($user['loyalty_points']); ?></span> pts
+                </span>
               </div>
               <div class="border-t border-slate-100 mt-5 pt-4 text-left">
-                <p class="text-xs text-slate-400 flex items-center gap-2"><i
-                    class="fa-regular fa-circle-check text-green-600 w-4"></i> email verified</p>
-                <p class="text-xs text-slate-400 flex items-center gap-2 mt-2"><i
-                    class="fa-regular fa-circle-check text-green-600 w-4"></i> phone verified</p>
-                <p class="text-xs text-slate-400 flex items-center gap-2 mt-2"><i class="fa-regular fa-id-card w-4"></i>
-                  preferred guest</p>
+                <p class="text-xs text-slate-400 flex items-center gap-2">
+                  <i
+                    class="fa-regular fa-circle-check <?php echo ($user['email_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
+                  email <?php echo ($user['email_verified'] ?? 0) ? 'verified' : 'unverified'; ?>
+                </p>
+                <p class="text-xs text-slate-400 flex items-center gap-2 mt-2">
+                  <i
+                    class="fa-regular fa-circle-check <?php echo ($user['phone_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
+                  phone <?php echo ($user['phone_verified'] ?? 0) ? 'verified' : 'unverified'; ?>
+                </p>
+                <p class="text-xs text-slate-400 flex items-center gap-2 mt-2">
+                  <i class="fa-regular fa-id-card w-4"></i>
+                  <?php echo ucfirst($user['role'] ?? 'customer'); ?> account
+                </p>
               </div>
             </div>
 
@@ -145,10 +212,17 @@
                 <i class="fa-regular fa-star text-2xl text-amber-600"></i>
                 <div class="flex-1">
                   <p class="font-medium text-sm">loyalty progress</p>
-                  <p class="text-xs text-slate-600"><span class="points-to-next">760</span> more pts to reach platinum
-                  </p>
+                  <?php if ($next_tier_name !== 'platinum (max)'): ?>
+                    <p class="text-xs text-slate-600">
+                      <span class="points-to-next"><?php echo number_format($points_to_next); ?></span> more pts to reach
+                      <?php echo $next_tier_name; ?>
+                    </p>
+                  <?php else: ?>
+                    <p class="text-xs text-slate-600">You've reached the highest tier!</p>
+                  <?php endif; ?>
                   <div class="w-full bg-amber-200 h-1.5 rounded-full mt-2">
-                    <div class="bg-amber-600 h-1.5 rounded-full" id="pointsProgress" style="width: 62%"></div>
+                    <div class="bg-amber-600 h-1.5 rounded-full" id="pointsProgress"
+                      style="width: <?php echo $progress_percentage; ?>%"></div>
                   </div>
                 </div>
               </div>
@@ -169,181 +243,228 @@
 
           <!-- Right Column - Forms -->
           <div class="lg:col-span-2 space-y-6">
-            <!-- Personal Information -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
-              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3"><i
-                  class="fa-regular fa-user text-amber-600"></i> personal information</h2>
+            <!-- Personal Information Form -->
+            <form action="../../controller/customer/update/update_profile.php" method="POST"
+              class="bg-white rounded-2xl border border-slate-200 p-6">
+              <input type="hidden" name="action" value="update_profile">
+
+              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
+                <i class="fa-regular fa-user text-amber-600"></i> personal information
+              </h2>
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">first name <span
                       class="text-red-400">*</span></label>
-                  <input type="text" id="firstName" value="Mia"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                  <input type="text" name="first_name" id="firstName"
+                    value="<?php echo htmlspecialchars($_SESSION['form_data']['first_name'] ?? $user['first_name'] ?? ''); ?>"
+                    class="w-full border <?php echo isset($_SESSION['error']['first_name']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                     required>
                 </div>
+
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">last name <span class="text-red-400">*</span></label>
-                  <input type="text" id="lastName" value="Cruz"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                  <input type="text" name="last_name" id="lastName"
+                    value="<?php echo htmlspecialchars($_SESSION['form_data']['last_name'] ?? $user['last_name'] ?? ''); ?>"
+                    class="w-full border <?php echo isset($_SESSION['error']['last_name']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                     required>
                 </div>
+
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">date of birth</label>
-                  <input type="date" id="dob" value="1994-05-12"
+                  <input type="date" name="date_of_birth" id="dob"
+                    value="<?php echo htmlspecialchars($_SESSION['form_data']['date_of_birth'] ?? $user['date_of_birth'] ?? ''); ?>"
                     class="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-600 focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
+
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">gender</label>
-                  <select id="gender"
+                  <select name="gender" id="gender"
                     class="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-amber-500 outline-none">
-                    <option selected>female</option>
-                    <option>male</option>
-                    <option>prefer not to say</option>
+                    <option value="female" <?php echo (($_SESSION['form_data']['gender'] ?? $user['gender'] ?? '') == 'female') ? 'selected' : ''; ?>>female</option>
+                    <option value="male" <?php echo (($_SESSION['form_data']['gender'] ?? $user['gender'] ?? '') == 'male') ? 'selected' : ''; ?>>male</option>
+                    <option value="prefer not to say" <?php echo (($_SESSION['form_data']['gender'] ?? $user['gender'] ?? '') == 'prefer not to say') ? 'selected' : ''; ?>>prefer not to say</option>
                   </select>
                 </div>
+
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">nationality</label>
-                  <input type="text" id="nationality" value="Filipino"
+                  <input type="text" name="nationality" id="nationality"
+                    value="<?php echo htmlspecialchars($_SESSION['form_data']['nationality'] ?? $user['nationality'] ?? ''); ?>"
                     class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
               </div>
-            </div>
 
-            <!-- Contact Details -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
-              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3"><i
-                  class="fa-regular fa-address-book text-amber-600"></i> contact details</h2>
-              <div class="space-y-4 mt-5">
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">email address <span
-                      class="text-red-400">*</span></label>
-                  <div class="flex gap-2 items-center">
-                    <input type="email" id="email" value="mia.cruz@email.com"
-                      class="flex-1 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
-                      required>
-                    <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">verified</span>
+              <!-- Contact Details -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 mt-6">
+                <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
+                  <i class="fa-regular fa-address-book text-amber-600"></i> contact details
+                </h2>
+
+                <div class="space-y-4 mt-5">
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">email address <span
+                        class="text-red-400">*</span></label>
+                    <div class="flex gap-2 items-center">
+                      <input type="email" name="email" id="email"
+                        value="<?php echo htmlspecialchars($_SESSION['form_data']['email'] ?? $user['email'] ?? ''); ?>"
+                        class="flex-1 border <?php echo isset($_SESSION['error']['email']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                        required>
+                      <?php if ($user['email_verified'] ?? 0): ?>
+                        <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">verified</span>
+                      <?php else: ?>
+                        <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">unverified</span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">mobile number <span
+                        class="text-red-400">*</span></label>
+                    <div class="flex gap-2 items-center">
+                      <input type="tel" name="phone" id="phone"
+                        value="<?php echo htmlspecialchars($_SESSION['form_data']['phone'] ?? $user['phone'] ?? ''); ?>"
+                        class="flex-1 border <?php echo isset($_SESSION['error']['phone']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                        required>
+                      <?php if ($user['phone_verified'] ?? 0): ?>
+                        <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">verified</span>
+                      <?php else: ?>
+                        <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">unverified</span>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">alternative phone (optional)</label>
+                    <input type="tel" name="alternative_phone" id="altPhone"
+                      value="<?php echo htmlspecialchars($_SESSION['form_data']['alternative_phone'] ?? $user['alternative_phone'] ?? ''); ?>"
+                      placeholder="+63 ..."
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                   </div>
                 </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">mobile number <span
-                      class="text-red-400">*</span></label>
-                  <div class="flex gap-2 items-center">
-                    <input type="tel" id="phone" value="+63 917 555 1234"
-                      class="flex-1 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
-                      required>
-                    <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">verified</span>
+              </div>
+
+              <!-- Address & Preferences -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6">
+                <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
+                  <i class="fa-regular fa-map text-amber-600"></i> address & preferences
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+                  <div class="md:col-span-2">
+                    <label class="block text-xs text-slate-500 mb-1">street address</label>
+                    <input type="text" name="address" id="address"
+                      value="<?php echo htmlspecialchars($_SESSION['form_data']['address'] ?? $user['address'] ?? ''); ?>"
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">city</label>
+                    <input type="text" name="city" id="city"
+                      value="<?php echo htmlspecialchars($_SESSION['form_data']['city'] ?? $user['city'] ?? ''); ?>"
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">postal code</label>
+                    <input type="text" name="postal_code" id="postalCode"
+                      value="<?php echo htmlspecialchars($_SESSION['form_data']['postal_code'] ?? $user['postal_code'] ?? ''); ?>"
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">country</label>
+                    <input type="text" name="country" id="country"
+                      value="<?php echo htmlspecialchars($_SESSION['form_data']['country'] ?? $user['country'] ?? 'Philippines'); ?>"
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  </div>
+
+                  <div>
+                    <label class="block text-xs text-slate-500 mb-1">preferred language</label>
+                    <select name="preferred_language" id="language"
+                      class="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-amber-500 outline-none">
+                      <option value="English" <?php echo (($_SESSION['form_data']['preferred_language'] ?? $user['preferred_language'] ?? 'English') == 'English') ? 'selected' : ''; ?>>English</option>
+                      <option value="Filipino" <?php echo (($_SESSION['form_data']['preferred_language'] ?? $user['preferred_language'] ?? '') == 'Filipino') ? 'selected' : ''; ?>>Filipino</option>
+                      <option value="Japanese" <?php echo (($_SESSION['form_data']['preferred_language'] ?? $user['preferred_language'] ?? '') == 'Japanese') ? 'selected' : ''; ?>>Japanese</option>
+                    </select>
                   </div>
                 </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">alternative phone (optional)</label>
-                  <input type="tel" id="altPhone" placeholder="+63 ..."
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+              </div>
+
+              <!-- Notification Preferences -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6">
+                <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
+                  <i class="fa-regular fa-bell text-amber-600"></i> notification preferences
+                </h2>
+                <div class="space-y-3 mt-4">
+                  <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="notify_email" id="emailNotifications" <?php echo (($_SESSION['form_data']['notify_email'] ?? $user['notify_email'] ?? 1) ? 'checked' : ''); ?>
+                      class="rounded text-amber-600 focus:ring-amber-500">
+                    email about booking confirmations
+                  </label>
+                  <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="notify_sms" id="smsNotifications" <?php echo (($_SESSION['form_data']['notify_sms'] ?? $user['notify_sms'] ?? 1) ? 'checked' : ''); ?>
+                      class="rounded text-amber-600 focus:ring-amber-500">
+                    SMS for reservation reminders
+                  </label>
+                  <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="notify_promo" id="promoNotifications" <?php echo (($_SESSION['form_data']['notify_promo'] ?? $user['notify_promo'] ?? 0) ? 'checked' : ''); ?>
+                      class="rounded text-amber-600 focus:ring-amber-500">
+                    promotional offers & newsletters
+                  </label>
+                  <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="notify_loyalty" id="loyaltyNotifications" <?php echo (($_SESSION['form_data']['notify_loyalty'] ?? $user['notify_loyalty'] ?? 1) ? 'checked' : ''); ?>
+                      class="rounded text-amber-600 focus:ring-amber-500">
+                    loyalty reward updates
+                  </label>
                 </div>
               </div>
-            </div>
 
-            <!-- Address & Preferences -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
-              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3"><i
-                  class="fa-regular fa-map text-amber-600"></i> address & preferences</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-                <div class="md:col-span-2">
-                  <label class="block text-xs text-slate-500 mb-1">street address</label>
-                  <input type="text" id="address" value="15 B. Gonzales St., Barangay San Antonio"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">city</label>
-                  <input type="text" id="city" value="Makati"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">postal code</label>
-                  <input type="text" id="postalCode" value="1203"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">country</label>
-                  <input type="text" id="country" value="Philippines"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                  <label class="block text-xs text-slate-500 mb-1">preferred language</label>
-                  <select id="language"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm bg-white focus:ring-2 focus:ring-amber-500 outline-none">
-                    <option selected>English</option>
-                    <option>Filipino</option>
-                    <option>Japanese</option>
-                  </select>
-                </div>
+              <!-- Save Buttons -->
+              <div class="flex flex-wrap items-center gap-4 pt-4">
+                <button type="submit"
+                  class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm transition">save
+                  changes</button>
+                <button type="button" onclick="resetForm()"
+                  class="border border-slate-300 bg-white hover:bg-slate-50 px-8 py-3 rounded-xl font-medium text-slate-700 transition">reset</button>
               </div>
-            </div>
+            </form>
 
-            <!-- Change Password -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
-              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3"><i
-                  class="fa-solid fa-lock text-amber-600"></i> change password</h2>
+            <!-- Change Password Form (Separate Form) -->
+            <form action="../../controller/customer/update/update_profile.php" method="POST"
+              class="bg-white rounded-2xl border border-slate-200 p-6">
+              <input type="hidden" name="action" value="change_password">
+
+              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
+                <i class="fa-solid fa-lock text-amber-600"></i> change password
+              </h2>
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
                 <div class="md:col-span-2">
                   <label class="block text-xs text-slate-500 mb-1">current password</label>
-                  <input type="password" id="currentPassword" value="••••••••"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  <input type="password" name="current_password" id="currentPassword"
+                    class="w-full border <?php echo isset($_SESSION['error']['current_password']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">new password</label>
-                  <input type="password" id="newPassword"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  <input type="password" name="new_password" id="newPassword"
+                    class="w-full border <?php echo isset($_SESSION['error']['new_password']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">confirm new password</label>
-                  <input type="password" id="confirmPassword"
-                    class="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                  <input type="password" name="confirm_password" id="confirmPassword"
+                    class="w-full border <?php echo isset($_SESSION['error']['confirm_password']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
                 </div>
               </div>
               <p class="text-xs text-slate-400 mt-2">minimum 8 characters, with uppercase & number</p>
-            </div>
 
-            <!-- Notification Preferences -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
-              <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3"><i
-                  class="fa-regular fa-bell text-amber-600"></i> notification preferences</h2>
-              <div class="space-y-3 mt-4">
-                <label class="flex items-center gap-3 text-sm cursor-pointer">
-                  <input type="checkbox" id="emailNotifications" checked
-                    class="rounded text-amber-600 focus:ring-amber-500">
-                  email about booking confirmations
-                </label>
-                <label class="flex items-center gap-3 text-sm cursor-pointer">
-                  <input type="checkbox" id="smsNotifications" checked
-                    class="rounded text-amber-600 focus:ring-amber-500">
-                  SMS for reservation reminders
-                </label>
-                <label class="flex items-center gap-3 text-sm cursor-pointer">
-                  <input type="checkbox" id="promoNotifications" class="rounded text-amber-600 focus:ring-amber-500">
-                  promotional offers & newsletters
-                </label>
-                <label class="flex items-center gap-3 text-sm cursor-pointer">
-                  <input type="checkbox" id="loyaltyNotifications" checked
-                    class="rounded text-amber-600 focus:ring-amber-500">
-                  loyalty reward updates
-                </label>
+              <div class="mt-4">
+                <button type="submit"
+                  class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-xl font-medium shadow-sm transition text-sm">update
+                  password</button>
               </div>
-            </div>
-
-            <!-- Save Buttons -->
-            <div class="flex flex-wrap items-center gap-4 pt-4">
-              <button onclick="saveProfile()"
-                class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-xl font-medium shadow-sm transition">save
-                changes</button>
-              <button onclick="resetForm()"
-                class="border border-slate-300 bg-white hover:bg-slate-50 px-8 py-3 rounded-xl font-medium text-slate-700 transition">reset</button>
-            </div>
+            </form>
           </div>
-        </div>
-
-        <!-- Bottom Hint -->
-        <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
-          ✅ My Profile module — personal info, contact, address, password, preferences, and account actions.
         </div>
       </main>
     </div>
@@ -355,22 +476,23 @@
       // ==================== GLOBAL STATE ====================
       const App = {
         user: {
-          name: 'Mia Cruz',
-          initials: 'MC',
-          email: 'mia.cruz@email.com',
-          phone: '+63 917 555 1234',
-          membership: 'gold',
-          points: 1240,
-          joinDate: '2024-03-15',
-          dob: '1994-05-12',
-          gender: 'female',
-          nationality: 'Filipino',
-          altPhone: '',
-          address: '15 B. Gonzales St., Barangay San Antonio',
-          city: 'Makati',
-          postalCode: '1203',
-          country: 'Philippines',
-          language: 'English'
+          name: '<?php echo addslashes($user['full_name'] ?? ''); ?>',
+          firstName: '<?php echo addslashes($user['first_name'] ?? ''); ?>',
+          lastName: '<?php echo addslashes($user['last_name'] ?? ''); ?>',
+          initials: '<?php echo addslashes($initials); ?>',
+          email: '<?php echo addslashes($user['email'] ?? ''); ?>',
+          phone: '<?php echo addslashes($user['phone'] ?? ''); ?>',
+          membership: '<?php echo $user['member_tier'] ?? 'bronze'; ?>',
+          points: <?php echo $user['loyalty_points'] ?? 0; ?>,
+          dob: '<?php echo $user['date_of_birth'] ?? ''; ?>',
+          gender: '<?php echo $user['gender'] ?? 'female'; ?>',
+          nationality: '<?php echo addslashes($user['nationality'] ?? ''); ?>',
+          altPhone: '<?php echo addslashes($user['alternative_phone'] ?? ''); ?>',
+          address: '<?php echo addslashes($user['address'] ?? ''); ?>',
+          city: '<?php echo addslashes($user['city'] ?? ''); ?>',
+          postalCode: '<?php echo addslashes($user['postal_code'] ?? ''); ?>',
+          country: '<?php echo addslashes($user['country'] ?? 'Philippines'); ?>',
+          language: '<?php echo addslashes($user['preferred_language'] ?? 'English'); ?>'
         },
 
         notifications: [
@@ -380,48 +502,8 @@
         ],
 
         init() {
-          this.loadState();
-          this.updateUI();
-          this.setupEventListeners();
           this.updateDateTime();
           setInterval(() => this.updateDateTime(), 60000);
-        },
-
-        loadState() {
-          const saved = localStorage.getItem('lucasPortal');
-          if (saved) {
-            try {
-              const data = JSON.parse(saved);
-              if (data.user) this.user = { ...this.user, ...data.user };
-              if (data.notifications) this.notifications = data.notifications;
-            } catch (e) {
-              console.error('Failed to load state:', e);
-            }
-          }
-        },
-
-        saveState() {
-          localStorage.setItem('lucasPortal', JSON.stringify({
-            user: this.user,
-            notifications: this.notifications
-          }));
-        },
-
-        updateUI() {
-          document.querySelectorAll('.user-name').forEach(el => el.textContent = this.user.name);
-          document.querySelectorAll('.user-points').forEach(el => el.textContent = this.user.points.toLocaleString());
-          document.querySelectorAll('.user-membership').forEach(el => el.textContent = this.user.membership);
-          document.getElementById('userInitials').textContent = this.user.initials;
-
-          const unreadCount = this.notifications.filter(n => !n.read).length;
-          document.querySelectorAll('.notification-count').forEach(el => el.textContent = unreadCount);
-
-          const pointsToNext = 2000 - this.user.points;
-          document.querySelectorAll('.points-to-next').forEach(el => el.textContent = Math.max(0, pointsToNext));
-
-          const progress = (this.user.points / 2000) * 100;
-          const progressBar = document.getElementById('pointsProgress');
-          if (progressBar) progressBar.style.width = `${Math.min(progress, 100)}%`;
         },
 
         updateDateTime() {
@@ -444,10 +526,10 @@
           };
 
           toast.className = `toast ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3`;
-          toast.innerphp = `
-          <i class="fa-regular ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
-          <span class="text-sm font-medium">${message}</span>
-        `;
+          toast.innerHTML = `
+                    <i class="fa-regular ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
+                    <span class="text-sm font-medium">${message}</span>
+                `;
 
           container.appendChild(toast);
 
@@ -467,129 +549,32 @@
         }
       };
 
-      // ==================== NAVIGATION ====================
-      function navigateTo(page) {
-        const urls = {
-          'dashboard': 'dashboard.php',
-          'profile': 'my_profile.php',
-          'hotel': 'hotel_booking.php',
-          'reservations': 'my_reservation.php',
-          'restaurant': 'restaurant_reservation.php',
-          'menu': 'order_food.php',
-          'payments': 'payments.php',
-          'loyalty': 'loyalty_rewards.php',
-          'reviews': 'reviews.php',
-          'notifications': 'Notifications.php',
-          'help': 'help_n_support.php'
-        };
-
-        if (urls[page]) {
-          window.location.href = urls[page];
-        } else {
-          App.showToast('Page not found', 'error');
-        }
-      }
-
-      function logout() {
-        if (confirm('Are you sure you want to logout?')) {
-          window.location.href = 'index.php';
-        }
-      }
-
       // ==================== PROFILE FUNCTIONS ====================
-      function saveProfile() {
-        // Get form values
-        const firstName = document.getElementById('firstName').value.trim();
-        const lastName = document.getElementById('lastName').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const dob = document.getElementById('dob').value;
-        const gender = document.getElementById('gender').value;
-        const nationality = document.getElementById('nationality').value;
-        const altPhone = document.getElementById('altPhone').value.trim();
-        const address = document.getElementById('address').value;
-        const city = document.getElementById('city').value;
-        const postalCode = document.getElementById('postalCode').value;
-        const country = document.getElementById('country').value;
-        const language = document.getElementById('language').value;
+      function resetForm() {
+        if (confirm('Reset all changes?')) {
+          document.getElementById('firstName').value = App.user.firstName;
+          document.getElementById('lastName').value = App.user.lastName;
+          document.getElementById('email').value = App.user.email;
+          document.getElementById('phone').value = App.user.phone;
+          document.getElementById('dob').value = App.user.dob;
+          document.getElementById('gender').value = App.user.gender;
+          document.getElementById('nationality').value = App.user.nationality;
+          document.getElementById('altPhone').value = App.user.altPhone;
+          document.getElementById('address').value = App.user.address;
+          document.getElementById('city').value = App.user.city;
+          document.getElementById('postalCode').value = App.user.postalCode;
+          document.getElementById('country').value = App.user.country;
+          document.getElementById('language').value = App.user.language;
 
-        // Validate required fields
-        if (!firstName || !lastName) {
-          App.showToast('First name and last name are required', 'error');
-          return;
+          App.showToast('Form reset', 'info');
         }
-
-        if (!email) {
-          App.showToast('Email is required', 'error');
-          return;
-        }
-
-        if (!App.validateEmail(email)) {
-          App.showToast('Please enter a valid email address', 'error');
-          return;
-        }
-
-        if (!phone) {
-          App.showToast('Phone number is required', 'error');
-          return;
-        }
-
-        if (!App.validatePhone(phone)) {
-          App.showToast('Please enter a valid phone number', 'error');
-          return;
-        }
-
-        // Update user object
-        App.user = {
-          ...App.user,
-          name: `${firstName} ${lastName}`,
-          initials: `${firstName[0]}${lastName[0]}`,
-          email,
-          phone,
-          dob,
-          gender,
-          nationality,
-          altPhone,
-          address,
-          city,
-          postalCode,
-          country,
-          language
-        };
-
-        // Save notification preferences
-        const preferences = {
-          email: document.getElementById('emailNotifications').checked,
-          sms: document.getElementById('smsNotifications').checked,
-          promo: document.getElementById('promoNotifications').checked,
-          loyalty: document.getElementById('loyaltyNotifications').checked
-        };
-        localStorage.setItem('notificationPreferences', JSON.stringify(preferences));
-
-        App.saveState();
-        App.updateUI();
-        App.showToast('Profile updated successfully!', 'success');
-      }
-
-      function changePhoto() {
-        // Simulate photo upload
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.onchange = (e) => {
-          if (e.target.files[0]) {
-            App.showToast('Photo updated successfully!', 'success');
-          }
-        };
-        fileInput.click();
       }
 
       function deactivateAccount() {
         if (confirm('Are you absolutely sure? This action cannot be undone.')) {
           if (confirm('All your data will be permanently deleted. Continue?')) {
-            localStorage.removeItem('lucasPortal');
             App.showToast('Account deactivated', 'info');
-            setTimeout(() => window.location.href = 'index.php', 1500);
+            setTimeout(() => window.location.href = '../../controller/auth/logout.php', 1500);
           }
         }
       }
@@ -611,64 +596,6 @@
         App.showToast('Data download started', 'success');
       }
 
-      function changePassword() {
-        const current = document.getElementById('currentPassword').value;
-        const newPass = document.getElementById('newPassword').value;
-        const confirm = document.getElementById('confirmPassword').value;
-
-        if (!current || !newPass || !confirm) {
-          App.showToast('Please fill all password fields', 'error');
-          return;
-        }
-
-        if (newPass !== confirm) {
-          App.showToast('New passwords do not match', 'error');
-          return;
-        }
-
-        if (newPass.length < 8) {
-          App.showToast('Password must be at least 8 characters', 'error');
-          return;
-        }
-
-        if (!/[A-Z]/.test(newPass)) {
-          App.showToast('Password must contain at least one uppercase letter', 'error');
-          return;
-        }
-
-        if (!/[0-9]/.test(newPass)) {
-          App.showToast('Password must contain at least one number', 'error');
-          return;
-        }
-
-        App.showToast('Password changed successfully!', 'success');
-
-        // Clear password fields
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-      }
-
-      function resetForm() {
-        if (confirm('Reset all changes?')) {
-          document.getElementById('firstName').value = App.user.name.split(' ')[0];
-          document.getElementById('lastName').value = App.user.name.split(' ')[1] || '';
-          document.getElementById('email').value = App.user.email;
-          document.getElementById('phone').value = App.user.phone;
-          document.getElementById('dob').value = App.user.dob || '1994-05-12';
-          document.getElementById('gender').value = App.user.gender || 'female';
-          document.getElementById('nationality').value = App.user.nationality || 'Filipino';
-          document.getElementById('altPhone').value = App.user.altPhone || '';
-          document.getElementById('address').value = App.user.address || '';
-          document.getElementById('city').value = App.user.city || '';
-          document.getElementById('postalCode').value = App.user.postalCode || '';
-          document.getElementById('country').value = App.user.country || '';
-          document.getElementById('language').value = App.user.language || 'English';
-
-          App.showToast('Form reset', 'info');
-        }
-      }
-
       function setupEventListeners() {
         // Real-time validation
         document.getElementById('email')?.addEventListener('blur', function () {
@@ -686,58 +613,14 @@
             this.classList.remove('border-red-500');
           }
         });
-
-        // Password strength indicator
-        document.getElementById('newPassword')?.addEventListener('input', function () {
-          const strength = calculatePasswordStrength(this.value);
-          const indicator = document.getElementById('passwordStrength');
-          if (!indicator) {
-            const div = document.createElement('div');
-            div.id = 'passwordStrength';
-            div.className = 'text-xs mt-1';
-            this.parentNode.appendChild(div);
-          }
-          const strengthEl = document.getElementById('passwordStrength');
-          if (strengthEl) {
-            strengthEl.textContent = `Strength: ${strength}`;
-            strengthEl.className = `text-xs mt-1 ${strength === 'Strong' ? 'text-green-600' :
-                strength === 'Medium' ? 'text-amber-600' :
-                  'text-red-600'
-              }`;
-          }
-        });
-      }
-
-      function calculatePasswordStrength(password) {
-        if (password.length < 8) return 'Weak';
-        let score = 0;
-        if (/[A-Z]/.test(password)) score++;
-        if (/[a-z]/.test(password)) score++;
-        if (/[0-9]/.test(password)) score++;
-        if (/[^A-Za-z0-9]/.test(password)) score++;
-
-        if (score >= 4 && password.length >= 10) return 'Strong';
-        if (score >= 3) return 'Medium';
-        return 'Weak';
       }
 
       // Initialize
       document.addEventListener('DOMContentLoaded', () => {
         App.init();
         setupEventListeners();
-
-        // Load notification preferences
-        const prefs = localStorage.getItem('notificationPreferences');
-        if (prefs) {
-          try {
-            const p = JSON.parse(prefs);
-            document.getElementById('emailNotifications').checked = p.email !== false;
-            document.getElementById('smsNotifications').checked = p.sms !== false;
-            document.getElementById('promoNotifications').checked = p.promo || false;
-            document.getElementById('loyaltyNotifications').checked = p.loyalty !== false;
-          } catch (e) { }
-        }
       });
     </script>
   </body>
-</php>
+
+</html>

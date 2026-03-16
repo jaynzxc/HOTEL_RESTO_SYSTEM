@@ -73,7 +73,8 @@
             <p class="font-medium text-slate-800">J. Mateo <span
                 class="text-xs bg-amber-100 px-2 py-0.5 rounded-full">maître d'</span></p>
             <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-bell text-[11px]"></i>
-              <span id="sidebarNotificationCount">0</span> notifications</p>
+              <span id="sidebarNotificationCount">0</span> notifications
+            </p>
           </div>
         </div>
 

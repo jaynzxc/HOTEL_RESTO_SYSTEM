@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../../../Class/Database.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
     header('Location: ../../view/auth/login.php');
     exit();
@@ -11,12 +10,10 @@ if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
 $config = require_once __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
 
-// Initialize session arrays for messages
 $_SESSION['error'] ??= [];
 $_SESSION['success'] ??= [];
 $_SESSION['form_data'] ??= [];
 
-// Get user data with all profile fields
 $user = $db->query(
     "SELECT 
         id, full_name, first_name, last_name, email, phone, alternative_phone,
@@ -34,7 +31,6 @@ if (!$user) {
     exit();
 }
 
-// Calculate tier based on points if not set
 if (empty($user['member_tier'])) {
     $points = $user['loyalty_points'] ?? 0;
     if ($points >= 2000) {
@@ -63,7 +59,6 @@ $initials = strtoupper(
     (isset($last_name) ? substr($last_name, 0, 1) : '')
 );
 
-// Calculate points to next tier
 $next_tier_threshold = 0;
 $next_tier_name = '';
 
@@ -86,10 +81,4 @@ $progress_percentage = $next_tier_threshold > 0
     ? min(100, ($user['loyalty_points'] / $next_tier_threshold) * 100)
     : 100;
 
-// Get unread notifications count (placeholder)
 $unread_count = 3;
-
-// Clear session data after displaying
-unset($_SESSION['error']);
-unset($_SESSION['success']);
-unset($_SESSION['form_data']);
