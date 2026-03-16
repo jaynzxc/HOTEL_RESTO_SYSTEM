@@ -106,7 +106,7 @@ session_start();
                         Book your stay, reserve a table, or order online. Your comfort is our priority.
                     </p>
                     <div class="flex flex-wrap gap-4">
-                        <a href="#"
+                        <a href="./src/customer_portal/hotel_booking.php"
                             class="bg-amber-600 text-white px-8 py-4 rounded-xl text-lg font-medium hover:bg-amber-700 transition shadow-lg hover:shadow-xl flex items-center gap-2">
                             <i class="fa-regular fa-calendar-check"></i> Book a Room
                         </a>

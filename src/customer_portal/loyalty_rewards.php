@@ -37,12 +37,12 @@
           opacity: 1;
         }
       }
-      
+
       .reward-card.disabled {
         opacity: 0.6;
         pointer-events: none;
       }
-      
+
       .balance-warning {
         background: linear-gradient(135deg, #ef4444, #dc2626);
       }
@@ -90,11 +90,13 @@
               <i class="fa-solid fa-exclamation-triangle text-2xl"></i>
               <div>
                 <p class="font-semibold">Outstanding Balance Detected</p>
-                <p class="text-sm opacity-90">You have ₱<?php echo number_format($totalOutstanding, 2); ?> in unpaid bookings.</p>
+                <p class="text-sm opacity-90">You have ₱<?php echo number_format($totalOutstanding, 2); ?> in unpaid
+                  bookings.</p>
                 <p class="text-xs opacity-75 mt-1">Please clear your balance before redeeming rewards.</p>
               </div>
             </div>
-            <a href="./payments.php" class="bg-white text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition">
+            <a href="./payments.php"
+              class="bg-white text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition">
               Go to Payments
             </a>
           </div>
@@ -170,109 +172,61 @@
           rewards you can redeem</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
 
-          <!-- reward 1 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="240">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-mug-hot"></i>
+          <?php if (empty($availableRewards)): ?>
+            <div class="col-span-3 text-center py-8 text-slate-500">
+              <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
+              <p>No rewards available at the moment.</p>
             </div>
-            <h3 class="font-semibold">Free Coffee / Tea</h3>
-            <p class="text-xs text-slate-500 mt-1">any hot beverage at Azure Lounge</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">240 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="Free Coffee / Tea" data-cost="240" data-experience="Beverage"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 2 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="480">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-bowl-food"></i>
-            </div>
-            <h3 class="font-semibold">Complimentary Breakfast</h3>
-            <p class="text-xs text-slate-500 mt-1">for one person at Azure Restaurant</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">480 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="Complimentary Breakfast" data-cost="480" data-experience="Dining"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 3 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="600">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-clock"></i>
-            </div>
-            <h3 class="font-semibold">Late Check-out (2pm)</h3>
-            <p class="text-xs text-slate-500 mt-1">subject to availability</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">600 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="Late Check-out" data-cost="600" data-experience="Hotel Stay"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 4 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="360">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-wine-glass"></i>
-            </div>
-            <h3 class="font-semibold">Welcome Drink (2 pax)</h3>
-            <p class="text-xs text-slate-500 mt-1">signature cocktail or mocktail</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">360 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="Welcome Drink" data-cost="360" data-experience="Dining"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 5 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="1200">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-hotel"></i>
-            </div>
-            <h3 class="font-semibold">Room Upgrade (next stay)</h3>
-            <p class="text-xs text-slate-500 mt-1">deluxe to suite (subject to availability)</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">1,200 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="Room Upgrade" data-cost="1200" data-experience="Hotel Stay"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 6 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
-            data-points="800">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-tag"></i>
-            </div>
-            <h3 class="font-semibold">₱500 Discount</h3>
-            <p class="text-xs text-slate-500 mt-1">on any hotel booking</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">800 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
-                data-reward="₱500 Discount" data-cost="800" data-experience="Hotel Stay"
-                <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>redeem</button>
-            </div>
-          </div>
+          <?php else: ?>
+            <?php foreach ($availableRewards as $reward):
+              // Determine icon based on category
+              $icon = 'fa-gift';
+              switch ($reward['category']) {
+                case 'beverage':
+                  $icon = 'fa-mug-hot';
+                  break;
+                case 'dining':
+                  $icon = 'fa-utensils';
+                  break;
+                case 'hotel':
+                  $icon = 'fa-hotel';
+                  break;
+                case 'spa':
+                  $icon = 'fa-spa';
+                  break;
+                default:
+                  $icon = 'fa-gift';
+              }
+              ?>
+              <div
+                class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
+                data-points="<?php echo $reward['points_cost']; ?>">
+                <div
+                  class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
+                  <i class="fa-regular <?php echo $icon; ?>"></i>
+                </div>
+                <h3 class="font-semibold"><?php echo htmlspecialchars($reward['reward_name']); ?></h3>
+                <p class="text-xs text-slate-500 mt-1"><?php echo htmlspecialchars($reward['description']); ?></p>
+                <div class="flex items-center justify-between mt-4">
+                  <span class="font-bold text-amber-700"><?php echo number_format($reward['points_cost']); ?> pts</span>
+                  <button
+                    class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
+                    data-reward="<?php echo htmlspecialchars($reward['reward_name']); ?>"
+                    data-cost="<?php echo $reward['points_cost']; ?>"
+                    data-experience="<?php echo htmlspecialchars($reward['category']); ?>" <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>
+                    redeem
+                  </button>
+                </div>
+                <?php if ($reward['stock_limit'] !== null): ?>
+                  <p class="text-xs text-slate-400 mt-2">
+                    <i class="fa-regular fa-box mr-1"></i>
+                    <?php echo max(0, $reward['stock_limit'] - $reward['times_redeemed']); ?> left
+                  </p>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
-
         <!-- ===== POINTS EARNING HISTORY ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
@@ -424,7 +378,7 @@
         document.querySelectorAll('.redeem-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
+
             // Check for outstanding balance first
             if (hasOutstandingBalance) {
               showBalanceWarning();
@@ -481,7 +435,6 @@
                 btn.innerHTML = 'redeem';
               }
             } catch (error) {
-              showToast('An error occurred. Please try again.', 'error');
               btn.disabled = false;
               btn.innerHTML = 'redeem';
             }
