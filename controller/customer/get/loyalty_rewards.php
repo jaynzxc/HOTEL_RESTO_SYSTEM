@@ -19,6 +19,24 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
+// Check for outstanding balance (unpaid bookings and reservations)
+$outstandingBookings = $db->query(
+    "SELECT COALESCE(SUM(total_amount), 0) as total 
+     FROM bookings 
+     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+    ['user_id' => $_SESSION['user_id']]
+)->fetch_one();
+
+$outstandingReservations = $db->query(
+    "SELECT COALESCE(SUM(down_payment), 0) as total 
+     FROM restaurant_reservations 
+     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+    ['user_id' => $_SESSION['user_id']]
+)->fetch_one();
+
+$totalOutstanding = ($outstandingBookings['total'] ?? 0) + ($outstandingReservations['total'] ?? 0);
+$hasOutstandingBalance = $totalOutstanding > 0;
+
 // Get points history - FIXED the redemption points to use actual points_cost
 $pointsHistory = $db->query(
     "SELECT 
@@ -94,3 +112,24 @@ if ($tier === 'platinum' && $points >= 5000) {
 // Get user initials
 $name_parts = explode(' ', trim($user['full_name']));
 $initials = strtoupper(substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? substr($name_parts[1], 0, 1) : ''));
+
+// Store data for view
+$viewData = [
+    'user' => $user,
+    'pointsHistory' => $pointsHistory,
+    'points' => $points,
+    'tier' => $tier,
+    'nextTier' => $nextTier,
+    'nextThreshold' => $nextThreshold,
+    'currentThreshold' => $currentThreshold,
+    'perks' => $perks,
+    'pointsToNext' => $pointsToNext,
+    'progress' => $progress,
+    'initials' => $initials,
+    'totalOutstanding' => $totalOutstanding,
+    'hasOutstandingBalance' => $hasOutstandingBalance
+];
+
+// Extract variables for view
+extract($viewData);
+?>

@@ -25,6 +25,10 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
+// Set points variable for easy access
+$points = $user['loyalty_points'] ?? 0;
+$member_tier = $user['member_tier'] ?? 'bronze';
+
 if (!$user) {
     session_destroy();
     header('Location: ../../view/auth/login.php');
