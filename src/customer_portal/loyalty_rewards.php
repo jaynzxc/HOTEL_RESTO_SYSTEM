@@ -1,6 +1,5 @@
 <?php require_once '../../controller/customer/get/loyalty_rewards.php' ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +7,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loyalty Rewards · Customer Portal </title>
+    <link rel="stylesheet" href="../output.css">
     <!-- Tailwind via CDN + Font Awesome 6 -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
       .progress-bar {
@@ -35,6 +37,15 @@
           opacity: 1;
         }
       }
+
+      .reward-card.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .balance-warning {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
     </style>
   </head>
 
@@ -47,69 +58,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR (customer portal) ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">customer portal · loyalty rewards</p>
-        </div>
-
-        <!-- user summary with actual data -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-            <?php echo htmlspecialchars($initials); ?>
-          </div>
-          <div>
-            <p class="font-medium text-slate-800"><?php echo htmlspecialchars($user['full_name']); ?></p>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
-              <i class="fa-regular fa-gem text-[11px]"></i> <?php echo $tier; ?> · <span
-                id="sidebarPoints"><?php echo $points; ?></span> pts
-            </p>
-          </div>
-        </div>
-
-        <!-- navigation -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="../customer_portal/dashboard.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="../customer_portal/my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="../customer_portal/hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-          <a href="../customer_portal/my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="../customer_portal/restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="../customer_portal/order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="../customer_portal/payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="../customer_portal/loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-regular fa-star w-5 text-amber-600"></i>Loyalty Rewards</a>
-          <a href="../customer_portal/notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="../../controller/auth/logout.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
+      <?php require './components/customer_nav.php' ?>
 
       <!-- ========== MAIN CONTENT (LOYALTY REWARDS PAGE) ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -131,6 +80,25 @@
                 <li><?php echo htmlspecialchars($message); ?></li>
               <?php endforeach; ?>
             </ul>
+          </div>
+        <?php endif; ?>
+
+        <!-- Outstanding Balance Warning -->
+        <?php if ($hasOutstandingBalance): ?>
+          <div class="balance-warning text-white rounded-2xl p-4 mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-exclamation-triangle text-2xl"></i>
+              <div>
+                <p class="font-semibold">Outstanding Balance Detected</p>
+                <p class="text-sm opacity-90">You have ₱<?php echo number_format($totalOutstanding, 2); ?> in unpaid
+                  bookings.</p>
+                <p class="text-xs opacity-75 mt-1">Please clear your balance before redeeming rewards.</p>
+              </div>
+            </div>
+            <a href="./payments.php"
+              class="bg-white text-red-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition">
+              Go to Payments
+            </a>
           </div>
         <?php endif; ?>
 
@@ -204,103 +172,61 @@
           rewards you can redeem</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
 
-          <!-- reward 1 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="240">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-mug-hot"></i>
+          <?php if (empty($availableRewards)): ?>
+            <div class="col-span-3 text-center py-8 text-slate-500">
+              <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
+              <p>No rewards available at the moment.</p>
             </div>
-            <h3 class="font-semibold">Free Coffee / Tea</h3>
-            <p class="text-xs text-slate-500 mt-1">any hot beverage at Azure Lounge</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">240 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="Free Coffee / Tea" data-cost="240" data-experience="Beverage">redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 2 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="480">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-bowl-food"></i>
-            </div>
-            <h3 class="font-semibold">Complimentary Breakfast</h3>
-            <p class="text-xs text-slate-500 mt-1">for one person at Azure Restaurant</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">480 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="Complimentary Breakfast" data-cost="480" data-experience="Dining">redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 3 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="600">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-clock"></i>
-            </div>
-            <h3 class="font-semibold">Late Check-out (2pm)</h3>
-            <p class="text-xs text-slate-500 mt-1">subject to availability</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">600 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="Late Check-out" data-cost="600" data-experience="Hotel Stay">redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 4 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="360">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-wine-glass"></i>
-            </div>
-            <h3 class="font-semibold">Welcome Drink (2 pax)</h3>
-            <p class="text-xs text-slate-500 mt-1">signature cocktail or mocktail</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">360 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="Welcome Drink" data-cost="360" data-experience="Dining">redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 5 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="1200">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-hotel"></i>
-            </div>
-            <h3 class="font-semibold">Room Upgrade (next stay)</h3>
-            <p class="text-xs text-slate-500 mt-1">deluxe to suite (subject to availability)</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">1,200 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="Room Upgrade" data-cost="1200" data-experience="Hotel Stay">redeem</button>
-            </div>
-          </div>
-
-          <!-- reward 6 -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card"
-            data-points="800">
-            <div
-              class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-              <i class="fa-regular fa-tag"></i>
-            </div>
-            <h3 class="font-semibold">₱500 Discount</h3>
-            <p class="text-xs text-slate-500 mt-1">on any hotel booking</p>
-            <div class="flex items-center justify-between mt-4">
-              <span class="font-bold text-amber-700">800 pts</span>
-              <button class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm"
-                data-reward="₱500 Discount" data-cost="800" data-experience="Hotel Stay">redeem</button>
-            </div>
-          </div>
+          <?php else: ?>
+            <?php foreach ($availableRewards as $reward):
+              // Determine icon based on category
+              $icon = 'fa-gift';
+              switch ($reward['category']) {
+                case 'beverage':
+                  $icon = 'fa-mug-hot';
+                  break;
+                case 'dining':
+                  $icon = 'fa-utensils';
+                  break;
+                case 'hotel':
+                  $icon = 'fa-hotel';
+                  break;
+                case 'spa':
+                  $icon = 'fa-spa';
+                  break;
+                default:
+                  $icon = 'fa-gift';
+              }
+              ?>
+              <div
+                class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition reward-card <?php echo $hasOutstandingBalance ? 'opacity-60' : ''; ?>"
+                data-points="<?php echo $reward['points_cost']; ?>">
+                <div
+                  class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
+                  <i class="fa-regular <?php echo $icon; ?>"></i>
+                </div>
+                <h3 class="font-semibold"><?php echo htmlspecialchars($reward['reward_name']); ?></h3>
+                <p class="text-xs text-slate-500 mt-1"><?php echo htmlspecialchars($reward['description']); ?></p>
+                <div class="flex items-center justify-between mt-4">
+                  <span class="font-bold text-amber-700"><?php echo number_format($reward['points_cost']); ?> pts</span>
+                  <button
+                    class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
+                    data-reward="<?php echo htmlspecialchars($reward['reward_name']); ?>"
+                    data-cost="<?php echo $reward['points_cost']; ?>"
+                    data-experience="<?php echo htmlspecialchars($reward['category']); ?>" <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>
+                    redeem
+                  </button>
+                </div>
+                <?php if ($reward['stock_limit'] !== null): ?>
+                  <p class="text-xs text-slate-400 mt-2">
+                    <i class="fa-regular fa-box mr-1"></i>
+                    <?php echo max(0, $reward['stock_limit'] - $reward['times_redeemed']); ?> left
+                  </p>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
-
         <!-- ===== POINTS EARNING HISTORY ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
@@ -397,6 +323,8 @@
 
         // Current points from PHP
         let currentPoints = <?php echo $points; ?>;
+        const hasOutstandingBalance = <?php echo $hasOutstandingBalance ? 'true' : 'false'; ?>;
+        const outstandingAmount = <?php echo $totalOutstanding; ?>;
 
         // Set current date
         const now = new Date();
@@ -414,6 +342,26 @@
           }, 3000);
         }
 
+        // Show balance warning
+        function showBalanceWarning() {
+          Swal.fire({
+            title: 'Outstanding Balance Detected',
+            html: `
+              <div class="text-left">
+                <p class="mb-3 text-red-600">You have an outstanding balance of <strong>₱${outstandingAmount.toFixed(2)}</strong>.</p>
+                <p class="mb-3">Please clear your balance before redeeming rewards.</p>
+                <a href="./payments.php" class="inline-block bg-amber-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-700 transition">
+                  Go to Payments
+                </a>
+              </div>
+            `,
+            icon: 'warning',
+            confirmButtonColor: '#d97706',
+            confirmButtonText: 'OK',
+            showCancelButton: false
+          });
+        }
+
         // Update points in UI
         function updatePoints(newPoints) {
           currentPoints = newPoints;
@@ -421,7 +369,6 @@
           sidebarPointsSpan.innerText = currentPoints;
 
           // Refresh the page to update tier and progress
-          // You can also update dynamically here, but for simplicity we'll reload
           setTimeout(() => {
             location.reload();
           }, 1500);
@@ -430,6 +377,14 @@
         // Redeem buttons
         document.querySelectorAll('.redeem-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // Check for outstanding balance first
+            if (hasOutstandingBalance) {
+              showBalanceWarning();
+              return;
+            }
+
             const rewardName = btn.dataset.reward;
             const cost = parseInt(btn.dataset.cost);
             const experience = btn.dataset.experience;
@@ -439,7 +394,18 @@
               return;
             }
 
-            if (!confirm(`Redeem ${rewardName} for ${cost} points?`)) {
+            // Use SweetAlert for confirmation
+            const result = await Swal.fire({
+              title: 'Redeem Reward?',
+              html: `Redeem <strong>${rewardName}</strong> for <strong>${cost} points</strong>?`,
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonColor: '#d97706',
+              cancelButtonColor: '#6b7280',
+              confirmButtonText: 'Yes, redeem'
+            });
+
+            if (!result.isConfirmed) {
               return;
             }
 
@@ -469,7 +435,6 @@
                 btn.innerHTML = 'redeem';
               }
             } catch (error) {
-              showToast('An error occurred. Please try again.', 'error');
               btn.disabled = false;
               btn.innerHTML = 'redeem';
             }
@@ -478,14 +443,26 @@
 
         // Dummy redeem button (top)
         document.getElementById('redeemDummyBtn').addEventListener('click', () => {
-          alert('Select a reward below to redeem.');
+          if (hasOutstandingBalance) {
+            showBalanceWarning();
+          } else {
+            Swal.fire({
+              title: 'Redeem Rewards',
+              text: 'Select a reward below to redeem your points.',
+              icon: 'info',
+              confirmButtonColor: '#d97706'
+            });
+          }
         });
 
         // For demo/testing: double-click to add points (remove in production)
         pointsBalanceSpan.addEventListener('dblclick', () => {
+          if (hasOutstandingBalance) {
+            showBalanceWarning();
+            return;
+          }
           let extra = prompt('Add test points (simulation)', '100');
           if (extra && !isNaN(parseInt(extra))) {
-            // This is just for testing - in production, points come from real activities
             alert('Test mode: Points would be added through reviews and purchases');
           }
         });

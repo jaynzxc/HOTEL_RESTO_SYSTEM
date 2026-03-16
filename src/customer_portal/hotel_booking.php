@@ -200,82 +200,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">customer portal · hotel booking</p>
-        </div>
-
-        <!-- user summary from database -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg overflow-hidden"
-            id="userInitials">
-            <?php if (!empty($user['avatar'])): ?>
-              <img src="../../../<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar"
-                class="w-full h-full object-cover">
-            <?php else: ?>
-              <?php echo htmlspecialchars($initials); ?>
-            <?php endif; ?>
-          </div>
-          <div>
-            <p class="font-medium text-slate-800" id="displayName">
-              <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
-            </p>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
-              <i class="fa-regular fa-gem text-[11px]"></i>
-              <span id="loyaltyTier"><?php echo htmlspecialchars($user['member_tier'] ?? 'bronze'); ?></span> ·
-              <span id="points"><?php echo number_format($user['loyalty_points'] ?? 0); ?></span> pts
-            </p>
-          </div>
-        </div>
-
-        <!-- navigation -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./dashboard.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
-          <a href="./my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="./restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="./payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="./loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications
-            <?php if ($unread_count > 0): ?>
-              <span
-                class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full"><?php echo $unread_count; ?></span>
-            <?php endif; ?>
-          </a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="../../controller/auth/logout.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
+      <?php require './components/customer_nav.php' ?>
 
       <!-- ========== MAIN CONTENT ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -800,13 +725,13 @@
                 Swal.fire({
                   title: 'Booking Created!',
                   html: `
-                                    <div class="text-left">
-                                        <p><strong>Reference:</strong> ${data.booking.reference}</p>
-                                        <p><strong>Room:</strong> ${data.booking.room_name}</p>
-                                        <p><strong>Total:</strong> ₱${data.booking.total.toLocaleString()}</p>
-                                        <p><strong>Points Earned:</strong> +${data.booking.points_earned}</p>
-                                    </div>
-                                `,
+                        <div class="text-left">
+                            <p><strong>Reference:</strong> ${data.booking.reference}</p>
+                            <p><strong>Room:</strong> ${data.booking.room_name}</p>
+                            <p><strong>Total:</strong> ₱${data.booking.total.toLocaleString()}</p>
+                            <p><strong>Points Earned:</strong> +${data.booking.points_earned}</p>
+                        </div>
+                    `,
                   icon: 'success',
                   confirmButtonColor: '#d97706',
                   confirmButtonText: 'Proceed to Payment'
@@ -815,7 +740,45 @@
                     window.location.href = './payments.php';
                   }
                 });
-              } else {
+              }
+              else if (data.has_pending) {
+                // User has pending booking
+                Swal.close();
+
+                const pending = data.pending_booking;
+                const formattedAmount = new Intl.NumberFormat('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP'
+                }).format(pending.total_amount);
+
+                Swal.fire({
+                  title: 'Pending Booking Found',
+                  html: `
+                        <div class="text-left">
+                            <p class="mb-3">${data.message}</p>
+                            <div class="bg-amber-50 p-3 rounded-lg">
+                                <p><strong>Reference:</strong> ${pending.booking_reference}</p>
+                                <p><strong>Room:</strong> ${pending.room_name}</p>
+                                <p><strong>Check-in:</strong> ${pending.check_in}</p>
+                                <p><strong>Check-out:</strong> ${pending.check_out}</p>
+                                <p><strong>Total:</strong> ${formattedAmount}</p>
+                            </div>
+                        </div>
+                    `,
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706',
+                  confirmButtonText: 'Pay Now',
+                  showCancelButton: true,
+                  cancelButtonText: 'Cancel',
+                  cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Go to payments page
+                    window.location.href = './payments.php?type=hotel&id=' + pending.id;
+                  }
+                });
+              }
+              else {
                 let errorMessage = data.message || 'An error occurred';
                 if (data.errors) {
                   errorMessage = data.errors.join('<br>');
@@ -838,7 +801,6 @@
               });
             });
         };
-
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
           // Set default dates if empty

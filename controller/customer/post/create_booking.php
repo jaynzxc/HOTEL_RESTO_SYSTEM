@@ -23,10 +23,46 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$config = require_once __DIR__ . '/../../../config/config.php';
+$config = require __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
 
 try {
+    // Check if user has any pending hotel bookings
+    $pendingBookings = $db->query(
+        "SELECT COUNT(*) as count 
+         FROM bookings 
+         WHERE user_id = :user_id 
+         AND booking_type = 'hotel'
+         AND status = 'pending' 
+         AND payment_status = 'unpaid'
+         AND check_in >= CURDATE()",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
+
+    if ($pendingBookings['count'] > 0) {
+        // Get the pending booking details
+        $pending = $db->query(
+            "SELECT id, booking_reference, room_name, check_in, check_out, nights, total_amount
+             FROM bookings 
+             WHERE user_id = :user_id 
+             AND booking_type = 'hotel'
+             AND status = 'pending' 
+             AND payment_status = 'unpaid'
+             AND check_in >= CURDATE()
+             ORDER BY created_at DESC
+             LIMIT 1",
+            ['user_id' => $_SESSION['user_id']]
+        )->fetch_one();
+
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'message' => 'You already have a pending hotel booking. Please complete payment for your existing booking before creating a new one.',
+            'pending_booking' => $pending
+        ]);
+        exit();
+    }
+
     // Get and validate input
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
@@ -150,8 +186,28 @@ try {
         );
     }
 
+    // Create notification for the user
+    $db->query(
+        "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
+         VALUES (:user_id, :title, :message, 'success', 'fa-hotel', :link, NOW())",
+        [
+            'user_id' => $_SESSION['user_id'],
+            'title' => 'Booking Created',
+            'message' => "Your booking for $room_name from $check_in to $check_out has been created. Total: ₱" . number_format($total_amount, 2),
+            'link' => '/src/customer_portal/my_reservation.php'
+        ]
+    );
+
     // Commit transaction
     $db->query("COMMIT");
+
+    // Get updated balance for response
+    $balance = $db->query(
+        "SELECT total_balance, pending_balance, available_balance 
+         FROM current_balance 
+         WHERE user_id = :user_id",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
 
     // Return success response
     echo json_encode([
@@ -166,7 +222,8 @@ try {
             'check_in' => $check_in,
             'check_out' => $check_out,
             'points_earned' => $points_earned
-        ]
+        ],
+        'balance' => $balance
     ]);
 
 } catch (Exception $e) {

@@ -32,78 +32,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR (customer portal) ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">customer portal · reviews</p>
-        </div>
-
-        <!-- user summary -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-            <?php echo htmlspecialchars($initials); ?>
-          </div>
-          <div>
-            <p class="font-medium text-slate-800"><?php echo htmlspecialchars($user['full_name']); ?></p>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
-              <i class="fa-regular fa-gem text-[11px]"></i>
-              <?php
-              if ($points >= 500)
-                echo 'platinum member';
-              elseif ($points >= 200)
-                echo 'gold member';
-              elseif ($points >= 50)
-                echo 'silver member';
-              else
-                echo 'bronze member';
-              ?> · <span id="loyaltyPoints"><?php echo $points; ?></span> pts
-            </p>
-          </div>
-        </div>
-
-        <!-- navigation -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./index.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
-          <a href="./my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="./restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="./payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="./loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="../../controller/auth/logout.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
+      <?php require './components/customer_nav.php' ?>
 
       <!-- ========== MAIN CONTENT (REVIEWS PAGE) ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -208,11 +137,12 @@
               <div class="bg-white rounded-2xl border border-slate-200 p-5 review-card"
                 data-review-id="<?php echo $review['id']; ?>">
                 <div class="flex flex-wrap items-start justify-between gap-3">
-                  <div class="flex gap-3">
-                    <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+                  <div class="flex gap-3 flex-1">
+                    <div
+                      class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0">
                       <i class="fa-solid <?php echo $review['icon'] ?? 'fa-pen'; ?>"></i>
                     </div>
-                    <div>
+                    <div class="flex-1">
                       <div class="flex items-center gap-2 flex-wrap">
                         <h3 class="font-semibold"><?php echo htmlspecialchars($review['experience']); ?></h3>
                         <div class="flex text-sm">
@@ -226,12 +156,32 @@
                       </div>
                       <p class="text-xs text-slate-500">
                         <?php echo date('M d, Y', strtotime($review['created_at'])); ?>
-                        <?php if (!empty($review['detail'])): ?>·
+                        <?php if (!empty($review['detail'])): ?> ·
                           <?php echo htmlspecialchars($review['detail']); ?>
                         <?php endif; ?>
                       </p>
-                      <p class="text-sm mt-2">"<?php echo htmlspecialchars($review['review_text']); ?>"</p>
-                      <div class="flex items-center gap-3 mt-2">
+                      <p class="text-sm mt-2">"<?php echo nl2br(htmlspecialchars($review['review_text'])); ?>"</p>
+
+                      <!-- Admin Response Section -->
+                      <?php if (!empty($review['response_id'])): ?>
+                        <div class="mt-3 p-3 bg-amber-50 rounded-xl border-l-4 border-amber-300">
+                          <div class="flex items-center gap-2 mb-1">
+                            <i class="fa-regular fa-reply text-amber-600 text-xs"></i>
+                            <p class="text-xs font-medium text-amber-700">Management response:</p>
+                            <span class="text-[10px] text-slate-500">by
+                              <?php echo htmlspecialchars($review['responder_name'] ?? 'Admin'); ?></span>
+                          </div>
+                          <p class="text-xs text-slate-700"><?php echo nl2br(htmlspecialchars($review['response_text'])); ?>
+                          </p>
+                          <p class="text-[10px] text-slate-400 mt-1">
+                            <?php echo date('M d, Y', strtotime($review['responded_at'])); ?>
+                          </p>
+                        </div>
+                      <?php else: ?>
+                        <p class="text-xs text-amber-600 mt-2 italic">Awaiting management response...</p>
+                      <?php endif; ?>
+
+                      <div class="flex items-center gap-3 mt-3">
                         <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">published</span>
                         <button type="button" class="text-xs text-amber-700 hover:underline edit-review"
                           data-id="<?php echo $review['id']; ?>"
@@ -255,7 +205,7 @@
             <?php endforeach; ?>
           <?php endif; ?>
         </div>
-
+        <!-- ===== RECENT REVIEWS FROM OTHER GUESTS ===== -->
         <!-- ===== RECENT REVIEWS FROM OTHER GUESTS ===== -->
         <h2 class="font-semibold text-xl mb-4 flex items-center gap-2">
           <i class="fa-regular fa-comments text-amber-600"></i> recent guest reviews
@@ -271,8 +221,8 @@
               <div class="bg-white border border-slate-200 rounded-2xl p-4 hover-scale transition">
                 <div class="flex items-center gap-2 mb-2">
                   <div
-                    class="h-8 w-8 rounded-full bg-slate-300 flex items-center justify-center text-xs font-bold uppercase">
-                    <?php echo substr($review['user_name'], 0, 1); ?>
+                    class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-xs font-bold uppercase text-amber-800">
+                    <?php echo htmlspecialchars($review['initial']); ?>
                   </div>
                   <div>
                     <p class="font-medium text-sm"><?php echo htmlspecialchars($review['user_name']); ?></p>
@@ -284,17 +234,40 @@
                       <?php endfor; ?>
                     </div>
                   </div>
+                  <?php if (!empty($review['member_tier']) && $review['member_tier'] !== 'bronze'): ?>
+                    <span class="ml-auto text-xs px-2 py-0.5 rounded-full <?php
+                    echo $review['member_tier'] == 'platinum' ? 'bg-purple-100 text-purple-700' :
+                      ($review['member_tier'] == 'gold' ? 'bg-amber-100 text-amber-700' :
+                        'bg-slate-100 text-slate-700');
+                    ?>">
+                      <?php echo ucfirst($review['member_tier']); ?>
+                    </span>
+                  <?php endif; ?>
                 </div>
-                <p class="text-sm">"<?php echo htmlspecialchars($review['review_text']); ?>"</p>
-                <p class="text-xs text-slate-400 mt-2">
+                <p class="text-sm">"<?php echo nl2br(htmlspecialchars($review['review_text'])); ?>"</p>
+
+                <!-- Admin Response for Guest Reviews -->
+                <?php if (!empty($review['admin_response'])): ?>
+                  <div class="mt-2 p-2 bg-amber-50 rounded-lg border-l-2 border-amber-300 text-xs">
+                    <p class="font-medium text-amber-700 flex items-center gap-1">
+                      <i class="fa-regular fa-reply"></i> Management response:
+                    </p>
+                    <p class="text-slate-600 mt-1"><?php echo nl2br(htmlspecialchars($review['admin_response'])); ?></p>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                      <?php echo date('M d, Y', strtotime($review['response_date'])); ?>
+                    </p>
+                  </div>
+                <?php endif; ?>
+
+                <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                  <i class="fa-regular fa-clock"></i>
                   <?php echo time_elapsed_string($review['created_at']); ?> ·
-                  <?php echo htmlspecialchars($review['experience']); ?>
+                  <span class="text-slate-500"><?php echo htmlspecialchars($review['experience']); ?></span>
                 </p>
               </div>
             <?php endforeach; ?>
           <?php endif; ?>
         </div>
-
         <!-- bottom hint -->
         <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
           ✅ Share your experience and earn loyalty points!

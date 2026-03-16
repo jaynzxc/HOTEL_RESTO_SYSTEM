@@ -23,6 +23,10 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
+// Set points variable for easy access
+$points = $user['loyalty_points'] ?? 0;
+$member_tier = $user['member_tier'] ?? 'bronze';
+
 // Get available rooms
 $rooms = $db->query(
     "SELECT * FROM rooms WHERE is_available = 1 ORDER BY price"

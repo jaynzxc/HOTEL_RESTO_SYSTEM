@@ -1,3 +1,7 @@
+<?php
+require_once '../../controller/customer/get/restaurant_reservation.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lùcas · Table & Seating with Down Payment</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Tailwind via CDN + Font Awesome 6 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -53,69 +58,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR (staff portal) ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm flex-shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">staff · table & seating module</p>
-        </div>
-
-        <!-- user summary (staff view) -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-            JM</div>
-          <div>
-            <p class="font-medium text-slate-800">J. Mateo <span
-                class="text-xs bg-amber-100 px-2 py-0.5 rounded-full">maître d'</span></p>
-            <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-bell text-[11px]"></i>
-              <span id="sidebarNotificationCount">0</span> notifications
-            </p>
-          </div>
-        </div>
-
-        <!-- navigation (restaurant reservation active) -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./index.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-          <a href="./my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="./restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-clock w-5 text-amber-600"></i>Restaurant Reservation</a>
-          <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="./payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="./loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./Notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="./login_form.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
-
+      <?php require './components/customer_nav.php' ?>
       <!-- ========== MAIN CONTENT ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto" id="mainContent">
 
@@ -127,8 +70,11 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> wednesday, 21 may 2025 · <span
-              class="text-amber-600 font-medium">service: 5:00 PM</span>
+            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <?php echo strtolower(date('l, F j, Y')); ?> ·
+            <span class="text-amber-600 font-medium">service:
+              <?php echo date('g:i A'); ?>
+            </span>
           </div>
         </div>
 
@@ -386,333 +332,508 @@
 
     <script>
       (function () {
-        // ---------- CLEAN STATE (no sample data) ----------
-        let tables = [
-          { id: 'T1', seats: 2, status: 'available' },
-          { id: 'T2', seats: 4, status: 'available' },
-          { id: 'T3', seats: 2, status: 'available' },
-          { id: 'T4', seats: 6, status: 'available' },
-          { id: 'T5', seats: 2, status: 'available' },
-          { id: 'T6', seats: 4, status: 'available' },
-          { id: 'T7', seats: 2, status: 'available' },
-          { id: 'T8', seats: 8, status: 'available' }
-        ];
+        // ---------- INITIAL STATE ----------
+        let pendingPayments = []; // Track down payments locally
 
-        let waitingList = [];   // empty
-        let notifications = []; // empty
-        let pendingPayments = []; // track down payments
+        // Current walk-in from form
+        let currentWalkin = {
+          name: '',
+          guests: 2,
+          time: '7:30 PM'
+        };
 
-        // current walk-in from form
-        let currentWalkin = { name: '', guests: 2, time: '7:30 PM' }; // default guests=2, time preset, name empty
-
-        // Helper: add notification
-        function addNotification(msg, icon = 'bell') {
+        // ---------- HELPER FUNCTIONS ----------
+        function updateDateTime() {
           const now = new Date();
-          let hours = now.getHours();
-          let minutes = now.getMinutes();
-          let ampm = hours >= 12 ? 'PM' : 'AM';
-          hours = hours % 12 || 12;
-          const timeStr = `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-          notifications.unshift({ time: timeStr, msg, icon });
-          if (notifications.length > 8) notifications.pop();
-          renderNotifications();
-        }
+          const dateTimeEl = document.getElementById('currentDateTime');
+          const dateDisplayEl = document.getElementById('currentDateDisplay');
 
-        // render all tables
-        function renderTables() {
-          const grid = document.getElementById('tableGrid');
-          grid.innerHTML = tables.map(t => {
-            let bg, border, statusText, textColor;
-            if (t.status === 'available') { bg = 'bg-green-100'; border = 'border-green-300'; statusText = 'available'; textColor = 'bg-green-600'; }
-            else if (t.status === 'reserved') { bg = 'bg-amber-100'; border = 'border-amber-300'; statusText = 'reserved'; textColor = 'bg-amber-600'; }
-            else { bg = 'bg-red-100'; border = 'border-red-300'; statusText = 'occupied'; textColor = 'bg-red-600'; }
-            return `<div class="${bg} ${border} border rounded-xl p-2 text-center text-xs table-tile" data-table="${t.id}">
-          <span class="font-bold">${t.id}</span> <span class="block">${t.seats} pax</span> 
-          <span class="${textColor} text-white px-1 rounded-full text-[10px] inline-block mt-1">${statusText}</span>
-        </div>`;
-          }).join('');
-        }
-
-        function renderWaiting() {
-          const container = document.getElementById('waitingListContainer');
-          if (waitingList.length === 0) {
-            container.innerHTML = '<div class="text-sm text-slate-400 text-center py-4">No parties waiting.</div>';
-          } else {
-            container.innerHTML = waitingList.map((w, idx) => {
-              let pulse = w.next ? 'waiting-pulse' : '';
-              let bg = w.next ? 'bg-amber-50' : 'bg-slate-50';
-              return `<div class="flex items-center justify-between ${bg} p-3 rounded-xl ${pulse}">
-            <div><span class="font-medium">${w.name}</span> <span class="text-xs bg-slate-200 ml-2 px-2 py-0.5 rounded-full">${w.guests} guests</span></div>
-            <div class="text-xs text-slate-500">waiting ${w.waitTime} min</div>
-            <span class="text-amber-600 text-xs">est. ${w.est} min</span>
-          </div>`;
-            }).join('');
+          if (dateTimeEl) {
+            dateTimeEl.innerText = now.toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
           }
-          document.getElementById('waitingCount').innerText = waitingList.length;
+
+          if (dateDisplayEl) {
+            dateDisplayEl.innerText = now.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            });
+          }
         }
 
-        function renderNotifications() {
-          const list = document.getElementById('notificationList');
-          if (notifications.length === 0) {
-            list.innerHTML = '<li class="text-slate-400 text-center text-xs">No notifications yet.</li>';
-          } else {
-            list.innerHTML = notifications.map(n => {
-              let iconClass = 'fa-regular fa-bell';
-              if (n.icon === 'circle-check') iconClass = 'fa-regular fa-circle-check text-green-600';
-              else if (n.icon === 'clock') iconClass = 'fa-regular fa-clock';
-              else if (n.icon === 'hourglass-half') iconClass = 'fa-regular fa-hourglass-half';
-              else if (n.icon === 'calendar-check') iconClass = 'fa-regular fa-calendar-check text-amber-600';
-              else if (n.icon === 'rotate') iconClass = 'fa-regular fa-rotate';
-              else if (n.icon === 'credit-card') iconClass = 'fa-regular fa-credit-card text-amber-600';
-              return `<li class="flex gap-2 text-xs"><i class="${iconClass}"></i> ${n.time} · ${n.msg}</li>`;
-            }).join('');
-          }
-          document.getElementById('sidebarNotificationCount') && (document.getElementById('sidebarNotificationCount').innerText = notifications.length);
-          document.querySelector('nav .relative span.bg-amber-100') && (document.querySelector('nav .relative span.bg-amber-100').innerText = notifications.length);
+        function isValidEmail(email) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidPhone(phone) {
+          return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(phone);
+        }
+
+        function addNotification(msg, icon = 'bell') {
+          // This is just for UI feedback, not actual notifications
+          console.log('Notification:', msg, icon);
         }
 
         function updatePaymentSummary() {
           const totalDownPayments = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
-          document.getElementById('paymentSummary').textContent = `₱${totalDownPayments.toFixed(2)} total down payments`;
-          document.getElementById('paymentCount').textContent = `${pendingPayments.length} pending payments`;
+          const paymentSummaryEl = document.getElementById('paymentSummary');
+          const paymentCountEl = document.getElementById('paymentCount');
+
+          if (paymentSummaryEl) {
+            paymentSummaryEl.textContent = `₱${totalDownPayments.toFixed(2)} total down payments`;
+          }
+          if (paymentCountEl) {
+            paymentCountEl.textContent = `${pendingPayments.length} pending payments`;
+          }
         }
 
         function updateAvailabilityMsg() {
+          const availabilitySpan = document.querySelector('#availabilityMessage span');
+          if (!availabilitySpan) return;
+
           if (!currentWalkin.name.trim()) {
-            document.querySelector('#availabilityMessage span').innerText = 'enter guest name first';
+            availabilitySpan.innerText = 'enter guest name first';
             return;
           }
-          let availableTable = tables.find(t => t.seats >= currentWalkin.guests && t.status === 'available');
-          let msg = availableTable ? `✅ ${currentWalkin.guests}-seater available? → yes (${availableTable.id})` : `❌ ${currentWalkin.guests}-seater available? → no · est. wait 15‑20 min`;
-          document.querySelector('#availabilityMessage span').innerText = msg;
+
+          // This is just a mock message since we're not checking real tables on customer side
+          availabilitySpan.innerText = '✅ reservation will be confirmed after payment';
         }
 
-        // Update walkin display from form
         function updateWalkinFromForm() {
-          const nameInput = document.getElementById('resName').value.trim();
-          const guests = parseInt(document.getElementById('resGuests').value);
-          const time = document.getElementById('resTime').value;
-          currentWalkin = { name: nameInput || '(unnamed guest)', guests, time };
-          document.getElementById('currentWalkinDisplay').innerText = `incoming: ${currentWalkin.name} · ${currentWalkin.guests} guests · ${currentWalkin.time}`;
+          const nameInput = document.getElementById('resName');
+          const guestsSelect = document.getElementById('resGuests');
+          const timeSelect = document.getElementById('resTime');
+
+          if (!nameInput || !guestsSelect || !timeSelect) return;
+
+          const name = nameInput.value.trim();
+          const guests = parseInt(guestsSelect.value) || 2;
+          const time = timeSelect.value;
+
+          currentWalkin = {
+            name: name || '(unnamed guest)',
+            guests: guests,
+            time: time
+          };
+
+          const walkinDisplay = document.getElementById('currentWalkinDisplay');
+          if (walkinDisplay) {
+            walkinDisplay.innerText = `incoming: ${currentWalkin.name} · ${currentWalkin.guests} guests · ${currentWalkin.time}`;
+          }
 
           // Update down payment display
-          document.getElementById('guestCountDisplay').textContent = guests;
-          const downPayment = guests * 100;
-          document.getElementById('downPaymentAmount').textContent = `₱${downPayment.toFixed(2)}`;
+          const guestCountDisplay = document.getElementById('guestCountDisplay');
+          const downPaymentAmount = document.getElementById('downPaymentAmount');
+
+          if (guestCountDisplay) guestCountDisplay.textContent = guests;
+          if (downPaymentAmount) {
+            const downPayment = guests * 100;
+            downPaymentAmount.textContent = `₱${downPayment.toFixed(2)}`;
+          }
 
           updateAvailabilityMsg();
+        }
+
+        function escapeHtml(unsafe) {
+          if (!unsafe) return '';
+          return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+
+        // Clear all pending session data
+        function clearPendingSessions() {
+          sessionStorage.removeItem('pendingRestaurantReservation');
+          sessionStorage.removeItem('pendingDownPayment');
+          sessionStorage.removeItem('pendingBooking');
+          console.log('Cleared all pending sessions');
         }
 
         // Show processing modal and redirect
         function processDownPaymentAndRedirect(reservationData) {
           const modal = document.getElementById('paymentProcessingModal');
           const message = document.getElementById('paymentProcessingMessage');
-          message.textContent = `Processing ₱${reservationData.downPayment} down payment...`;
+
+          if (!modal || !message) return;
+
+          message.textContent = `Processing ₱${reservationData.downPayment.toFixed(2)} down payment...`;
           modal.classList.remove('hidden');
           modal.classList.add('flex');
 
-          // Add to pending payments
-          pendingPayments.push({
-            id: Date.now(),
-            name: reservationData.name,
+          // Split full name into first and last name
+          const nameParts = reservationData.name.trim().split(' ');
+          const firstName = nameParts[0] || reservationData.name;
+          const lastName = nameParts.slice(1).join(' ') || 'Guest';
+
+          // Prepare data for server
+          const formData = new URLSearchParams({
+            first_name: firstName,
+            last_name: lastName,
+            email: reservationData.email,
+            phone: reservationData.phone,
+            reservation_date: reservationData.date,
+            reservation_time: reservationData.time + ':00', // Add seconds for database format
             guests: reservationData.guests,
-            amount: reservationData.downPayment,
-            date: reservationData.date,
-            time: reservationData.time
+            special_requests: reservationData.request || '',
+            occasion: reservationData.occasion || ''
           });
-          updatePaymentSummary();
 
-          // Create payment data for payments page
-          const paymentData = {
-            amount: reservationData.downPayment,
-            description: `Restaurant reservation for ${reservationData.guests} guests on ${reservationData.date} at ${reservationData.time}`,
-            type: 'restaurant_down_payment',
-            customerName: reservationData.name,
-            customerPhone: reservationData.phone,
-            customerEmail: reservationData.email,
-            timestamp: new Date().toISOString()
-          };
+          console.log('Sending reservation data:', Object.fromEntries(formData));
 
-          // Save to sessionStorage for payments page
-          sessionStorage.setItem('pendingDownPayment', JSON.stringify(paymentData));
+          // Send to server via AJAX
+          fetch('../../controller/customer/post/create_restaurant_reservation.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('Server response:', data);
 
-          // Add notification
-          addNotification(`Down payment of ₱${reservationData.downPayment} initiated for ${reservationData.name}`, 'credit-card');
+              if (data.success) {
+                // ... existing success code ...
+              }
+              else if (data.has_pending) {
+                // User has pending reservation
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
 
-          // Simulate processing time then redirect
-          setTimeout(() => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+                const pending = data.pending_reservation;
+                const formattedAmount = new Intl.NumberFormat('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP'
+                }).format(pending.down_payment);
 
-            // Check if payments page exists, if not, alert and simulate
-            if (window.location.href.includes('restaurant_reservation')) {
-              // Try to redirect to payments page
-              window.location.href = './payments.php';
-            } else {
-              alert(`✅ Down payment of ₱${reservationData.downPayment} processed successfully!\nRedirecting to payments page...`);
-              // In a real implementation, this would actually redirect
-              console.log('Redirect to payments.php with data:', paymentData);
-            }
-          }, 2000);
+                Swal.fire({
+                  title: 'Pending Reservation Found',
+                  html: `
+        <div class="text-left">
+          <p class="mb-3">${data.message}</p>
+          <div class="bg-amber-50 p-3 rounded-lg">
+            <p><strong>Reference:</strong> ${pending.reservation_reference}</p>
+            <p><strong>Guests:</strong> ${pending.guests}</p>
+            <p><strong>Date:</strong> ${pending.reservation_date}</p>
+            <p><strong>Time:</strong> ${pending.reservation_time}</p>
+            <p><strong>Down Payment:</strong> ${formattedAmount}</p>
+          </div>
+        </div>
+      `,
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706',
+                  confirmButtonText: 'Pay Now',
+                  showCancelButton: true,
+                  cancelButtonText: 'Cancel',
+                  cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    // Go to payments page
+                    window.location.href = './payments.php?type=restaurant&id=' + pending.id;
+                  }
+                });
+              }
+              else {
+                // Regular error
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+
+                let errorMessage = data.message || 'An error occurred';
+                if (data.errors) {
+                  errorMessage = data.errors.join('<br>');
+                }
+
+                Swal.fire({
+                  title: 'Error',
+                  html: errorMessage,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Fetch error:', error);
+              modal.classList.add('hidden');
+              modal.classList.remove('flex');
+
+              Swal.fire({
+                title: 'Error',
+                text: 'Failed to create reservation. Please check your connection and try again.',
+                icon: 'error',
+                confirmButtonColor: '#d97706'
+              });
+            });
         }
 
-        // ----- event listeners -----
-        document.getElementById('submitReservationBtn').addEventListener('click', () => {
+        // ---------- EVENT LISTENERS ----------
+        document.addEventListener('DOMContentLoaded', function () {
+          // Update date and time
+          updateDateTime();
+          setInterval(updateDateTime, 60000);
+
+          // Set default date to tomorrow
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+
+          const dateInput = document.getElementById('resDate');
+          if (dateInput && !dateInput.value) {
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+          }
+
+          // Submit reservation button
+          const submitBtn = document.getElementById('submitReservationBtn');
+          if (submitBtn) {
+            submitBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+
+              updateWalkinFromForm();
+
+              // Validate required fields
+              const name = document.getElementById('resName').value.trim();
+              const phone = document.getElementById('resPhone').value.trim();
+              const email = document.getElementById('resEmail').value.trim();
+
+              // Validation checks
+              if (!name || !phone || !email) {
+                Swal.fire({
+                  title: 'Validation Error',
+                  text: 'Please fill in all required fields (name, phone, email).',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
+                return;
+              }
+
+              if (name === '(unnamed guest)') {
+                Swal.fire({
+                  title: 'Validation Error',
+                  text: 'Please enter a valid customer name.',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                return;
+              }
+
+              if (!isValidEmail(email)) {
+                Swal.fire({
+                  title: 'Validation Error',
+                  text: 'Please enter a valid email address.',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid email format';
+                return;
+              }
+
+              if (!isValidPhone(phone)) {
+                Swal.fire({
+                  title: 'Validation Error',
+                  text: 'Please enter a valid phone number.',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid phone format';
+                return;
+              }
+
+              const guests = parseInt(document.getElementById('resGuests').value);
+              const date = document.getElementById('resDate').value;
+              const time = document.getElementById('resTime').value;
+              const downPayment = guests * 100;
+
+              // Validate date is not in the past
+              const selectedDate = new Date(date);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+
+              if (selectedDate < today) {
+                Swal.fire({
+                  title: 'Validation Error',
+                  text: 'Reservation date cannot be in the past.',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                return;
+              }
+
+              // Create reservation object
+              const reservation = {
+                name,
+                phone,
+                email,
+                guests,
+                date,
+                time,
+                downPayment,
+                request: document.getElementById('resRequest').value,
+                occasion: ''
+              };
+
+              // Update validation hint
+              document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-check"></i> processing reservation...';
+
+              // Process down payment and redirect
+              processDownPaymentAndRedirect(reservation);
+            });
+          }
+
+          // Validate fields button
+          const validateBtn = document.getElementById('validateFieldsBtn');
+          if (validateBtn) {
+            validateBtn.addEventListener('click', () => {
+              const name = document.getElementById('resName').value.trim();
+              const phone = document.getElementById('resPhone').value.trim();
+              const email = document.getElementById('resEmail').value.trim();
+              const hint = document.getElementById('validationHint');
+
+              if (!name || !phone || !email) {
+                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
+                Swal.fire({
+                  title: 'Validation',
+                  text: 'Please fill in all required fields.',
+                  icon: 'info',
+                  confirmButtonColor: '#d97706',
+                  timer: 2000
+                });
+              } else if (!isValidEmail(email)) {
+                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid email format';
+                Swal.fire({
+                  title: 'Validation',
+                  text: 'Please enter a valid email address.',
+                  icon: 'info',
+                  confirmButtonColor: '#d97706',
+                  timer: 2000
+                });
+              } else if (!isValidPhone(phone)) {
+                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid phone format';
+                Swal.fire({
+                  title: 'Validation',
+                  text: 'Please enter a valid phone number.',
+                  icon: 'info',
+                  confirmButtonColor: '#d97706',
+                  timer: 2000
+                });
+              } else {
+                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-check"></i> all required fields look good';
+                Swal.fire({
+                  title: 'Validation',
+                  text: 'All fields are valid! You can now submit.',
+                  icon: 'success',
+                  confirmButtonColor: '#d97706',
+                  timer: 2000
+                });
+              }
+            });
+          }
+
+          // Refresh notifications button (demo)
+          const refreshBtn = document.getElementById('refreshNotifications');
+          if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+              addNotification('Notification feed refreshed', 'rotate');
+              Swal.fire({
+                title: 'Refreshed',
+                text: 'Notification list updated.',
+                icon: 'success',
+                confirmButtonColor: '#d97706',
+                timer: 1500,
+                showConfirmButton: false
+              });
+            });
+          }
+
+          // Update walkin on form changes
+          ['resName', 'resGuests', 'resTime'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+              el.addEventListener('change', updateWalkinFromForm);
+              if (id === 'resName') {
+                el.addEventListener('input', updateWalkinFromForm);
+              }
+            }
+          });
+
+          // Initial update
           updateWalkinFromForm();
+          updatePaymentSummary();
 
-          // Validate required fields
-          const name = document.getElementById('resName').value.trim();
-          const phone = document.getElementById('resPhone').value.trim();
-          const email = document.getElementById('resEmail').value.trim();
+          // Check for any pending down payments from previous session
+          const pending = sessionStorage.getItem('pendingRestaurantReservation');
+          if (pending) {
+            const pendingData = JSON.parse(pending);
 
-          if (!name || !phone || !email) {
-            alert('❌ Please fill in all required fields (name, phone, email).');
-            document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
-            return;
+            // OPTION 1: Check if this reservation still exists in the database
+            // You would need an API endpoint to verify this
+            // For now, we'll just show a message with an option to clear it
+
+            Swal.fire({
+              title: 'Pending Payment Found',
+              text: `You have a pending down payment of ₱${pendingData.down_payment} for your reservation. Would you like to complete it now?`,
+              icon: 'info',
+              confirmButtonColor: '#d97706',
+              confirmButtonText: 'Pay Now',
+              showCancelButton: true,
+              cancelButtonText: 'Clear and Start Fresh',
+              cancelButtonColor: '#6b7280'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.href = './payments.php?type=restaurant&id=' + pendingData.id;
+              } else if (result.dismiss === Swal.DismissReason.cancel) {
+                // Clear the pending session
+                sessionStorage.removeItem('pendingRestaurantReservation');
+                sessionStorage.removeItem('pendingDownPayment');
+                Swal.fire({
+                  title: 'Cleared',
+                  text: 'Pending payment has been cleared. You can start a new reservation.',
+                  icon: 'success',
+                  confirmButtonColor: '#d97706',
+                  timer: 2000
+                });
+              }
+            });
           }
 
-          if (!name || name === '(unnamed guest)') {
-            alert('❌ Please enter a valid customer name.');
-            return;
-          }
-
-          const guests = parseInt(document.getElementById('resGuests').value);
-          const date = document.getElementById('resDate').value;
-          const time = document.getElementById('resTime').value;
-          const downPayment = guests * 100;
-
-          // Create reservation object
-          const reservation = {
-            name,
-            phone,
-            email,
-            guests,
-            date,
-            time,
-            downPayment,
-            request: document.getElementById('resRequest').value
+          // OPTION 2: Add a manual clear button (optional)
+          // You can add this to your HTML if needed
+          const clearBtn = document.createElement('button');
+          clearBtn.className = 'fixed bottom-4 left-4 bg-slate-200 text-slate-700 px-3 py-1 rounded-lg text-xs z-50 hover:bg-slate-300 transition';
+          clearBtn.innerHTML = '<i class="fa-regular fa-trash-can mr-1"></i> Clear Pending';
+          clearBtn.onclick = function () {
+            clearPendingSessions();
+            Swal.fire({
+              title: 'Cleared',
+              text: 'All pending sessions cleared!',
+              icon: 'success',
+              confirmButtonColor: '#d97706',
+              timer: 1500
+            });
           };
-
-          // Process down payment and redirect
-          processDownPaymentAndRedirect(reservation);
-
-          // Also add to notifications
-          addNotification(`New reservation: ${name} (${guests} pax) - Down payment: ₱${downPayment}`, 'calendar-check');
+          document.body.appendChild(clearBtn);
         });
 
-        document.getElementById('validateFieldsBtn').addEventListener('click', () => {
-          const name = document.getElementById('resName').value.trim();
-          const phone = document.getElementById('resPhone').value.trim();
-          const email = document.getElementById('resEmail').value.trim();
-          if (!name || !phone || !email) {
-            document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
-          } else {
-            document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-check"></i> all required fields look good';
-          }
-        });
+        // Make functions global if needed
+        window.addNotification = addNotification;
+        window.updatePaymentSummary = updatePaymentSummary;
+        window.clearPendingSessions = clearPendingSessions;
 
-        document.getElementById('assignWalkinBtn').addEventListener('click', () => {
-          updateWalkinFromForm();
-          if (!currentWalkin.name || currentWalkin.name === '(unnamed guest)') {
-            alert('❌ Please enter customer name in reservation form.');
-            return;
-          }
-          let availableTable = tables.find(t => t.seats >= currentWalkin.guests && t.status === 'available');
-          if (availableTable) {
-            availableTable.status = 'reserved';
-            renderTables();
-            addNotification(`Table ${availableTable.id} assigned to walk‑in (${currentWalkin.name}) → waiter notified`, 'circle-check');
-            document.querySelector('#dbStatus span:nth-child(2)').innerHTML = `<i class="fa-regular fa-chair"></i> Table ${availableTable.id} → reserved (by walk-in)`;
-            alert(`✅ Table ${availableTable.id} assigned to ${currentWalkin.name}.`);
-          } else {
-            alert('❌ No table available. Add to waiting list.');
-          }
-        });
-
-        document.getElementById('addToWaitingBtn').addEventListener('click', () => {
-          updateWalkinFromForm();
-          if (!currentWalkin.name || currentWalkin.name === '(unnamed guest)') {
-            alert('❌ Please enter a name.');
-            return;
-          }
-          if (waitingList.some(w => w.name === currentWalkin.name)) {
-            alert(`${currentWalkin.name} already on waiting list.`);
-            return;
-          }
-          let newEntry = {
-            name: currentWalkin.name,
-            guests: currentWalkin.guests,
-            waitTime: 0,
-            est: Math.floor(Math.random() * 15 + 10), // simulate est
-            next: (waitingList.length === 0) // first in line becomes 'next'
-          };
-          waitingList.push(newEntry);
-          renderWaiting();
-          addNotification(`${currentWalkin.name} added to waiting list (est. ${newEntry.est} min)`, 'hourglass-half');
-          alert(`🚶 ${currentWalkin.name} added to waiting list.`);
-        });
-
-        document.getElementById('simulateTableFreeBtn').addEventListener('click', () => {
-          if (waitingList.length === 0) {
-            alert('Waiting list is empty.');
-            return;
-          }
-          let target = waitingList.find(w => w.next) || waitingList[0];
-          let availableTable = tables.find(t => t.seats >= target.guests && t.status === 'available');
-          if (availableTable) {
-            availableTable.status = 'reserved';
-            addNotification(`Table ${availableTable.id} now available → assigned to ${target.name} (waiting)`, 'bell');
-            waitingList = waitingList.filter(w => w.name !== target.name);
-            if (waitingList.length > 0) waitingList[0].next = true;
-            renderTables();
-            renderWaiting();
-            alert(`✅ Table ${availableTable.id} assigned to ${target.name}.`);
-          } else {
-            alert('No table currently available for waiting party.');
-          }
-        });
-
-        // table click: toggle status (demo)
-        document.getElementById('tableGrid').addEventListener('click', (e) => {
-          const tile = e.target.closest('.table-tile');
-          if (!tile) return;
-          const tableId = tile.dataset.table;
-          const table = tables.find(t => t.id === tableId);
-          if (table) {
-            if (table.status === 'available') table.status = 'reserved';
-            else if (table.status === 'reserved') table.status = 'occupied';
-            else if (table.status === 'occupied') table.status = 'available';
-            renderTables();
-            addNotification(`Table ${tableId} status changed to ${table.status} (manual)`, 'rotate');
-          }
-        });
-
-        document.getElementById('refreshNotifications').addEventListener('click', () => {
-          addNotification('Notification feed refreshed', 'rotate');
-        });
-
-        // Update walkin on form changes
-        ['resName', 'resGuests', 'resTime'].forEach(id => {
-          document.getElementById(id).addEventListener('change', updateWalkinFromForm);
-          if (id === 'resName') document.getElementById(id).addEventListener('input', updateWalkinFromForm);
-        });
-
-        // Update guest count display on guests change
-        document.getElementById('resGuests').addEventListener('change', updateWalkinFromForm);
-        document.getElementById('resGuests').addEventListener('input', updateWalkinFromForm);
-
-        // initial render (no sample data)
-        renderTables();
-        renderWaiting();
-        renderNotifications();
-        updateWalkinFromForm(); // reads empty name, shows placeholder
-        updatePaymentSummary();
-
-        // minimal demo for seating times placeholder
-        setInterval(() => {
-          let occupiedTables = tables.filter(t => t.status === 'occupied').map(t => `${t.id} (${t.seats}pax)`).join(', ') || 'None';
-          document.getElementById('seatingTimesDemo').innerText = occupiedTables !== 'None' ? `Occupied: ${occupiedTables}` : 'No occupied tables.';
-        }, 1000);
       })();
     </script>
   </body>

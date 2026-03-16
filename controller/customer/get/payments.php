@@ -22,6 +22,10 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
+// Set points variable for easy access
+$points = $user['loyalty_points'] ?? 0;
+$member_tier = $user['member_tier'] ?? 'bronze';
+
 // Get user's payment methods
 $paymentMethods = $db->query(
     "SELECT * FROM payment_methods WHERE user_id = :user_id ORDER BY is_default DESC, created_at DESC",
@@ -45,14 +49,29 @@ $payments = $db->query(
     ['user_id' => $_SESSION['user_id']]
 )->find();
 
-// Calculate current balance (sum of unpaid bookings)
-$pendingBalance = $db->query(
-    "SELECT COALESCE(SUM(total_amount), 0) as balance 
-     FROM bookings 
-     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+// Get current balance from current_balance table (using the view or direct query)
+$balanceData = $db->query(
+    "SELECT total_balance, pending_balance, available_balance 
+     FROM current_balance 
+     WHERE user_id = :user_id",
     ['user_id' => $_SESSION['user_id']]
 )->fetch_one();
-$currentBalance = $pendingBalance['balance'] ?? 0;
+
+// If no balance record exists, create one
+if (!$balanceData) {
+    $db->query(
+        "INSERT INTO current_balance (user_id, total_balance, pending_balance, available_balance) 
+         VALUES (:user_id, 0, 0, 0)",
+        ['user_id' => $_SESSION['user_id']]
+    );
+    $balanceData = [
+        'total_balance' => 0,
+        'pending_balance' => 0,
+        'available_balance' => 0
+    ];
+}
+
+$currentBalance = $balanceData['available_balance'] ?? 0;
 
 // Get monthly summary from payments table
 $currentMonth = date('Y-m');
@@ -109,6 +128,69 @@ if ($user) {
     );
 }
 
-// Get unread notifications count (placeholder)
-$unread_count = 3;
+// Get unread notifications count
+try {
+    $unread_result = $db->query(
+        "SELECT COUNT(*) as count FROM notifications 
+         WHERE user_id = :user_id AND is_read = 0",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
+    $unread_count = $unread_result['count'] ?? 0;
+} catch (Exception $e) {
+    $unread_count = 0;
+}
 
+// Get recent unpaid bookings for quick payment
+$recentUnpaid = $db->query(
+    "SELECT 
+        id,
+        booking_reference as reference,
+        'hotel' as type,
+        total_amount as amount,
+        check_in as date
+     FROM bookings 
+     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'
+     UNION ALL
+     SELECT 
+        id,
+        reservation_reference as reference,
+        'restaurant' as type,
+        down_payment as amount,
+        reservation_date as date
+     FROM restaurant_reservations 
+     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'
+     ORDER BY date DESC
+     LIMIT 5",
+    ['user_id' => $_SESSION['user_id']]
+)->find();
+
+// Get success and error messages from session
+$success = $_SESSION['success'] ?? [];
+$error = $_SESSION['error'] ?? [];
+
+// Clear session messages
+unset($_SESSION['success']);
+unset($_SESSION['error']);
+
+// Store data for view
+$viewData = [
+    'user' => $user,
+    'paymentMethods' => $paymentMethods,
+    'payments' => $payments,
+    'currentBalance' => $currentBalance,
+    'balanceData' => $balanceData,
+    'monthlyStats' => $monthlyStats,
+    'percentChange' => $percentChange,
+    'initials' => $initials,
+    'unread_count' => $unread_count,
+    'recentUnpaid' => $recentUnpaid,
+    'success' => $success,
+    'error' => $error,
+    'lastMonthTotal' => $lastMonthTotal,
+    'points' => $points,
+    'member_tier' => $member_tier
+];
+
+// Extract variables for view
+extract($viewData);
+?>
