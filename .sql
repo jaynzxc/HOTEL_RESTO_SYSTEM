@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Mar 16, 2026 at 05:21 PM
+-- Generation Time: Mar 16, 2026 at 08:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -56,14 +56,6 @@ CREATE TABLE `bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `bookings`
---
-
-INSERT INTO `bookings` (`id`, `booking_reference`, `user_id`, `guest_first_name`, `guest_last_name`, `guest_email`, `guest_phone`, `booking_type`, `check_in`, `check_out`, `nights`, `room_id`, `room_name`, `room_price`, `adults`, `children`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `payment_method`, `payment_date`, `special_requests`, `payment_id`, `created_at`, `updated_at`) VALUES
-(20, 'HOT-202603-63D950', 4, 'Dolo', 'dols', 'janzeldols@gmail.com', '+639565819961', 'hotel', '2026-03-17', '2026-03-19', 2, '205', 'Executive Suite', 8500.00, 2, 0, 17000.00, 2040.00, 19040.00, 'cancelled', 'unpaid', NULL, NULL, '', NULL, '2026-03-16 15:56:38', '2026-03-16 15:57:11'),
-(21, 'HOT-202603-8227EF', 4, 'Dolo', 'dols', 'janzeldols@gmail.com', '+639565819961', 'hotel', '2026-03-17', '2026-03-19', 2, '202', 'Ocean Suite', 6900.00, 2, 0, 13800.00, 1656.00, 15456.00, 'cancelled', 'unpaid', NULL, NULL, '', NULL, '2026-03-16 16:05:28', '2026-03-16 16:05:39');
 
 --
 -- Triggers `bookings`
@@ -124,7 +116,31 @@ CREATE TABLE `current_balance` (
 --
 
 INSERT INTO `current_balance` (`id`, `user_id`, `total_balance`, `pending_balance`, `available_balance`, `last_updated`) VALUES
-(17, 4, 100.00, 0.00, 100.00, '2026-03-16 16:05:39');
+(20, 4, -100.00, 0.00, -100.00, '2026-03-16 18:29:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE `events` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `event_name` varchar(100) NOT NULL,
+  `event_date` date NOT NULL,
+  `event_time` time DEFAULT NULL,
+  `location` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`id`, `event_name`, `event_date`, `event_time`, `location`, `description`, `created_at`) VALUES
+(1, 'Wedding Rehearsal', '2026-03-17', '15:00:00', 'Grand Ballroom', 'Wedding rehearsal dinner', '2026-03-16 16:35:46'),
+(2, 'Corporate Meeting', '2026-03-17', '10:00:00', 'Boardroom A', 'Executive board meeting', '2026-03-16 16:35:46');
 
 -- --------------------------------------------------------
 
@@ -147,6 +163,50 @@ CREATE TABLE `food_orders` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `guest_interactions`
+--
+
+CREATE TABLE `guest_interactions` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `admin_id` int(10) UNSIGNED NOT NULL,
+  `type` enum('email','sms','both','call','note') NOT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory`
+--
+
+CREATE TABLE `inventory` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `item_name` varchar(100) NOT NULL,
+  `category` varchar(50) DEFAULT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0,
+  `reorder_level` int(11) NOT NULL DEFAULT 10,
+  `unit` varchar(20) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `inventory`
+--
+
+INSERT INTO `inventory` (`id`, `item_name`, `category`, `stock`, `reorder_level`, `unit`, `created_at`, `updated_at`) VALUES
+(1, 'Rice', 'Food', 25, 20, 'kg', '2026-03-16 16:35:46', '2026-03-16 16:35:46'),
+(2, 'Pork', 'Meat', 15, 10, 'kg', '2026-03-16 16:35:46', '2026-03-16 16:35:46'),
+(3, 'Beef', 'Meat', 8, 10, 'kg', '2026-03-16 16:35:46', '2026-03-16 16:35:46'),
+(4, 'Chicken', 'Meat', 12, 10, 'kg', '2026-03-16 16:35:46', '2026-03-16 16:35:46'),
+(5, 'Cooking Oil', 'Supply', 5, 5, 'bottles', '2026-03-16 16:35:46', '2026-03-16 16:35:46');
 
 -- --------------------------------------------------------
 
@@ -198,6 +258,19 @@ CREATE TABLE `notifications` (
   `read_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `icon`, `link`, `is_read`, `created_at`, `read_at`) VALUES
+(48, 5, 'Points Adjusted', 'Your points have been adjusted by +500. Reason: Administrative adjustment', 'info', 'fa-star', NULL, 0, '2026-03-16 17:42:16', NULL),
+(49, 5, 'Points Adjusted', 'Your points have been adjusted by -500. Reason: Administrative adjustment', 'info', 'fa-star', NULL, 0, '2026-03-16 17:42:25', NULL),
+(50, 4, 'Restaurant Reservation Created', 'Your reservation for 1 guests on 2026-06-25 at 5:30 PM:00 has been created. Down payment: ₱100.00', 'success', 'fa-utensils', '/src/customer_portal/my_reservation.php', 0, '2026-03-16 18:27:50', NULL),
+(51, 4, 'Reservation Cancelled', 'Your restaurant reservation #12 has been cancelled. 10 points have been deducted.', 'warning', 'fa-times-circle', NULL, 0, '2026-03-16 18:29:35', NULL),
+(52, 4, 'Birthday Greetings Sent', 'Birthday greetings sent to 0 guest', 'success', 'fa-gift', NULL, 0, '2026-03-16 18:56:15', NULL),
+(53, 6, 'Birthday Greetings Sent', 'Birthday greetings sent to 0 guest', 'success', 'fa-gift', NULL, 0, '2026-03-16 19:02:31', NULL),
+(54, 6, 'Birthday Greetings Sent', 'Birthday greetings sent to 0 guest', 'success', 'fa-gift', NULL, 0, '2026-03-16 19:02:40', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -232,6 +305,14 @@ CREATE TABLE `payments` (
   `payment_date` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `payment_reference`, `user_id`, `booking_type`, `booking_id`, `amount`, `payment_method`, `payment_status`, `approval_status`, `approved_by`, `approved_at`, `rejection_reason`, `transaction_id`, `payment_date`, `created_at`) VALUES
+(10, 'PAY-202603-11763688', 4, '', 0, 100.00, 'GCash', 'completed', 'approved', NULL, NULL, NULL, NULL, '2026-03-17 01:42:47', '2026-03-16 17:42:47'),
+(11, 'PAY-202603-BBE0602F', 4, '', 0, 100.00, 'GCash', 'completed', 'pending', NULL, NULL, NULL, NULL, '2026-03-17 02:28:14', '2026-03-16 18:28:14');
 
 --
 -- Triggers `payments`
@@ -348,6 +429,38 @@ CREATE TABLE `redemptions` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `redemptions`
+--
+
+INSERT INTO `redemptions` (`id`, `user_id`, `reward_name`, `points_cost`, `experience`, `status`, `created_at`) VALUES
+(17, 4, 'Free Coffee / Tea', 240, 'beverage', 'pending', '2026-03-16 18:28:24'),
+(18, 4, 'Free Coffee / Tea', 240, 'beverage', 'pending', '2026-03-16 18:28:31'),
+(19, 4, 'Free Coffee / Tea', 240, 'beverage', 'pending', '2026-03-16 18:29:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `response_templates`
+--
+
+CREATE TABLE `response_templates` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `template_text` text NOT NULL,
+  `category` enum('positive','negative','neutral') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `response_templates`
+--
+
+INSERT INTO `response_templates` (`id`, `name`, `template_text`, `category`, `created_at`) VALUES
+(1, 'Thank you for 5 stars! ⭐', 'Thank you so much for your wonderful review! We\'re thrilled to hear you enjoyed your experience and look forward to welcoming you again soon.', 'positive', '2026-03-16 16:56:01'),
+(2, 'Apology for inconvenience', 'We sincerely apologize for the inconvenience you experienced. This is not the standard we strive for. Please contact us directly so we can make things right.', 'negative', '2026-03-16 16:56:01'),
+(3, 'Thank you for feedback', 'Thank you for taking the time to share your feedback. We appreciate your input and will use it to improve our services.', 'neutral', '2026-03-16 16:56:01');
+
 -- --------------------------------------------------------
 
 --
@@ -383,7 +496,7 @@ CREATE TABLE `restaurant_reservations` (
 --
 
 INSERT INTO `restaurant_reservations` (`id`, `reservation_reference`, `user_id`, `guest_first_name`, `guest_last_name`, `guest_email`, `guest_phone`, `reservation_date`, `reservation_time`, `guests`, `table_number`, `special_requests`, `occasion`, `down_payment`, `points_earned`, `status`, `payment_status`, `payment_method`, `payment_date`, `created_at`, `updated_at`) VALUES
-(11, 'REST-202603-E1B3F9', 4, 'jzel', 'dols', 'janzeldols@gmail.com', '+639565819961', '2026-12-03', '05:30:00', 1, NULL, '', '', 100.00, 0, 'pending', 'unpaid', NULL, NULL, '2026-03-16 15:51:10', '2026-03-16 15:51:10');
+(12, 'REST-202603-6302B4', 4, 'jzel', 'dols', 'janzeldols@gmail.com', '+639565819961', '2026-06-25', '05:30:00', 1, NULL, '', '', 100.00, 0, 'cancelled', 'unpaid', NULL, NULL, '2026-03-16 18:27:50', '2026-03-16 18:29:35');
 
 --
 -- Triggers `restaurant_reservations`
@@ -473,6 +586,54 @@ CREATE TABLE `reviews` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `review_responses`
+--
+
+CREATE TABLE `review_responses` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `review_id` int(10) UNSIGNED NOT NULL,
+  `response_text` text NOT NULL,
+  `responded_by` int(10) UNSIGNED NOT NULL,
+  `responded_at` datetime NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rewards`
+--
+
+CREATE TABLE `rewards` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `reward_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `points_cost` int(11) NOT NULL,
+  `category` enum('beverage','dining','hotel','spa','other') NOT NULL DEFAULT 'other',
+  `image_url` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `stock_limit` int(11) DEFAULT NULL,
+  `times_redeemed` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rewards`
+--
+
+INSERT INTO `rewards` (`id`, `reward_name`, `description`, `points_cost`, `category`, `image_url`, `is_active`, `stock_limit`, `times_redeemed`, `created_at`, `updated_at`) VALUES
+(1, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, NULL, 6, '2026-03-16 17:30:12', '2026-03-16 18:29:19'),
+(2, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-16 18:24:48'),
+(3, 'Late Check-out (2pm)', 'subject to availability', 600, 'hotel', NULL, 1, NULL, 0, '2026-03-16 17:30:12', '2026-03-16 17:30:12'),
+(4, 'Room Upgrade', 'deluxe to suite (subject to availability)', 1200, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-16 18:24:35'),
+(5, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, 100, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
+(6, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, 50, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
+(11, 'xx', 'd', 6600, 'dining', NULL, 1, NULL, 0, '2026-03-16 18:32:08', '2026-03-16 18:32:08');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `rooms`
 --
 
@@ -504,6 +665,30 @@ INSERT INTO `rooms` (`id`, `name`, `description`, `price`, `beds`, `view`, `amen
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `setting_key` varchar(50) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `created_at`, `updated_at`) VALUES
+(1, 'tier_bronze', '0', '2026-03-16 17:36:20', '2026-03-16 17:36:20'),
+(2, 'tier_silver', '500', '2026-03-16 17:36:20', '2026-03-16 17:36:20'),
+(3, 'tier_gold', '1000', '2026-03-16 17:36:20', '2026-03-16 17:36:20'),
+(4, 'tier_platinum', '2000', '2026-03-16 17:36:20', '2026-03-16 17:36:20');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -524,6 +709,10 @@ CREATE TABLE `users` (
   `country` varchar(50) DEFAULT 'Philippines',
   `preferred_language` varchar(30) DEFAULT 'English',
   `loyalty_points` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `preferences` text DEFAULT NULL,
+  `allergies` text DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `anniversary` date DEFAULT NULL,
   `role` enum('customer','admin','staff') NOT NULL DEFAULT 'customer',
   `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
   `email_verified` tinyint(1) NOT NULL DEFAULT 0,
@@ -541,16 +730,18 @@ CREATE TABLE `users` (
   `remember_token` varchar(64) DEFAULT NULL,
   `token_expires` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `last_login` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `full_name`, `first_name`, `last_name`, `email`, `phone`, `alternative_phone`, `date_of_birth`, `gender`, `nationality`, `address`, `city`, `postal_code`, `country`, `preferred_language`, `loyalty_points`, `role`, `status`, `email_verified`, `email_verification_token`, `email_verification_expires`, `phone_verified`, `notify_email`, `notify_sms`, `notify_promo`, `notify_loyalty`, `avatar`, `member_tier`, `join_date`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`) VALUES
-(4, 'Dolo dols', 'Dolo', 'dols', 'janzeldols@gmail.com', '+639565819961', '+639565819961', '2026-03-16', 'prefer not to say', 'ako ay', 'Sampaloc', 'caloocan city', 'NONE', 'Philippines', 'English', 3860, 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 1, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$LSPIJZd7kcJxavwyEteiEehuiwbeIZKh1oM1DRXKF2zIuvh5Fsxma', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-16 16:05:39'),
-(5, 'Janzel', 'Janzel', '', 'janzeldols1@gmail.com', '+639565819962', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 0, 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 0, 1, NULL, 'bronze', '2026-03-15 09:44:16', '$2y$12$u0dSR8ysUZ8qE8sWigLBo.eCHxREWFLVs4w5il8iWAE71YcModD3.', NULL, NULL, '2026-03-15 09:44:16', '2026-03-15 15:08:52');
+INSERT INTO `users` (`id`, `full_name`, `first_name`, `last_name`, `email`, `phone`, `alternative_phone`, `date_of_birth`, `gender`, `nationality`, `address`, `city`, `postal_code`, `country`, `preferred_language`, `loyalty_points`, `preferences`, `allergies`, `birthday`, `anniversary`, `role`, `status`, `email_verified`, `email_verification_token`, `email_verification_expires`, `phone_verified`, `notify_email`, `notify_sms`, `notify_promo`, `notify_loyalty`, `avatar`, `member_tier`, `join_date`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`, `last_login`) VALUES
+(4, 'Dolo dols', 'Dolo', 'dols', 'janzeldol1s@gmail.com', '+639565819961', '+639565819961', '2026-03-16', 'prefer not to say', 'ako ay', 'Sampaloc', 'caloocan city', 'NONE', 'Philippines', 'English', 285, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, 1, 1, 1, 1, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$LSPIJZd7kcJxavwyEteiEehuiwbeIZKh1oM1DRXKF2zIuvh5Fsxma', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-16 18:43:34', NULL),
+(5, 'janzel Dolo', 'janzel', 'Dolo', 'janzeldols@gmail.com', '+639565819962', NULL, NULL, NULL, NULL, '', '', '', 'Philippines', 'English', 0, '', '', '0000-00-00', '0000-00-00', 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 0, 1, NULL, 'bronze', '2026-03-15 09:44:16', '$2y$12$u0dSR8ysUZ8qE8sWigLBo.eCHxREWFLVs4w5il8iWAE71YcModD3.', NULL, NULL, '2026-03-15 09:44:16', '2026-03-16 18:45:13', NULL),
+(6, 'Dolo', NULL, NULL, 'janzeldol0s@gmail.com', '+639565819967', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 0, NULL, NULL, NULL, NULL, 'customer', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-16 18:57:47', '$2y$12$pBzetbKYpSI9KMqYsItVjeOQNDi7xxf/OBvnZ6Z0QKM/XCO/WDDTG', NULL, NULL, '2026-03-16 18:57:47', '2026-03-16 18:57:47', NULL);
 
 -- --------------------------------------------------------
 
@@ -630,6 +821,13 @@ ALTER TABLE `current_balance`
   ADD UNIQUE KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `event_date` (`event_date`);
+
+--
 -- Indexes for table `food_orders`
 --
 ALTER TABLE `food_orders`
@@ -637,6 +835,20 @@ ALTER TABLE `food_orders`
   ADD UNIQUE KEY `order_reference` (`order_reference`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `status` (`status`);
+
+--
+-- Indexes for table `guest_interactions`
+--
+ALTER TABLE `guest_interactions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `admin_id` (`admin_id`);
+
+--
+-- Indexes for table `inventory`
+--
+ALTER TABLE `inventory`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `menu_items`
@@ -683,6 +895,12 @@ ALTER TABLE `redemptions`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `response_templates`
+--
+ALTER TABLE `response_templates`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `restaurant_reservations`
 --
 ALTER TABLE `restaurant_reservations`
@@ -708,10 +926,31 @@ ALTER TABLE `reviews`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `review_responses`
+--
+ALTER TABLE `review_responses`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `review_id` (`review_id`),
+  ADD KEY `responded_by` (`responded_by`);
+
+--
+-- Indexes for table `rewards`
+--
+ALTER TABLE `rewards`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `setting_key` (`setting_key`);
 
 --
 -- Indexes for table `users`
@@ -743,13 +982,31 @@ ALTER TABLE `bookings`
 -- AUTO_INCREMENT for table `current_balance`
 --
 ALTER TABLE `current_balance`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT for table `events`
+--
+ALTER TABLE `events`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `food_orders`
 --
 ALTER TABLE `food_orders`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `guest_interactions`
+--
+ALTER TABLE `guest_interactions`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `inventory`
+--
+ALTER TABLE `inventory`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `menu_items`
@@ -761,13 +1018,13 @@ ALTER TABLE `menu_items`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
@@ -779,13 +1036,19 @@ ALTER TABLE `payment_methods`
 -- AUTO_INCREMENT for table `redemptions`
 --
 ALTER TABLE `redemptions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `response_templates`
+--
+ALTER TABLE `response_templates`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `restaurant_reservations`
 --
 ALTER TABLE `restaurant_reservations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `restaurant_tables`
@@ -797,13 +1060,31 @@ ALTER TABLE `restaurant_tables`
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `review_responses`
+--
+ALTER TABLE `review_responses`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `rewards`
+--
+ALTER TABLE `rewards`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `waiting_list`
@@ -834,6 +1115,13 @@ ALTER TABLE `food_orders`
   ADD CONSTRAINT `food_orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `guest_interactions`
+--
+ALTER TABLE `guest_interactions`
+  ADD CONSTRAINT `guest_interactions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `guest_interactions_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `notifications`
 --
 ALTER TABLE `notifications`
@@ -862,6 +1150,13 @@ ALTER TABLE `restaurant_reservations`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `review_responses`
+--
+ALTER TABLE `review_responses`
+  ADD CONSTRAINT `review_responses_ibfk_1` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `review_responses_ibfk_2` FOREIGN KEY (`responded_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
