@@ -714,7 +714,7 @@
       const occupied = document.getElementById('occupiedRooms');
       occupied.textContent = parseInt(occupied.textContent) + 1;
       
-      showToast(`✅ Guest checked in successfully`, 'success');
+      showToast(`Guest checked in successfully`, 'success');
       closeModal('checkinModal');
       
       // Add notification
@@ -767,7 +767,7 @@
       const occupied = document.getElementById('occupiedRooms');
       occupied.textContent = parseInt(occupied.textContent) - 1;
       
-      showToast(`💰 Check-out completed. Payment processed.`, 'success');
+      showToast(`Check-out completed. Payment processed.`, 'success');
       closeModal('checkoutModal');
       
       // Add notification
@@ -816,7 +816,7 @@
       const arrivals = document.getElementById('arrivalsCount');
       arrivals.textContent = parseInt(arrivals.textContent) + 1;
       
-      showToast(`✅ Walk-in guest added: ${name}`, 'success');
+      showToast(`Walk-in guest added: ${name}`, 'success');
       closeModal('walkinModal');
       
       // Add notification
@@ -836,7 +836,7 @@
         const requests = document.getElementById('guestRequests');
         requests.textContent = parseInt(requests.textContent) - 1;
         
-        showToast('✅ Request marked as completed', 'success');
+        showToast('Request marked as completed', 'success');
       }
     }
     
@@ -857,19 +857,19 @@
         actionCell.innerHTML = '<span class="text-xs text-slate-400">done</span>';
       });
       
-      showToast(`✅ Batch check-out completed for ${pendingRows.length} guests`, 'success');
+      showToast(`Batch check-out completed for ${pendingRows.length} guests`, 'success');
     }
     
     function roomChange() {
-      showToast('🔄 Room change feature - please select a guest first', 'info');
+      showToast('Room change feature - please select a guest first', 'info');
     }
     
     function printFolio() {
-      showToast('🖨️ Folio ready for printing', 'info');
+      showToast('Folio ready for printing', 'info');
     }
     
     function messageGuest() {
-      showToast('💬 Message feature - select a guest to message', 'info');
+      showToast('Message feature - select a guest to message', 'info');
     }
     
     // ==================== NOTIFICATIONS ====================
@@ -893,14 +893,14 @@
       button.textContent = 'notify';
       button.setAttribute('onclick', 'notifyGuest(this)');
       
-      showToast('✅ Reservation confirmed', 'success');
+      showToast('Reservation confirmed', 'success');
     }
     
     function notifyGuest(button) {
       const row = button.closest('tr');
       const guestName = row.querySelector('td:first-child').textContent;
       
-      showToast(`📱 Notification sent to ${guestName}`, 'info');
+      showToast(`Notification sent to ${guestName}`, 'info');
     }
     
     // ==================== SHOW ALL REQUESTS ====================
