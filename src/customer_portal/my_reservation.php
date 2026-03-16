@@ -9,17 +9,24 @@ require_once __DIR__ . '/../../Class/Database.php';
 $config = require __DIR__ . '/../../config/config.php';
 $db = new Database($config['database']);
 
-// For local/testing: allow direct access without login using user_id from query string or session (paki palitan to ng authentication from before di kase ako maka login)
-$userId = isset($_GET['user_id']) ? (int) $_GET['user_id'] : ($_SESSION['user_id'] ?? 0);
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
+    header('Location: ../../view/auth/login.php');
+    exit();
+}
 
-// Build a lightweight current user array compatible with this page
-$currentUser = [
-    'user_id' => $userId,
-    'first_name' => $_SESSION['user_name'] ?? 'Guest',
-    'last_name' => '',
-    'membership_tier' => 'member',
-    'loyalty_points' => 0,
-];
+$userId = $_SESSION['user_id'];
+
+// Get user data
+$user = $db->query(
+    "SELECT id, full_name, first_name, last_name, email, loyalty_points, member_tier
+     FROM users WHERE id = :id",
+    ['id' => $userId]
+)->fetch_one();
+
+// Set points variable for easy access
+$points = $user['loyalty_points'] ?? 0;
+$member_tier = $user['member_tier'] ?? 'bronze';
 
 // Handle form submissions
 $success = '';
@@ -34,20 +41,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($bookingId)) {
             $error = 'Invalid booking ID';
         } else {
-            // Cancel booking
-            $result = $db->query(
-                "UPDATE hotel_bookings
-                 SET booking_status = 'cancelled'
-                 WHERE booking_id = :id AND user_id = :user_id",
-                [
-                    'id' => $bookingId,
-                    'user_id' => $currentUser['user_id'],
-                ]
-            );
-            if ($result) {
-                $success = 'Hotel booking cancelled successfully';
-            } else {
-                $error = 'Failed to cancel hotel booking';
+            try {
+                $db->query("START TRANSACTION");
+
+                // Get booking details before cancelling - need to calculate points earned
+                $booking = $db->query(
+                    "SELECT id, total_amount, subtotal, status, payment_status 
+                     FROM bookings 
+                     WHERE id = :id AND user_id = :user_id",
+                    [
+                        'id' => $bookingId,
+                        'user_id' => $userId
+                    ]
+                )->fetch_one();
+
+                if (!$booking) {
+                    throw new Exception('Booking not found');
+                }
+
+                if ($booking['status'] === 'cancelled') {
+                    throw new Exception('Booking is already cancelled');
+                }
+
+                // Calculate points earned from this booking (5 points per ₱100 of subtotal)
+                $points_earned = floor($booking['subtotal'] / 100) * 5;
+
+                // Cancel booking
+                $result = $db->query(
+                    "UPDATE bookings
+                     SET status = 'cancelled', updated_at = NOW()
+                     WHERE id = :id AND user_id = :user_id",
+                    [
+                        'id' => $bookingId,
+                        'user_id' => $userId
+                    ]
+                );
+
+                if ($result) {
+                    // Deduct points that were earned from this booking
+                    if ($points_earned > 0) {
+                        $db->query(
+                            "UPDATE users SET loyalty_points = loyalty_points - :points 
+                             WHERE id = :user_id",
+                            [
+                                'points' => $points_earned,
+                                'user_id' => $userId
+                            ]
+                        );
+                    }
+
+                    // Add notification
+                    $db->query(
+                        "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
+                         VALUES (:user_id, 'Booking Cancelled', :message, 'warning', 'fa-times-circle', NOW())",
+                        [
+                            'user_id' => $userId,
+                            'message' => "Your booking #{$bookingId} has been cancelled. " .
+                                ($points_earned > 0 ? "{$points_earned} points have been deducted." : "")
+                        ]
+                    );
+
+                    $db->query("COMMIT");
+                    $success = 'Hotel booking cancelled successfully' .
+                        ($points_earned > 0 ? " and {$points_earned} points deducted." : "");
+                } else {
+                    throw new Exception('Failed to cancel booking');
+                }
+            } catch (Exception $e) {
+                $db->query("ROLLBACK");
+                $error = $e->getMessage();
             }
         }
     } elseif ($action === 'cancel_reservation') {
@@ -56,20 +118,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($reservationId)) {
             $error = 'Invalid reservation ID';
         } else {
-            // Cancel reservation
-            $result = $db->query(
-                "UPDATE restaurant_reservations
-                 SET reservation_status = 'cancelled'
-                 WHERE reservation_id = :id AND user_id = :user_id",
-                [
-                    'id' => $reservationId,
-                    'user_id' => $currentUser['user_id'],
-                ]
-            );
-            if ($result) {
-                $success = 'Restaurant reservation cancelled successfully';
-            } else {
-                $error = 'Failed to cancel restaurant reservation';
+            try {
+                $db->query("START TRANSACTION");
+
+                // Get reservation details - need to calculate points earned
+                $reservation = $db->query(
+                    "SELECT id, down_payment, status, payment_status 
+                     FROM restaurant_reservations 
+                     WHERE id = :id AND user_id = :user_id",
+                    [
+                        'id' => $reservationId,
+                        'user_id' => $userId
+                    ]
+                )->fetch_one();
+
+                if (!$reservation) {
+                    throw new Exception('Reservation not found');
+                }
+
+                if ($reservation['status'] === 'cancelled') {
+                    throw new Exception('Reservation is already cancelled');
+                }
+
+                // Calculate points earned from this reservation (1 point per ₱10 down payment)
+                $points_earned = floor($reservation['down_payment'] / 10);
+
+                // Cancel reservation
+                $result = $db->query(
+                    "UPDATE restaurant_reservations
+                     SET status = 'cancelled', updated_at = NOW()
+                     WHERE id = :id AND user_id = :user_id",
+                    [
+                        'id' => $reservationId,
+                        'user_id' => $userId
+                    ]
+                );
+
+                if ($result) {
+                    // Deduct points that were earned from this reservation
+                    if ($points_earned > 0) {
+                        $db->query(
+                            "UPDATE users SET loyalty_points = loyalty_points - :points 
+                             WHERE id = :user_id",
+                            [
+                                'points' => $points_earned,
+                                'user_id' => $userId
+                            ]
+                        );
+                    }
+
+                    // Add notification
+                    $db->query(
+                        "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
+                         VALUES (:user_id, 'Reservation Cancelled', :message, 'warning', 'fa-times-circle', NOW())",
+                        [
+                            'user_id' => $userId,
+                            'message' => "Your restaurant reservation #{$reservationId} has been cancelled. " .
+                                ($points_earned > 0 ? "{$points_earned} points have been deducted." : "")
+                        ]
+                    );
+
+                    $db->query("COMMIT");
+                    $success = 'Restaurant reservation cancelled successfully' .
+                        ($points_earned > 0 ? " and {$points_earned} points deducted." : "");
+                } else {
+                    throw new Exception('Failed to cancel reservation');
+                }
+            } catch (Exception $e) {
+                $db->query("ROLLBACK");
+                $error = $e->getMessage();
             }
         }
     } elseif ($action === 'modify_reservation') {
@@ -81,48 +198,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($reservationId) || empty($newDate) || empty($newTime) || empty($newGuests)) {
             $error = 'Please fill in all fields';
         } else {
-            // Modify reservation
-            $result = $db->query(
-                "UPDATE restaurant_reservations
-                 SET reservation_date = :date,
-                     reservation_time = :time,
-                     number_of_guests = :guests
-                 WHERE reservation_id = :id AND user_id = :user_id",
-                [
-                    'date' => $newDate,
-                    'time' => $newTime,
-                    'guests' => $newGuests,
-                    'id' => $reservationId,
-                    'user_id' => $currentUser['user_id'],
-                ]
-            );
-            if ($result) {
-                $success = 'Restaurant reservation modified successfully';
-            } else {
-                $error = 'Failed to modify restaurant reservation';
+            try {
+                // Modify reservation
+                $result = $db->query(
+                    "UPDATE restaurant_reservations
+                     SET reservation_date = :date,
+                         reservation_time = :time,
+                         guests = :guests,
+                         updated_at = NOW()
+                     WHERE id = :id AND user_id = :user_id",
+                    [
+                        'date' => $newDate,
+                        'time' => $newTime,
+                        'guests' => $newGuests,
+                        'id' => $reservationId,
+                        'user_id' => $userId
+                    ]
+                );
+
+                if ($result) {
+                    $success = 'Restaurant reservation modified successfully';
+                } else {
+                    $error = 'Failed to modify restaurant reservation';
+                }
+            } catch (Exception $e) {
+                $error = $e->getMessage();
             }
         }
     }
 }
 
-// Get user's reservations from hotel_bookings and restaurant_reservations tables
+// Get user's hotel bookings from bookings table (not hotel_bookings)
 $hotelBookings = $db->query(
-    "SELECT *
-     FROM hotel_bookings
-     WHERE user_id = :user_id
-     ORDER BY check_in_date DESC
+    "SELECT 
+        id as booking_id,
+        booking_reference,
+        guest_first_name,
+        guest_last_name,
+        room_name as room_type,
+        room_id,
+        check_in as check_in_date,
+        check_out as check_out_date,
+        adults + children as number_of_guests,
+        adults,
+        children,
+        nights,
+        subtotal,
+        tax,
+        total_amount,
+        special_requests,
+        status as booking_status,
+        payment_status,
+        created_at,
+        updated_at
+     FROM bookings
+     WHERE user_id = :user_id AND booking_type = 'hotel'
+     ORDER BY check_in DESC
      LIMIT 20",
-    ['user_id' => $currentUser['user_id']]
+    ['user_id' => $userId]
 )->find();
 
+// Get user's restaurant reservations
 $restaurantReservations = $db->query(
-    "SELECT *
+    "SELECT 
+        id as reservation_id,
+        reservation_reference,
+        guest_first_name,
+        guest_last_name,
+        reservation_date,
+        reservation_time,
+        guests as number_of_guests,
+        table_number,
+        special_requests,
+        occasion,
+        down_payment as deposit_amount,
+        CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END as deposit_paid,
+        status as reservation_status,
+        payment_status,
+        created_at,
+        updated_at
      FROM restaurant_reservations
      WHERE user_id = :user_id
      ORDER BY reservation_date DESC, reservation_time DESC
      LIMIT 20",
-    ['user_id' => $currentUser['user_id']]
+    ['user_id' => $userId]
 )->find();
+
+// Get user's current balance
+$balance = $db->query(
+    "SELECT total_balance, pending_balance, available_balance 
+     FROM current_balance 
+     WHERE user_id = :user_id",
+    ['user_id' => $userId]
+)->fetch_one();
+
+// Get unread notifications count
+try {
+    $unread_result = $db->query(
+        "SELECT COUNT(*) as count FROM notifications 
+         WHERE user_id = :user_id AND is_read = 0",
+        ['user_id' => $userId]
+    )->fetch_one();
+    $unread_count = $unread_result['count'] ?? 0;
+} catch (Exception $e) {
+    $unread_count = 0;
+}
 
 // Helper functions
 function formatCurrency($amount)
@@ -153,10 +333,9 @@ function getBookingStatusClass($status)
 {
     $statusClasses = [
         'confirmed' => 'bg-green-100 text-green-700',
-        'checked_in' => 'bg-blue-100 text-blue-700',
-        'checked_out' => 'bg-slate-100 text-slate-700',
+        'pending' => 'bg-amber-100 text-amber-700',
         'cancelled' => 'bg-red-100 text-red-700',
-        'pending' => 'bg-amber-100 text-amber-700'
+        'completed' => 'bg-slate-100 text-slate-700'
     ];
     return $statusClasses[$status] ?? 'bg-slate-100 text-slate-700';
 }
@@ -175,13 +354,12 @@ function getReservationStatusClass($status)
 
 function isCancellable($status, $date)
 {
-    if ($status === 'cancelled' || $status === 'completed' || $status === 'checked_out') {
+    if ($status === 'cancelled' || $status === 'completed') {
         return false;
     }
     $reservationDate = new DateTime($date);
     $today = new DateTime();
-    $interval = $today->diff($reservationDate);
-    return $interval->days >= 1; // Can cancel if at least 1 day before
+    return $reservationDate > $today;
 }
 ?>
 
@@ -194,6 +372,7 @@ function isCancellable($status, $date)
         <title>My Reservations · Lùcas Customer Portal</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             @keyframes slideIn {
                 from {
@@ -228,75 +407,17 @@ function isCancellable($status, $date)
                 border-radius: 9999px;
                 font-weight: 500;
             }
+
+            .balance-card {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+            }
         </style>
     </head>
 
     <body class="bg-slate-50 font-sans antialiased">
         <div class="min-h-screen flex flex-col lg:flex-row">
             <!-- Sidebar -->
-            <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
-                <div class="px-6 py-7 border-b border-slate-100">
-                    <div class="flex items-center gap-2 text-amber-700">
-                        <i class="fa-solid fa-utensils text-xl"></i>
-                        <i class="fa-solid fa-bed text-xl"></i>
-                        <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                                class="text-amber-600">.stay</span></span>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-1">customer portal · my reservations</p>
-                </div>
-                <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-                    <div
-                        class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-                        <?php echo getUserInitials($currentUser['first_name'] ?? '', $currentUser['last_name'] ?? ''); ?>
-                    </div>
-                    <div>
-                        <p class="font-medium text-slate-800">
-                            <?php echo htmlspecialchars(($currentUser['first_name'] ?? '') . ' ' . ($currentUser['last_name'] ?? '')); ?>
-                        </p>
-                        <p class="text-xs text-slate-500 flex items-center gap-1"><i
-                                class="fa-regular fa-gem text-[11px]"></i>
-                            <span><?php echo htmlspecialchars($currentUser['membership_tier'] ?? 'member'); ?></span> ·
-                            <span><?php echo number_format($currentUser['loyalty_points'] ?? 0); ?></span> pts</p>
-                    </div>
-                </div>
-
-                <!-- Navigation -->
-                <nav class="p-4 space-y-1.5 text-sm">
-                    <a href="index.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-                    <a href="my_profile.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-                    <a href="hotel_booking.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-                    <a href="my_reservation.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-                            class="fa-regular fa-calendar-check w-5 text-amber-600"></i>My Reservations</a>
-                    <a href="restaurant_reservation.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-                    <a href="order_food.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-                    <a href="payments.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-                    <a href="loyalty_rewards.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-                            class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-                    <a href="notifications.php"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-                            class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-                            class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">0</span></a>
-                    <div class="border-t border-slate-200 pt-3 mt-3">
-                        <a href="logout.php"
-                            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-                    </div>
-                </nav>
-            </aside>
+            <?php require './components/customer_nav.php' ?>
 
             <!-- Main Content -->
             <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -351,10 +472,10 @@ function isCancellable($status, $date)
                     <!-- Hotel Bookings -->
                     <div id="hotelBookings" class="grid gap-4 md:grid-cols-2">
                         <?php if (empty($hotelBookings)): ?>
-                            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+                            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center md:col-span-2">
                                 <i class="fa-solid fa-bed text-4xl text-slate-300 mb-4"></i>
                                 <h3 class="text-lg font-medium text-slate-800 mb-2">No hotel bookings yet</h3>
-                                <p class="text-slate-500 mb-4">Book your first stay with us!</p>
+                                <p class="text-slate-500 mb-4">Book your first stay with us and earn loyalty points!</p>
                                 <a href="hotel_booking.php"
                                     class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-medium transition">
                                     <i class="fa-solid fa-plus"></i>
@@ -364,116 +485,91 @@ function isCancellable($status, $date)
                         <?php else: ?>
                             <?php foreach ($hotelBookings as $booking): ?>
                                 <?php
-                                $rawStatus = $booking['booking_status'] ?? '';
-                                $paymentStatus = $booking['payment_status'] ?? '';
-                                // If booking is cancelled, always show cancelled and never allow payment
-                                if ($rawStatus === 'cancelled') {
-                                    $displayStatus = 'cancelled';
-                                } else {
-                                    $displayStatus = ($paymentStatus === 'pending') ? 'pending' : $rawStatus;
-                                }
+                                $status = $booking['booking_status'] ?? 'pending';
+                                $paymentStatus = $booking['payment_status'] ?? 'unpaid';
+                                $isPaid = $paymentStatus === 'paid';
+                                $isCancelled = $status === 'cancelled';
+                                $canCancel = !$isCancelled && !$isPaid && isCancellable($status, $booking['check_in_date']);
                                 ?>
                                 <div class="reservation-card bg-white rounded-2xl border border-slate-200 p-4 md:p-5">
                                     <div class="flex flex-col gap-3">
-                                        <!-- Booking Summary (organized) -->
-                                        <div class="flex items-start gap-3 flex-1 min-w-0">
-                                            <div class="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center">
-                                                <i class="fa-solid fa-hotel text-amber-600 text-sm"></i>
-                                            </div>
-                                            <div class="flex-1 min-w-0 space-y-0.5">
-                                                <div class="flex items-center gap-2 flex-wrap">
-                                                    <h3 class="font-medium text-sm text-slate-800 truncate">
+                                        <!-- Header -->
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                                    <i class="fa-solid fa-hotel text-amber-600 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="text-xs text-slate-500">Reference</span>
+                                                    <p class="font-mono text-xs font-medium">
                                                         <?php echo htmlspecialchars($booking['booking_reference'] ?? ''); ?>
-                                                    </h3>
-                                                    <span
-                                                        class="status-badge <?php echo getBookingStatusClass($displayStatus); ?>">
-                                                        <?php echo htmlspecialchars($displayStatus); ?>
-                                                    </span>
-                                                    <?php if ($paymentStatus === 'completed'): ?>
-                                                        <span class="status-badge bg-emerald-100 text-emerald-700">
-                                                            paid
-                                                        </span>
-                                                    <?php endif; ?>
+                                                    </p>
                                                 </div>
-                                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                                                    <span>
-                                                        <i class="fa-regular fa-calendar-check mr-1 text-amber-600"></i>
-                                                        <?php echo formatDate($booking['check_in_date'] ?? ''); ?>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <span class="status-badge <?php echo getBookingStatusClass($status); ?>">
+                                                    <?php echo htmlspecialchars($status); ?>
+                                                </span>
+                                                <?php if ($isPaid): ?>
+                                                    <span class="status-badge bg-emerald-100 text-emerald-700">
+                                                        paid
                                                     </span>
-                                                    <span class="hidden sm:inline text-slate-300">•</span>
-                                                    <span>
-                                                        <i class="fa-regular fa-calendar-xmark mr-1 text-amber-600"></i>
-                                                        <?php echo formatDate($booking['check_out_date'] ?? ''); ?>
-                                                    </span>
-                                                    <span class="hidden sm:inline text-slate-300">•</span>
-                                                    <span>
-                                                        <i class="fa-regular fa-user mr-1 text-slate-400"></i>
-                                                        <?php echo (int) ($booking['number_of_guests'] ?? 1); ?> guests
-                                                    </span>
-                                                </div>
-                                                <p class="text-xs text-slate-500 truncate">
-                                                    Room:
-                                                    <span class="font-medium text-slate-700">
-                                                        <?php echo htmlspecialchars($booking['room_type'] ?? ''); ?>
-                                                    </span>
-                                                    · <?php echo htmlspecialchars($booking['room_number'] ?? 'TBD'); ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Details -->
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <p class="text-slate-500">Check-in</p>
+                                                <p class="font-medium"><?php echo formatDate($booking['check_in_date']); ?></p>
+                                            </div>
+                                            <div>
+                                                <p class="text-slate-500">Check-out</p>
+                                                <p class="font-medium"><?php echo formatDate($booking['check_out_date']); ?></p>
+                                            </div>
+                                            <div>
+                                                <p class="text-slate-500">Room</p>
+                                                <p class="font-medium truncate">
+                                                    <?php echo htmlspecialchars($booking['room_type'] ?? ''); ?>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-slate-500">Guests</p>
+                                                <p class="font-medium"><?php echo $booking['number_of_guests'] ?? 1; ?></p>
+                                            </div>
+                                            <div class="col-span-2">
+                                                <p class="text-slate-500">Total Amount</p>
+                                                <p class="font-semibold text-amber-700">
+                                                    <?php echo formatCurrency($booking['total_amount'] ?? 0); ?>
                                                 </p>
                                             </div>
                                         </div>
-                                        <!-- Actions -->
-                                        <div class="pt-3 border-t border-slate-100">
-                                            <div class="flex flex-wrap items-center justify-end gap-2 text-[11px]">
-                                                <?php if ($paymentStatus === 'pending' && $rawStatus !== 'cancelled'): ?>
-                                                    <a href="payments.php?context=hotel&booking_id=<?php echo $booking['booking_id']; ?>"
-                                                        class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-regular fa-credit-card"></i>
-                                                        <span>Proceed</span>
-                                                    </a>
-                                                <?php endif; ?>
 
-                                                <?php if ($booking['booking_status'] === 'confirmed'): ?>
-                                                    <button onclick="viewBookingDetails(this)"
-                                                        class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition"
-                                                        data-type="hotel"
-                                                        data-reference="<?php echo htmlspecialchars($booking['booking_reference'] ?? ''); ?>"
-                                                        data-status="<?php echo htmlspecialchars($booking['booking_status'] ?? ''); ?>"
-                                                        data-room-type="<?php echo htmlspecialchars($booking['room_type'] ?? ''); ?>"
-                                                        data-room-number="<?php echo htmlspecialchars($booking['room_number'] ?? 'TBD'); ?>"
-                                                        data-check-in="<?php echo formatDate($booking['check_in_date'] ?? ''); ?>"
-                                                        data-check-out="<?php echo formatDate($booking['check_out_date'] ?? ''); ?>"
-                                                        data-guests="<?php echo (int) ($booking['number_of_guests'] ?? 1); ?>"
-                                                        data-amount="<?php echo formatCurrency($booking['total_amount'] ?? 0); ?>"
-                                                        data-special-requests="<?php echo htmlspecialchars($booking['special_requests'] ?? 'None'); ?>">
-                                                        <i class="fa-regular fa-eye"></i>
-                                                        <span>Details</span>
-                                                    </button>
-                                                    <?php if (isCancellable($booking['booking_status'], $booking['check_in_date'])): ?>
-                                                        <form method="POST" onsubmit="return confirmCancelBooking()"
-                                                            class="inline-flex">
-                                                            <input type="hidden" name="action" value="cancel_booking">
-                                                            <input type="hidden" name="booking_id"
-                                                                value="<?php echo $booking['booking_id']; ?>">
-                                                            <button type="submit"
-                                                                class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                                <i class="fa-regular fa-times-circle"></i>
-                                                                <span>Cancel</span>
-                                                            </button>
-                                                        </form>
-                                                    <?php endif; ?>
-                                                <?php elseif ($booking['booking_status'] === 'checked_in'): ?>
-                                                    <button
-                                                        class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-solid fa-key"></i>
-                                                        <span>Checked In</span>
-                                                    </button>
-                                                <?php elseif ($booking['booking_status'] === 'checked_out'): ?>
-                                                    <button onclick="rateStay(<?php echo $booking['booking_id']; ?>)"
-                                                        class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-regular fa-star"></i>
-                                                        <span>Rate</span>
-                                                    </button>
-                                                <?php endif; ?>
-                                            </div>
+                                        <!-- Actions -->
+                                        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                                            <?php if (!$isPaid && !$isCancelled): ?>
+                                                <a href="payments.php?type=hotel&id=<?php echo $booking['booking_id']; ?>"
+                                                    class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                    <i class="fa-regular fa-credit-card"></i>
+                                                    Pay Now
+                                                </a>
+                                            <?php endif; ?>
+
+                                            <button
+                                                onclick="viewBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)"
+                                                class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                <i class="fa-regular fa-eye"></i>
+                                                Details
+                                            </button>
+
+                                            <?php if ($canCancel): ?>
+                                                <button onclick="cancelBooking(<?php echo $booking['booking_id']; ?>)"
+                                                    class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                    <i class="fa-regular fa-times-circle"></i>
+                                                    Cancel
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -484,10 +580,10 @@ function isCancellable($status, $date)
                     <!-- Restaurant Reservations -->
                     <div id="restaurantReservations" class="grid gap-4 md:grid-cols-2 hidden">
                         <?php if (empty($restaurantReservations)): ?>
-                            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+                            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center md:col-span-2">
                                 <i class="fa-solid fa-utensils text-4xl text-slate-300 mb-4"></i>
                                 <h3 class="text-lg font-medium text-slate-800 mb-2">No restaurant reservations yet</h3>
-                                <p class="text-slate-500 mb-4">Reserve a table at our restaurant!</p>
+                                <p class="text-slate-500 mb-4">Reserve a table at our restaurant and earn points!</p>
                                 <a href="restaurant_reservation.php"
                                     class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-medium transition">
                                     <i class="fa-solid fa-plus"></i>
@@ -497,115 +593,103 @@ function isCancellable($status, $date)
                         <?php else: ?>
                             <?php foreach ($restaurantReservations as $reservation): ?>
                                 <?php
-                                $resStatus = $reservation['reservation_status'] ?? '';
-                                $depositAmount = (float) ($reservation['deposit_amount'] ?? 0);
-                                $depositPaid = (int) ($reservation['deposit_paid'] ?? 0);
-                                // Only allow payment and "pending" status if not cancelled
-                                if ($resStatus === 'cancelled') {
-                                    $paymentPending = false;
-                                    $displayResStatus = 'cancelled';
-                                } else {
-                                    $paymentPending = !$depositPaid;
-                                    $displayResStatus = $paymentPending ? 'pending' : $resStatus;
-                                }
+                                $status = $reservation['reservation_status'] ?? 'pending';
+                                $paymentStatus = $reservation['payment_status'] ?? 'unpaid';
+                                $depositPaid = $reservation['deposit_paid'] ?? 0;
+                                $isPaid = $paymentStatus === 'paid' || $depositPaid;
+                                $isCancelled = $status === 'cancelled';
+                                $canCancel = !$isCancelled && !$isPaid && isCancellable($status, $reservation['reservation_date']);
                                 ?>
                                 <div class="reservation-card bg-white rounded-2xl border border-slate-200 p-4 md:p-5">
                                     <div class="flex flex-col gap-3">
-                                        <!-- Reservation Summary (organized) -->
-                                        <div class="flex items-start gap-3 flex-1 min-w-0">
-                                            <div class="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center">
-                                                <i class="fa-solid fa-utensils text-amber-600 text-sm"></i>
+                                        <!-- Header -->
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                                    <i class="fa-solid fa-utensils text-amber-600 text-xs"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="text-xs text-slate-500">Table for</span>
+                                                    <p class="font-medium text-sm">
+                                                        <?php echo $reservation['number_of_guests'] ?? 1; ?> guests
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div class="flex-1 min-w-0 space-y-0.5">
-                                                <div class="flex items-center gap-2 flex-wrap">
-                                                    <h3 class="font-medium text-sm text-slate-800 truncate">
-                                                        Table Reservation
-                                                    </h3>
-                                                    <span
-                                                        class="status-badge <?php echo getReservationStatusClass($displayResStatus); ?>">
-                                                        <?php echo htmlspecialchars($displayResStatus); ?>
+                                            <div class="flex gap-1">
+                                                <span class="status-badge <?php echo getReservationStatusClass($status); ?>">
+                                                    <?php echo htmlspecialchars($status); ?>
+                                                </span>
+                                                <?php if ($isPaid): ?>
+                                                    <span class="status-badge bg-emerald-100 text-emerald-700">
+                                                        paid
                                                     </span>
-                                                    <?php if ($depositAmount > 0 && $depositPaid): ?>
-                                                        <span class="status-badge bg-emerald-100 text-emerald-700">
-                                                            deposit paid
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                                                    <span>
-                                                        <i class="fa-regular fa-calendar mr-1 text-amber-600"></i>
-                                                        <?php echo formatDate($reservation['reservation_date'] ?? ''); ?>
-                                                    </span>
-                                                    <span class="hidden sm:inline text-slate-300">•</span>
-                                                    <span>
-                                                        <i class="fa-regular fa-clock mr-1 text-amber-600"></i>
-                                                        <?php echo formatTime($reservation['reservation_time'] ?? ''); ?>
-                                                    </span>
-                                                    <span class="hidden sm:inline text-slate-300">•</span>
-                                                    <span>
-                                                        <i class="fa-regular fa-user mr-1 text-slate-400"></i>
-                                                        <?php echo (int) ($reservation['number_of_guests'] ?? 1); ?> guests
-                                                    </span>
-                                                </div>
-                                                <p class="text-xs text-slate-500 truncate">
-                                                    Table
-                                                    <span class="font-medium text-slate-700">
-                                                        <?php echo htmlspecialchars($reservation['table_number'] ?? 'TBD'); ?>
-                                                    </span>
-                                                </p>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-                                        <!-- Actions -->
-                                        <div class="pt-3 border-t border-slate-100">
-                                            <div class="flex flex-wrap items-center justify-end gap-2 text-[11px]">
-                                                <?php if ($paymentPending && $resStatus !== 'cancelled'): ?>
-                                                    <a href="payments.php?context=restaurant&reservation_id=<?php echo $reservation['reservation_id']; ?>"
-                                                        class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-regular fa-credit-card"></i>
-                                                        <span>Proceed</span>
-                                                    </a>
-                                                <?php endif; ?>
 
-                                                <?php if ($reservation['reservation_status'] === 'confirmed'): ?>
-                                                    <button onclick="viewReservationDetails(this)"
-                                                        class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition"
-                                                        data-type="restaurant"
-                                                        data-status="<?php echo htmlspecialchars($reservation['reservation_status'] ?? ''); ?>"
-                                                        data-date="<?php echo formatDate($reservation['reservation_date'] ?? ''); ?>"
-                                                        data-time="<?php echo formatTime($reservation['reservation_time'] ?? ''); ?>"
-                                                        data-guests="<?php echo (int) ($reservation['number_of_guests'] ?? 1); ?>"
-                                                        data-table="<?php echo htmlspecialchars($reservation['table_number'] ?? 'TBD'); ?>"
-                                                        data-special-requests="<?php echo htmlspecialchars($reservation['special_requests'] ?? 'None'); ?>">
-                                                        <i class="fa-regular fa-eye"></i>
-                                                        <span>Details</span>
-                                                    </button>
-                                                    <?php if (isCancellable($reservation['reservation_status'], $reservation['reservation_date'])): ?>
-                                                        <form method="POST" onsubmit="return confirmCancelReservation()"
-                                                            class="inline-flex">
-                                                            <input type="hidden" name="action" value="cancel_reservation">
-                                                            <input type="hidden" name="reservation_id"
-                                                                value="<?php echo $reservation['reservation_id']; ?>">
-                                                            <button type="submit"
-                                                                class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                                <i class="fa-regular fa-times-circle"></i>
-                                                                <span>Cancel</span>
-                                                            </button>
-                                                        </form>
-                                                    <?php endif; ?>
-                                                    <button
-                                                        onclick="modifyReservation(<?php echo $reservation['reservation_id']; ?>, '<?php echo $reservation['reservation_date']; ?>', '<?php echo $reservation['reservation_time']; ?>', '<?php echo $reservation['number_of_guests']; ?>')"
-                                                        class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-regular fa-edit"></i>
-                                                        <span>Modify</span>
-                                                    </button>
-                                                <?php elseif ($reservation['reservation_status'] === 'completed'): ?>
-                                                    <button onclick="rateDining(<?php echo $reservation['reservation_id']; ?>)"
-                                                        class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg font-medium transition">
-                                                        <i class="fa-regular fa-star"></i>
-                                                        <span>Rate</span>
-                                                    </button>
-                                                <?php endif; ?>
+                                        <!-- Details -->
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <p class="text-slate-500">Date</p>
+                                                <p class="font-medium">
+                                                    <?php echo formatDate($reservation['reservation_date']); ?>
+                                                </p>
                                             </div>
+                                            <div>
+                                                <p class="text-slate-500">Time</p>
+                                                <p class="font-medium">
+                                                    <?php echo formatTime($reservation['reservation_time']); ?>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-slate-500">Table</p>
+                                                <p class="font-medium">
+                                                    <?php echo htmlspecialchars($reservation['table_number'] ?? 'TBD'); ?>
+                                                </p>
+                                            </div>
+                                            <?php if ($reservation['deposit_amount'] > 0): ?>
+                                                <div>
+                                                    <p class="text-slate-500">Deposit</p>
+                                                    <p class="font-medium">
+                                                        <?php echo formatCurrency($reservation['deposit_amount']); ?>
+                                                    </p>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                                            <?php if (!$isPaid && !$isCancelled && $reservation['deposit_amount'] > 0): ?>
+                                                <a href="payments.php?type=restaurant&id=<?php echo $reservation['reservation_id']; ?>"
+                                                    class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                    <i class="fa-regular fa-credit-card"></i>
+                                                    Pay Deposit
+                                                </a>
+                                            <?php endif; ?>
+
+                                            <button
+                                                onclick="viewReservationDetails(<?php echo htmlspecialchars(json_encode($reservation)); ?>)"
+                                                class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                <i class="fa-regular fa-eye"></i>
+                                                Details
+                                            </button>
+
+                                            <?php if ($canCancel): ?>
+                                                <button onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)"
+                                                    class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                    <i class="fa-regular fa-times-circle"></i>
+                                                    Cancel
+                                                </button>
+                                            <?php endif; ?>
+
+                                            <?php if ($status === 'confirmed' && !$isPaid && !$isCancelled): ?>
+                                                <button
+                                                    onclick="modifyReservation(<?php echo $reservation['reservation_id']; ?>, '<?php echo $reservation['reservation_date']; ?>', '<?php echo $reservation['reservation_time']; ?>', <?php echo $reservation['number_of_guests']; ?>)"
+                                                    class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                                    <i class="fa-regular fa-edit"></i>
+                                                    Modify
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -623,7 +707,7 @@ function isCancellable($status, $date)
                                 <p class="text-xs text-slate-600">contact our support team or modify online</p>
                             </div>
                         </div>
-                        <button type="button"
+                        <button onclick="contactSupport()"
                             class="bg-white border border-amber-600 text-amber-700 px-5 py-2 rounded-xl text-sm hover:bg-amber-50">
                             contact support
                         </button>
@@ -631,8 +715,7 @@ function isCancellable($status, $date)
 
                     <!-- Bottom hint -->
                     <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
-                        ✅ My Reservations module — receives reservations after payment from hotel and restaurant
-                        bookings
+                        ✅ Manage all your reservations in one place
                     </div>
                 </div>
             </main>
@@ -640,21 +723,19 @@ function isCancellable($status, $date)
 
         <!-- Details Modal -->
         <div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-            <div class="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div>
                         <h3 id="detailsTitle" class="text-lg font-semibold text-slate-800 mb-1">Reservation Details</h3>
                         <p id="detailsSubtitle" class="text-xs text-slate-500"></p>
                     </div>
-                    <button type="button" onclick="closeDetailsModal()" class="text-slate-400 hover:text-slate-600">
+                    <button onclick="closeDetailsModal()" class="text-slate-400 hover:text-slate-600">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
-                <div id="detailsBody" class="space-y-3 text-sm text-slate-700">
-                    <!-- Filled dynamically -->
-                </div>
+                <div id="detailsBody" class="space-y-3 text-sm text-slate-700"></div>
                 <div class="mt-5 flex justify-end">
-                    <button type="button" onclick="closeDetailsModal()"
+                    <button onclick="closeDetailsModal()"
                         class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium">
                         Close
                     </button>
@@ -666,7 +747,7 @@ function isCancellable($status, $date)
         <div id="modifyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
             <div class="bg-white rounded-2xl p-6 w-full max-w-md">
                 <h3 class="text-lg font-semibold text-slate-800 mb-4">Modify Reservation</h3>
-                <form method="POST">
+                <form method="POST" action="">
                     <input type="hidden" name="action" value="modify_reservation">
                     <input type="hidden" name="reservation_id" id="modifyReservationId">
 
@@ -674,6 +755,7 @@ function isCancellable($status, $date)
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">Date</label>
                             <input type="date" name="new_date" id="modifyDate" required
+                                min="<?php echo date('Y-m-d'); ?>"
                                 class="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-500 outline-none">
                         </div>
                         <div>
@@ -699,14 +781,10 @@ function isCancellable($status, $date)
                             <label class="block text-sm font-medium text-slate-700 mb-2">Number of Guests</label>
                             <select name="new_guests" id="modifyGuests" required
                                 class="w-full border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-500 outline-none">
-                                <option value="1">1 guest</option>
-                                <option value="2">2 guests</option>
-                                <option value="3">3 guests</option>
-                                <option value="4">4 guests</option>
-                                <option value="5">5 guests</option>
-                                <option value="6">6 guests</option>
-                                <option value="7">7 guests</option>
-                                <option value="8">8 guests</option>
+                                <?php for ($i = 1; $i <= 8; $i++): ?>
+                                    <option value="<?php echo $i; ?>"><?php echo $i; ?>
+                                        guest<?php echo $i > 1 ? 's' : ''; ?></option>
+                                <?php endfor; ?>
                             </select>
                         </div>
                     </div>
@@ -746,129 +824,158 @@ function isCancellable($status, $date)
                 }
             }
 
-            // Confirmation dialogs
-            function confirmCancelBooking() {
-                return confirm('Are you sure you want to cancel this hotel booking? This action cannot be undone.');
+            // Cancel functions with SweetAlert
+            function cancelBooking(bookingId) {
+                Swal.fire({
+                    title: 'Cancel Booking?',
+                    text: 'Are you sure you want to cancel this hotel booking? This action cannot be undone and points earned will be deducted.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d97706',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, cancel it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '';
+                        form.innerHTML = `
+                        <input type="hidden" name="action" value="cancel_booking">
+                        <input type="hidden" name="booking_id" value="${bookingId}">
+                    `;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             }
 
-            function confirmCancelReservation() {
-                return confirm('Are you sure you want to cancel this restaurant reservation? This action cannot be undone.');
+            function cancelReservation(reservationId) {
+                Swal.fire({
+                    title: 'Cancel Reservation?',
+                    text: 'Are you sure you want to cancel this restaurant reservation? This action cannot be undone and points earned will be deducted.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d97706',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, cancel it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '';
+                        form.innerHTML = `
+                        <input type="hidden" name="action" value="cancel_reservation">
+                        <input type="hidden" name="reservation_id" value="${reservationId}">
+                    `;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             }
 
-            // Details modal helpers
-            function openDetailsModal(title, subtitle, bodyHtml) {
-                document.getElementById('detailsTitle').textContent = title;
-                document.getElementById('detailsSubtitle').textContent = subtitle || '';
-                document.getElementById('detailsBody').innerHTML = bodyHtml;
-                const modal = document.getElementById('detailsModal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
+            // Details modal functions
+            function viewBookingDetails(booking) {
+                document.getElementById('detailsTitle').textContent = 'Hotel Booking Details';
+                document.getElementById('detailsSubtitle').textContent = `Reference: ${booking.booking_reference}`;
 
-            function closeDetailsModal() {
-                const modal = document.getElementById('detailsModal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-
-            // View details
-            function viewBookingDetails(buttonEl) {
-                const ref = buttonEl.dataset.reference || '';
-                const status = buttonEl.dataset.status || '';
-                const roomType = buttonEl.dataset.roomType || '';
-                const roomNumber = buttonEl.dataset.roomNumber || 'TBD';
-                const checkIn = buttonEl.dataset.checkIn || '';
-                const checkOut = buttonEl.dataset.checkOut || '';
-                const guests = buttonEl.dataset.guests || '';
-                const amount = buttonEl.dataset.amount || '';
-                const special = buttonEl.dataset.specialRequests || 'None';
-
-                const subtitle = `Status: ${status}`;
                 const body = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-slate-500 text-xs">Booking Reference</p>
-                        <p class="font-medium">${ref}</p>
+                        <p class="text-slate-500 text-xs">Guest Name</p>
+                        <p class="font-medium">${booking.guest_first_name} ${booking.guest_last_name}</p>
                     </div>
                     <div>
                         <p class="text-slate-500 text-xs">Room</p>
-                        <p class="font-medium">${roomType} · ${roomNumber}</p>
+                        <p class="font-medium">${booking.room_type}</p>
                     </div>
                     <div>
                         <p class="text-slate-500 text-xs">Check-in</p>
-                        <p class="font-medium">${checkIn}</p>
+                        <p class="font-medium">${formatDate(booking.check_in_date)}</p>
                     </div>
                     <div>
                         <p class="text-slate-500 text-xs">Check-out</p>
-                        <p class="font-medium">${checkOut}</p>
+                        <p class="font-medium">${formatDate(booking.check_out_date)}</p>
                     </div>
                     <div>
-                        <p class="text-slate-500 text-xs">Guests</p>
-                        <p class="font-medium">${guests} guest${guests == 1 ? '' : 's'}</p>
+                        <p class="text-slate-500 text-xs">Adults</p>
+                        <p class="font-medium">${booking.adults || 0}</p>
                     </div>
                     <div>
+                        <p class="text-slate-500 text-xs">Children</p>
+                        <p class="font-medium">${booking.children || 0}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Subtotal</p>
+                        <p class="font-medium">₱${Number(booking.subtotal).toLocaleString()}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Tax (12%)</p>
+                        <p class="font-medium">₱${Number(booking.tax).toLocaleString()}</p>
+                    </div>
+                    <div class="col-span-2">
                         <p class="text-slate-500 text-xs">Total Amount</p>
-                        <p class="font-semibold text-amber-700">${amount}</p>
+                        <p class="font-semibold text-amber-700 text-lg">₱${Number(booking.total_amount).toLocaleString()}</p>
                     </div>
                 </div>
-                <div class="mt-3">
+                <div class="mt-4 pt-4 border-t">
                     <p class="text-slate-500 text-xs mb-1">Special Requests</p>
-                    <p class="text-sm">${special}</p>
+                    <p class="text-sm">${booking.special_requests || 'None'}</p>
                 </div>
             `;
 
-                openDetailsModal('Hotel Booking Details', subtitle, body);
+                document.getElementById('detailsBody').innerHTML = body;
+                document.getElementById('detailsModal').classList.remove('hidden');
+                document.getElementById('detailsModal').classList.add('flex');
             }
 
-            function viewReservationDetails(buttonEl) {
-                const status = buttonEl.dataset.status || '';
-                const date = buttonEl.dataset.date || '';
-                const time = buttonEl.dataset.time || '';
-                const guests = buttonEl.dataset.guests || '';
-                const table = buttonEl.dataset.table || 'TBD';
-                const special = buttonEl.dataset.specialRequests || 'None';
+            function viewReservationDetails(reservation) {
+                document.getElementById('detailsTitle').textContent = 'Restaurant Reservation Details';
+                document.getElementById('detailsSubtitle').textContent = `${reservation.number_of_guests} guests`;
 
-                const subtitle = `Status: ${status}`;
                 const body = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-slate-500 text-xs">Date</p>
-                        <p class="font-medium">${date}</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-xs">Time</p>
-                        <p class="font-medium">${time}</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 text-xs">Guests</p>
-                        <p class="font-medium">${guests} guest${guests == 1 ? '' : 's'}</p>
+                        <p class="text-slate-500 text-xs">Guest Name</p>
+                        <p class="font-medium">${reservation.guest_first_name} ${reservation.guest_last_name}</p>
                     </div>
                     <div>
                         <p class="text-slate-500 text-xs">Table</p>
-                        <p class="font-medium">${table}</p>
+                        <p class="font-medium">${reservation.table_number || 'TBD'}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Date</p>
+                        <p class="font-medium">${formatDate(reservation.reservation_date)}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Time</p>
+                        <p class="font-medium">${formatTime(reservation.reservation_time)}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Occasion</p>
+                        <p class="font-medium">${reservation.occasion || 'None'}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-xs">Deposit</p>
+                        <p class="font-medium">₱${Number(reservation.deposit_amount || 0).toLocaleString()}</p>
                     </div>
                 </div>
-                <div class="mt-3">
+                <div class="mt-4 pt-4 border-t">
                     <p class="text-slate-500 text-xs mb-1">Special Requests</p>
-                    <p class="text-sm">${special}</p>
+                    <p class="text-sm">${reservation.special_requests || 'None'}</p>
                 </div>
             `;
 
-                openDetailsModal('Restaurant Reservation Details', subtitle, body);
+                document.getElementById('detailsBody').innerHTML = body;
+                document.getElementById('detailsModal').classList.remove('hidden');
+                document.getElementById('detailsModal').classList.add('flex');
             }
 
-            // Rating functions
-            function rateStay(bookingId) {
-                // In a real implementation, this would open a rating modal
-                alert('Rate your stay feature coming soon!');
+            function closeDetailsModal() {
+                document.getElementById('detailsModal').classList.add('hidden');
+                document.getElementById('detailsModal').classList.remove('flex');
             }
 
-            function rateDining(reservationId) {
-                // In a real implementation, this would open a rating modal
-                alert('Rate your dining experience feature coming soon!');
-            }
-
-            // Modify reservation
+            // Modify functions
             function modifyReservation(reservationId, currentDate, currentTime, currentGuests) {
                 document.getElementById('modifyReservationId').value = reservationId;
                 document.getElementById('modifyDate').value = currentDate;
@@ -881,6 +988,45 @@ function isCancellable($status, $date)
             function closeModifyModal() {
                 document.getElementById('modifyModal').classList.add('hidden');
                 document.getElementById('modifyModal').classList.remove('flex');
+            }
+
+            // Contact support
+            function contactSupport() {
+                Swal.fire({
+                    title: 'Contact Support',
+                    text: 'Please call us at +63 (2) 1234 5678 or email support@lucas.stay',
+                    icon: 'info',
+                    confirmButtonColor: '#d97706'
+                });
+            }
+
+            // Helper functions
+            function formatDate(dateString) {
+                if (!dateString) return 'Not set';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            function formatTime(timeString) {
+                if (!timeString) return 'Not set';
+                const [hours, minutes] = timeString.split(':');
+                const hour = parseInt(hours);
+                const ampm = hour >= 12 ? 'PM' : 'AM';
+                const hour12 = hour % 12 || 12;
+                return `${hour12}:${minutes} ${ampm}`;
+            }
+
+            // Close modals on outside click
+            window.onclick = function (event) {
+                const detailsModal = document.getElementById('detailsModal');
+                const modifyModal = document.getElementById('modifyModal');
+
+                if (detailsModal && event.target === detailsModal) {
+                    closeDetailsModal();
+                }
+                if (modifyModal && event.target === modifyModal) {
+                    closeModifyModal();
+                }
             }
         </script>
     </body>

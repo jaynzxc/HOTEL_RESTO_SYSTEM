@@ -1,3 +1,8 @@
+<?php
+
+require_once '../../controller/customer/get/notifications.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,66 +21,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR (customer portal) ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">customer portal · notifications</p>
-        </div>
-
-        <!-- user summary (empty shell) -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
-            —</div>
-          <div>
-            <p class="font-medium text-slate-800">Guest</p>
-            <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-gem text-[11px]"></i>
-              member · 0 pts</p>
-          </div>
-        </div>
-
-        <!-- navigation (notifications highlighted) -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./index.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-hotel w-5 text-amber-600"></i>Hotel Booking</a>
-          <a href="./my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="./restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="./payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="./loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./Notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full">3</span></a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="./login_form.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
+      <?php require './components/customer_nav.php' ?>
 
       <!-- ========== MAIN CONTENT (NOTIFICATIONS PAGE - CLEAN) ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -154,8 +100,9 @@
 
     <script>
       (function () {
-        // ---------- CLEAN STATE: no notifications ----------
-        let notifications = [];
+        // ---------- LOAD DATA FROM DATABASE ----------
+        let notifications = <?php echo json_encode($notifications); ?>;
+        let counts = <?php echo json_encode($counts); ?>;
         let currentFilter = 'all';
 
         // DOM elements
@@ -165,33 +112,34 @@
         const bookingsCountSpan = document.getElementById('bookingsCount');
         const promosCountSpan = document.getElementById('promosCount');
         const systemCountSpan = document.getElementById('systemCount');
-        const sidebarBadge = document.getElementById('sidebarNotificationCount');
+        const sidebarBadge = document.querySelector('nav .relative span.bg-amber-100');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const markAllBtn = document.getElementById('markAllReadBtn');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
         const dateSpan = document.getElementById('currentDate');
+        const preferencesBtn = document.getElementById('preferencesBtn');
 
         // Helper: format date
         const now = new Date();
-        dateSpan.innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toLowerCase();
-
-        // Helper: generate random time string
-        function randomTimeAgo() {
-          const r = Math.floor(Math.random() * 60) + 1;
-          if (r < 10) return r + ' minutes ago';
-          else if (r < 30) return r + ' minutes ago';
-          else return 'about ' + Math.floor(r / 10) + ' hours ago';
-        }
+        dateSpan.innerText = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).toLowerCase();
 
         // Helper: get icon for category
-        function getIcon(cat) {
-          if (cat === 'booking') return 'fa-regular fa-calendar-check';
-          if (cat === 'reminder') return 'fa-regular fa-clock';
-          if (cat === 'promo') return 'fa-regular fa-gem';
-          if (cat === 'payment') return 'fa-regular fa-credit-card';
-          if (cat === 'points') return 'fa-regular fa-star';
-          if (cat === 'review') return 'fa-regular fa-pen-to-square';
-          return 'fa-regular fa-circle-info';
+        function getIcon(category) {
+          const iconMap = {
+            'booking': 'fa-regular fa-calendar-check',
+            'reminder': 'fa-regular fa-clock',
+            'promo': 'fa-regular fa-gem',
+            'payment': 'fa-regular fa-credit-card',
+            'points': 'fa-regular fa-star',
+            'review': 'fa-regular fa-pen-to-square',
+            'system': 'fa-regular fa-circle-info'
+          };
+          return iconMap[category] || 'fa-regular fa-bell';
         }
 
         // Render notifications based on filter
@@ -204,19 +152,23 @@
               <p class="text-xs text-slate-400 mt-1">We'll notify you when something arrives.</p>
             </div>
           `;
-            loadMoreBtn.disabled = true;
-            loadMoreBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            if (loadMoreBtn) {
+              loadMoreBtn.disabled = true;
+              loadMoreBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
             return;
           }
 
-          loadMoreBtn.disabled = false;
-          loadMoreBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          if (loadMoreBtn) {
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
 
           let filtered = notifications;
           if (currentFilter === 'unread') filtered = notifications.filter(n => !n.read);
           else if (currentFilter === 'bookings') filtered = notifications.filter(n => n.category === 'booking' || n.category === 'reminder');
           else if (currentFilter === 'promos') filtered = notifications.filter(n => n.category === 'promo');
-          else if (currentFilter === 'system') filtered = notifications.filter(n => n.category === 'system' || n.category === 'payment' || n.category === 'points' || n.category === 'review');
+          else if (currentFilter === 'system') filtered = notifications.filter(n => ['system', 'payment', 'points', 'review'].includes(n.category));
 
           if (filtered.length === 0) {
             container.innerHTML = `<div class="text-center py-12 bg-white rounded-2xl border border-slate-200"><p class="text-slate-500">No notifications in this category.</p></div>`;
@@ -226,23 +178,24 @@
           let html = '';
           filtered.forEach(n => {
             const borderClass = n.read ? 'border-slate-200' : 'border-l-4 border-amber-600';
-            const bgClass = n.read ? 'bg-white' : 'bg-white'; // all white, unread has left border
-            const opacityClass = n.read ? 'opacity-80' : '';
+            const bgClass = 'bg-white';
             const badge = n.read ? '' : '<span class="bg-amber-600 text-white text-xs px-2 py-0.5 rounded-full ml-2">new</span>';
 
             html += `
-            <div class="${borderClass} rounded-r-2xl rounded-l-none ${bgClass} p-5 flex flex-wrap items-start gap-4 shadow-sm ${opacityClass} notification-item" data-id="${n.id}">
-              <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0"><i class="${getIcon(n.category)}"></i></div>
+            <div class="${borderClass} rounded-r-2xl rounded-l-none ${bgClass} p-5 flex flex-wrap items-start gap-4 shadow-sm notification-item" data-id="${n.id}">
+              <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+                <i class="${getIcon(n.category)}"></i>
+              </div>
               <div class="flex-1">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <h3 class="font-semibold">${n.title}</h3>
+                  <h3 class="font-semibold">${escapeHtml(n.title)}</h3>
                   ${badge}
                 </div>
-                <p class="text-sm text-slate-600 mt-1">${n.message}</p>
+                <p class="text-sm text-slate-600 mt-1">${escapeHtml(n.message)}</p>
                 <div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                  <span><i class="fa-regular fa-clock mr-1"></i> ${n.timeAgo}</span>
-                  <button class="text-amber-700 hover:underline view-action" data-id="${n.id}" data-action="view">${n.viewText || 'view details'}</button>
-                  <button class="text-slate-500 hover:underline dismiss-action" data-id="${n.id}" data-action="dismiss">dismiss</button>
+                  <span><i class="fa-regular fa-clock mr-1"></i> ${n.time_ago}</span>
+                  ${n.link ? `<a href="${n.link}" class="text-amber-700 hover:underline view-action" data-id="${n.id}">${n.view_text}</a>` : ''}
+                  <button class="text-slate-500 hover:underline dismiss-action" data-id="${n.id}">dismiss</button>
                 </div>
               </div>
             </div>
@@ -250,7 +203,7 @@
           });
           container.innerHTML = html;
 
-          // Update counts in filter tabs
+          // Update counts
           updateCounts();
         }
 
@@ -260,39 +213,127 @@
           const unread = notifications.filter(n => !n.read).length;
           const bookings = notifications.filter(n => n.category === 'booking' || n.category === 'reminder').length;
           const promos = notifications.filter(n => n.category === 'promo').length;
-          const system = notifications.filter(n => n.category === 'system' || n.category === 'payment' || n.category === 'points' || n.category === 'review').length;
+          const system = notifications.filter(n => ['system', 'payment', 'points', 'review'].includes(n.category)).length;
 
-          allCountSpan.innerText = `(${total})`;
-          unreadCountSpan.innerText = `(${unread})`;
-          bookingsCountSpan.innerText = `(${bookings})`;
-          promosCountSpan.innerText = `(${promos})`;
-          systemCountSpan.innerText = `(${system})`;
-          sidebarBadge.innerText = unread;
+          if (allCountSpan) allCountSpan.innerText = `(${total})`;
+          if (unreadCountSpan) unreadCountSpan.innerText = `(${unread})`;
+          if (bookingsCountSpan) bookingsCountSpan.innerText = `(${bookings})`;
+          if (promosCountSpan) promosCountSpan.innerText = `(${promos})`;
+          if (systemCountSpan) systemCountSpan.innerText = `(${system})`;
+
+          // Update sidebar badge
+          const sidebarBadge = document.querySelector('nav .relative span.bg-amber-100');
+          if (sidebarBadge) {
+            sidebarBadge.innerText = unread;
+            if (unread === 0) {
+              sidebarBadge.style.display = 'none';
+            } else {
+              sidebarBadge.style.display = 'inline-block';
+            }
+          }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(unsafe) {
+          if (!unsafe) return '';
+          return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
         }
 
         // Dismiss notification
         function dismissNotification(id) {
-          notifications = notifications.filter(n => n.id !== id);
-          renderNotifications();
-          updateCounts();
+          fetch('../../controller/customer/post/notification_actions.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              action: 'dismiss',
+              notification_id: id
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                notifications = notifications.filter(n => n.id != id);
+                renderNotifications();
+                showToast(data.message, 'success');
+              } else {
+                showToast(data.message, 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('Failed to dismiss notification', 'error');
+            });
         }
 
-        // Mark one as read (via view)
+        // Mark as read
         function markAsRead(id) {
-          const notif = notifications.find(n => n.id === id);
-          if (notif && !notif.read) {
-            notif.read = true;
-            renderNotifications();
-            updateCounts();
-          }
+          fetch('../../controller/customer/post/notification_actions.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              action: 'mark_read',
+              notification_id: id
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                const notif = notifications.find(n => n.id == id);
+                if (notif) {
+                  notif.read = true;
+                  renderNotifications();
+                }
+              }
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         // Mark all as read
         function markAllRead() {
-          notifications.forEach(n => n.read = true);
-          renderNotifications();
-          updateCounts();
-          alert('All notifications marked as read (demo).');
+          fetch('../../controller/customer/post/notification_actions.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              action: 'mark_read'
+            })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                notifications.forEach(n => n.read = true);
+                renderNotifications();
+                showToast(data.message, 'success');
+              } else {
+                showToast(data.message, 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('Failed to mark all as read', 'error');
+            });
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+          const toast = document.createElement('div');
+          toast.className = `fixed bottom-4 right-4 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-bounce`;
+          toast.innerHTML = `<i class="fa-regular ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i>${message}`;
+          document.body.appendChild(toast);
+
+          setTimeout(() => {
+            toast.remove();
+          }, 3000);
         }
 
         // Filter change
@@ -311,63 +352,58 @@
 
         // Event delegation for view/dismiss
         container.addEventListener('click', (e) => {
-          if (e.target.classList.contains('dismiss-action') || e.target.parentElement?.classList.contains('dismiss-action')) {
-            const btn = e.target.closest('button');
-            if (!btn) return;
-            const id = btn.dataset.id;
+          const dismissBtn = e.target.closest('.dismiss-action');
+          const viewLink = e.target.closest('.view-action');
+
+          if (dismissBtn) {
+            e.preventDefault();
+            const id = dismissBtn.dataset.id;
             dismissNotification(id);
-          } else if (e.target.classList.contains('view-action') || e.target.parentElement?.classList.contains('view-action')) {
-            const btn = e.target.closest('button');
-            if (!btn) return;
-            const id = btn.dataset.id;
+          } else if (viewLink) {
+            const id = viewLink.dataset.id;
             markAsRead(id);
-            alert(`Viewing notification ${id} (demo).`);
+            // Don't prevent default - let the link work
           }
         });
 
         // Mark all as read
-        markAllBtn.addEventListener('click', markAllRead);
+        if (markAllBtn) {
+          markAllBtn.addEventListener('click', markAllRead);
+        }
 
-        // Load more (simulate adding a demo notification)
-        loadMoreBtn.addEventListener('click', () => {
-          const demoNotif = {
-            id: 'demo-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-            title: 'Demo notification',
-            message: 'This is a sample notification added via "load more". You can dismiss or view it.',
-            category: 'system',
-            read: false,
-            timeAgo: 'just now',
-            viewText: 'learn more'
-          };
-          notifications.push(demoNotif);
-          renderNotifications();
-          updateCounts();
-        });
+        // Load more (pagination)
+        if (loadMoreBtn) {
+          loadMoreBtn.addEventListener('click', () => {
+            // In a real implementation, you'd load more notifications from the server
+            showToast('Loading more notifications...', 'info');
+          });
+        }
 
         // Preferences button
-        document.getElementById('preferencesBtn').addEventListener('click', () => {
-          alert('Notification preferences panel (demo).');
-        });
+        if (preferencesBtn) {
+          preferencesBtn.addEventListener('click', () => {
+            alert('Notification preferences will be available soon.');
+          });
+        }
 
-        // Initialize empty
+        // Update user info in sidebar
+        const sidebarUser = document.querySelector('.flex.items-center.gap-3.px-6.py-5');
+        if (sidebarUser) {
+          const initialsSpan = sidebarUser.querySelector('.h-12.w-12');
+          const nameSpan = sidebarUser.querySelector('.font-medium.text-slate-800');
+          const tierSpan = sidebarUser.querySelector('.text-xs.text-slate-500 span');
+          const pointsSpan = sidebarUser.querySelectorAll('.text-xs.text-slate-500 span')[1];
+
+          if (initialsSpan) initialsSpan.innerText = '<?php echo $initials; ?>';
+          if (nameSpan) nameSpan.innerText = '<?php echo addslashes($user['full_name'] ?? 'Guest'); ?>';
+          if (tierSpan) tierSpan.innerText = '<?php echo $user['member_tier'] ?? 'bronze'; ?>';
+          if (pointsSpan) pointsSpan.innerText = '<?php echo number_format($user['loyalty_points'] ?? 0); ?>';
+        }
+
+        // Initialize
         renderNotifications();
-        updateCounts();
 
-        // For convenience, you can double-click the header to add a sample notification (optional)
-        document.querySelector('h1')?.addEventListener('dblclick', () => {
-          const sample = {
-            id: 'sample-' + Date.now(),
-            title: 'Sample booking confirmation',
-            message: 'Your Deluxe Twin room from Jun 12-15 is confirmed.',
-            category: 'booking',
-            read: false,
-            timeAgo: 'just now',
-            viewText: 'view booking'
-          };
-          notifications.unshift(sample);
-          renderNotifications();
-          updateCounts();
-        });
+        // Remove demo double-click handler if you had one
       })();
     </script>
   </body>

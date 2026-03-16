@@ -70,104 +70,28 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== SIDEBAR ========== -->
-      <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm flex-shrink-0">
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1">customer portal · payments</p>
-        </div>
-
-        <!-- user summary from database -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg overflow-hidden"
-            id="userInitials">
-            <?php if (!empty($user['avatar'])): ?>
-              <img src="../../../<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar"
-                class="w-full h-full object-cover">
-            <?php else: ?>
-              <?php echo htmlspecialchars($initials); ?>
-            <?php endif; ?>
-          </div>
-          <div>
-            <p class="font-medium text-slate-800" id="displayName">
-              <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
-            </p>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
-              <i class="fa-regular fa-gem text-[11px]"></i>
-              <span id="loyaltyTier"><?php echo htmlspecialchars($user['member_tier'] ?? 'bronze'); ?></span> ·
-              <span id="loyaltyPoints"><?php echo number_format($user['loyalty_points'] ?? 0); ?></span> pts
-            </p>
-          </div>
-        </div>
-
-        <!-- navigation -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="./dashboard.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>Dashboard</a>
-          <a href="./my_profile.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="./hotel_booking.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-          <a href="./my_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="./restaurant_reservation.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="./order_food.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="./payments.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-regular fa-credit-card w-5 text-amber-600"></i>Payments</a>
-          <a href="./loyalty_rewards.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="./notifications.php"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications
-            <?php if ($unread_count > 0): ?>
-              <span
-                class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full"><?php echo $unread_count; ?></span>
-            <?php endif; ?>
-          </a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="../../controller/auth/logout.php"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-      </aside>
-
+      <?php require './components/customer_nav.php' ?>
       <!-- ========== MAIN CONTENT ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
 
         <!-- Display Messages -->
         <?php if (!empty($_SESSION['success'])): ?>
-          <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
-            <?php foreach ($_SESSION['success'] as $message): ?>
-              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
-              </p>
-            <?php endforeach; ?>
-          </div>
+            <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
+              <?php foreach ($_SESSION['success'] as $message): ?>
+                  <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+                  </p>
+              <?php endforeach; ?>
+            </div>
         <?php endif; ?>
 
         <?php if (!empty($_SESSION['error'])): ?>
-          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-            <ul class="list-disc list-inside text-sm">
-              <?php foreach ($_SESSION['error'] as $field => $message): ?>
-                <li><?php echo htmlspecialchars($message); ?></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
+            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
+              <ul class="list-disc list-inside text-sm">
+                <?php foreach ($_SESSION['error'] as $field => $message): ?>
+                    <li><?php echo htmlspecialchars($message); ?></li>
+                <?php endforeach; ?>
+              </ul>
+            </div>
         <?php endif; ?>
 
         <!-- header -->
@@ -258,37 +182,37 @@
               payment methods</h3>
             <div class="mt-3 space-y-2" id="paymentMethodsSummary">
               <?php if (empty($paymentMethods)): ?>
-                <p class="text-sm text-slate-500 italic">no payment methods added</p>
+                  <p class="text-sm text-slate-500 italic">no payment methods added</p>
               <?php else: ?>
-                <?php foreach (array_slice($paymentMethods, 0, 3) as $method): ?>
-                  <div class="flex items-center gap-2 text-sm">
-                    <?php
-                    $icon = '';
-                    switch ($method['method_type']) {
-                      case 'gcash':
-                        $icon = '<i class="fa-brands fa-gcash text-blue-500 text-lg"></i>';
-                        break;
-                      case 'visa':
-                        $icon = '<i class="fa-brands fa-cc-visa text-slate-400"></i>';
-                        break;
-                      case 'mastercard':
-                        $icon = '<i class="fa-brands fa-cc-mastercard text-slate-400"></i>';
-                        break;
-                      case 'cash':
-                        $icon = '<i class="fa-solid fa-money-bill-wave text-amber-600"></i>';
-                        break;
-                    }
-                    echo $icon;
-                    ?>
-                    <span><?php echo htmlspecialchars($method['account_name']); ?></span>
-                    <?php if ($method['is_default']): ?>
-                      <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full">default</span>
-                    <?php endif; ?>
-                  </div>
-                <?php endforeach; ?>
-                <?php if (count($paymentMethods) > 3): ?>
-                  <p class="text-xs text-slate-400 mt-1">+<?php echo count($paymentMethods) - 3; ?> more</p>
-                <?php endif; ?>
+                  <?php foreach (array_slice($paymentMethods, 0, 3) as $method): ?>
+                      <div class="flex items-center gap-2 text-sm">
+                        <?php
+                        $icon = '';
+                        switch ($method['method_type']) {
+                          case 'gcash':
+                            $icon = '<i class="fa-brands fa-gcash text-blue-500 text-lg"></i>';
+                            break;
+                          case 'visa':
+                            $icon = '<i class="fa-brands fa-cc-visa text-slate-400"></i>';
+                            break;
+                          case 'mastercard':
+                            $icon = '<i class="fa-brands fa-cc-mastercard text-slate-400"></i>';
+                            break;
+                          case 'cash':
+                            $icon = '<i class="fa-solid fa-money-bill-wave text-amber-600"></i>';
+                            break;
+                        }
+                        echo $icon;
+                        ?>
+                        <span><?php echo htmlspecialchars($method['account_name']); ?></span>
+                        <?php if ($method['is_default']): ?>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full">default</span>
+                        <?php endif; ?>
+                      </div>
+                  <?php endforeach; ?>
+                  <?php if (count($paymentMethods) > 3): ?>
+                      <p class="text-xs text-slate-400 mt-1">+<?php echo count($paymentMethods) - 3; ?> more</p>
+                  <?php endif; ?>
               <?php endif; ?>
             </div>
             <button onclick="openAddPaymentModal()"
@@ -308,16 +232,16 @@
             </p>
             <p class="text-xs text-slate-400 mt-2" id="monthlyComparison">
               <?php if ($lastMonthTotal['total'] > 0): ?>
-                <?php
-                $symbol = $percentChange >= 0 ? '↑' : '↓';
-                $color = $percentChange >= 0 ? 'text-green-600' : 'text-red-600';
-                ?>
-                <span class="<?php echo $color; ?>"><?php echo $symbol; ?>
-                  <?php echo number_format(abs($percentChange), 1); ?>% from last month</span>
+                  <?php
+                  $symbol = $percentChange >= 0 ? '↑' : '↓';
+                  $color = $percentChange >= 0 ? 'text-green-600' : 'text-red-600';
+                  ?>
+                  <span class="<?php echo $color; ?>"><?php echo $symbol; ?>
+                    <?php echo number_format(abs($percentChange), 1); ?>% from last month</span>
               <?php elseif ($monthlyStats['total'] > 0): ?>
-                <span class="text-green-600">↑ new spending this month</span>
+                  <span class="text-green-600">↑ new spending this month</span>
               <?php else: ?>
-                no transactions this month
+                  no transactions this month
               <?php endif; ?>
             </p>
           </div>
@@ -333,69 +257,69 @@
           </div>
           <div id="paymentMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <?php if (empty($paymentMethods)): ?>
-              <div class="col-span-full text-center py-8 text-slate-500">
-                <i class="fa-regular fa-credit-card text-4xl mb-3 text-slate-300"></i>
-                <p class="text-sm">No payment methods added yet</p>
-                <p class="text-xs text-slate-400 mt-1">Add a payment method to get started</p>
-              </div>
-            <?php else: ?>
-              <?php foreach ($paymentMethods as $index => $method): ?>
-                <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 <?php
-                    switch ($method['method_type']) {
-                      case 'gcash':
-                        echo 'bg-blue-100 text-blue-600';
-                        break;
-                      case 'cash':
-                        echo 'bg-amber-100 text-amber-600';
-                        break;
-                      default:
-                        echo 'bg-slate-100 text-slate-600';
-                    }
-                    ?> rounded-full flex items-center justify-center">
-                      <?php
-                      switch ($method['method_type']) {
-                        case 'gcash':
-                          echo '<i class="fa-brands fa-gcash text-xl"></i>';
-                          break;
-                        case 'visa':
-                          echo '<i class="fa-brands fa-cc-visa text-xl"></i>';
-                          break;
-                        case 'mastercard':
-                          echo '<i class="fa-brands fa-cc-mastercard text-xl"></i>';
-                          break;
-                        case 'cash':
-                          echo '<i class="fa-solid fa-money-bill-wave text-xl"></i>';
-                          break;
-                      }
-                      ?>
-                    </div>
-                    <div>
-                      <p class="font-medium"><?php echo htmlspecialchars($method['display_name']); ?></p>
-                      <p class="text-xs text-slate-500">
-                        <?php echo htmlspecialchars($method['account_name']); ?>
-                        <?php if (!empty($method['expiry_date'])): ?>
-                          · <?php echo htmlspecialchars($method['expiry_date']); ?>
-                        <?php endif; ?>
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex gap-2">
-                    <?php if ($method['is_default']): ?>
-                      <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">default</span>
-                    <?php endif; ?>
-                    <button onclick="setDefaultPayment(<?php echo $method['id']; ?>)"
-                      class="text-slate-400 hover:text-amber-600" title="Set as default">
-                      <i class="fa-regular fa-star"></i>
-                    </button>
-                    <button onclick="deletePaymentMethod(<?php echo $method['id']; ?>)"
-                      class="text-slate-400 hover:text-red-600">
-                      <i class="fa-regular fa-trash-can"></i>
-                    </button>
-                  </div>
+                <div class="col-span-full text-center py-8 text-slate-500">
+                  <i class="fa-regular fa-credit-card text-4xl mb-3 text-slate-300"></i>
+                  <p class="text-sm">No payment methods added yet</p>
+                  <p class="text-xs text-slate-400 mt-1">Add a payment method to get started</p>
                 </div>
-              <?php endforeach; ?>
+            <?php else: ?>
+                <?php foreach ($paymentMethods as $index => $method): ?>
+                    <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 <?php
+                        switch ($method['method_type']) {
+                          case 'gcash':
+                            echo 'bg-blue-100 text-blue-600';
+                            break;
+                          case 'cash':
+                            echo 'bg-amber-100 text-amber-600';
+                            break;
+                          default:
+                            echo 'bg-slate-100 text-slate-600';
+                        }
+                        ?> rounded-full flex items-center justify-center">
+                          <?php
+                          switch ($method['method_type']) {
+                            case 'gcash':
+                              echo '<i class="fa-brands fa-gcash text-xl"></i>';
+                              break;
+                            case 'visa':
+                              echo '<i class="fa-brands fa-cc-visa text-xl"></i>';
+                              break;
+                            case 'mastercard':
+                              echo '<i class="fa-brands fa-cc-mastercard text-xl"></i>';
+                              break;
+                            case 'cash':
+                              echo '<i class="fa-solid fa-money-bill-wave text-xl"></i>';
+                              break;
+                          }
+                          ?>
+                        </div>
+                        <div>
+                          <p class="font-medium"><?php echo htmlspecialchars($method['display_name']); ?></p>
+                          <p class="text-xs text-slate-500">
+                            <?php echo htmlspecialchars($method['account_name']); ?>
+                            <?php if (!empty($method['expiry_date'])): ?>
+                                · <?php echo htmlspecialchars($method['expiry_date']); ?>
+                            <?php endif; ?>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="flex gap-2">
+                        <?php if ($method['is_default']): ?>
+                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">default</span>
+                        <?php endif; ?>
+                        <button onclick="setDefaultPayment(<?php echo $method['id']; ?>)"
+                          class="text-slate-400 hover:text-amber-600" title="Set as default">
+                          <i class="fa-regular fa-star"></i>
+                        </button>
+                        <button onclick="deletePaymentMethod(<?php echo $method['id']; ?>)"
+                          class="text-slate-400 hover:text-red-600">
+                          <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                      </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
           </div>
         </div>
@@ -420,48 +344,48 @@
               </thead>
               <tbody id="transactionsTable" class="divide-y">
                 <?php if (empty($transactions)): ?>
-                  <tr>
-                    <td colspan="5" class="py-12 text-center text-slate-500">
-                      <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
-                      <p class="text-sm">No recent transactions</p>
-                      <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
-                    </td>
-                  </tr>
-                <?php else: ?>
-                  <?php foreach (array_slice($transactions, 0, 5) as $transaction): ?>
                     <tr>
-                      <td class="py-3">
-                        <?php echo date('M d, Y', strtotime($transaction['created_at'])); ?>
-                      </td>
-                      <td><?php echo htmlspecialchars($transaction['description']); ?></td>
-                      <td class="font-medium">₱<?php echo number_format($transaction['amount'], 2); ?></td>
-                      <td>
-                        <?php
-                        $statusClass = '';
-                        switch ($transaction['status']) {
-                          case 'completed':
-                            $statusClass = 'bg-green-100 text-green-700';
-                            break;
-                          case 'pending':
-                            $statusClass = 'bg-yellow-100 text-yellow-700';
-                            break;
-                          case 'failed':
-                            $statusClass = 'bg-red-100 text-red-700';
-                            break;
-                        }
-                        ?>
-                        <span class="<?php echo $statusClass; ?> px-2 py-0.5 rounded-full text-xs">
-                          <?php echo $transaction['status']; ?>
-                        </span>
-                      </td>
-                      <td>
-                        <?php if ($transaction['status'] === 'completed'): ?>
-                          <button onclick="viewReceipt(<?php echo $transaction['id']; ?>)"
-                            class="text-amber-700 text-xs">receipt</button>
-                        <?php endif; ?>
+                      <td colspan="5" class="py-12 text-center text-slate-500">
+                        <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-sm">No recent transactions</p>
+                        <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
                       </td>
                     </tr>
-                  <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach (array_slice($transactions, 0, 5) as $transaction): ?>
+                        <tr>
+                          <td class="py-3">
+                            <?php echo date('M d, Y', strtotime($transaction['created_at'])); ?>
+                          </td>
+                          <td><?php echo htmlspecialchars($transaction['description']); ?></td>
+                          <td class="font-medium">₱<?php echo number_format($transaction['amount'], 2); ?></td>
+                          <td>
+                            <?php
+                            $statusClass = '';
+                            switch ($transaction['status']) {
+                              case 'completed':
+                                $statusClass = 'bg-green-100 text-green-700';
+                                break;
+                              case 'pending':
+                                $statusClass = 'bg-yellow-100 text-yellow-700';
+                                break;
+                              case 'failed':
+                                $statusClass = 'bg-red-100 text-red-700';
+                                break;
+                            }
+                            ?>
+                            <span class="<?php echo $statusClass; ?> px-2 py-0.5 rounded-full text-xs">
+                              <?php echo $transaction['status']; ?>
+                            </span>
+                          </td>
+                          <td>
+                            <?php if ($transaction['status'] === 'completed'): ?>
+                                <button onclick="viewReceipt(<?php echo $transaction['id']; ?>)"
+                                  class="text-amber-700 text-xs">receipt</button>
+                            <?php endif; ?>
+                          </td>
+                        </tr>
+                    <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
             </table>
@@ -570,9 +494,9 @@
                   required>
                   <option value="">Select method</option>
                   <?php foreach ($paymentMethods as $method): ?>
-                    <option value="<?php echo $method['id']; ?>" <?php echo $method['is_default'] ? 'selected' : ''; ?>>
-                      <?php echo htmlspecialchars($method['display_name'] . ' - ' . $method['account_name']); ?>
-                    </option>
+                      <option value="<?php echo $method['id']; ?>" <?php echo $method['is_default'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($method['display_name'] . ' - ' . $method['account_name']); ?>
+                      </option>
                   <?php endforeach; ?>
                 </select>
               </div>
@@ -620,10 +544,17 @@
         tier: '<?php echo $user['member_tier'] ?? 'bronze'; ?>'
       };
 
-      const initialBalance = <?php echo $currentBalance; ?>;
+      const balanceData = {
+        total: <?php echo $balanceData['total_balance'] ?? 0; ?>,
+        pending: <?php echo $balanceData['pending_balance'] ?? 0; ?>,
+        available: <?php echo $balanceData['available_balance'] ?? 0; ?>
+      };
+
       let paymentMethods = <?php echo json_encode($paymentMethods); ?>;
       let payments = <?php echo json_encode($payments); ?>;
-      let currentBalance = initialBalance;
+      let currentBalance = balanceData.available;
+      let totalBalance = balanceData.total;
+      let pendingBalance = balanceData.pending;
       let loyaltyPoints = userData.points;
 
       // Store pending payments
@@ -640,6 +571,7 @@
         setupPaymentTypeHandler();
         updateUI();
         updatePaymentsTable();
+        updateBalanceMessage();
       });
 
       // Helper functions
@@ -678,6 +610,27 @@
           day: 'numeric'
         };
         document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options).toLowerCase();
+      }
+
+      function updateBalanceMessage() {
+        const balanceMessage = document.getElementById('balanceMessage');
+        const payNowBtn = document.getElementById('payNowBtn');
+
+        if (balanceMessage) {
+          if (currentBalance > 0) {
+            balanceMessage.textContent = 'due for payment';
+            if (payNowBtn) {
+              payNowBtn.disabled = false;
+              payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+          } else {
+            balanceMessage.textContent = 'no outstanding balance';
+            if (payNowBtn) {
+              payNowBtn.disabled = true;
+              payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+          }
+        }
       }
 
       function setupPaymentTypeHandler() {
@@ -813,7 +766,7 @@
             pendingHotelPayment = {
               amount: bookingData.total || 5000,
               description: bookingData.description || 'Hotel booking',
-              roomName: bookingData.roomName,
+              roomName: bookingData.room_name,
               checkIn: bookingData.check_in,
               checkOut: bookingData.check_out,
               adults: bookingData.adults || 2,
@@ -823,9 +776,9 @@
               id: `HOTEL${Date.now()}`,
               type: 'hotel',
               status: 'confirmed',
-              title: bookingData.roomName || 'Hotel Room',
+              title: bookingData.room_name || 'Hotel Room',
               details: {
-                room: bookingData.roomName || 'Deluxe Room',
+                room: bookingData.room_name || 'Deluxe Room',
                 checkIn: bookingData.check_in || new Date().toISOString().split('T')[0],
                 checkOut: bookingData.check_out || new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
                 adults: bookingData.adults || 2,
@@ -960,13 +913,22 @@
       };
 
       window.openPaymentModal = function () {
+        if (currentBalance <= 0) {
+          showToast('No outstanding balance to pay', 'info');
+          return;
+        }
+
         if (paymentMethods.length === 0) {
           showToast('Please add a payment method first', 'warning');
           openAddPaymentModal();
           return;
         }
+
         const modal = document.getElementById('paymentModal');
         if (modal) {
+          // Set the amount to the current balance
+          document.getElementById('paymentAmount').value = currentBalance.toFixed(2);
+          document.getElementById('paymentDescription').value = 'Payment for outstanding balance';
           modal.classList.remove('hidden');
           modal.classList.add('flex');
         }
@@ -1109,6 +1071,13 @@
             showToast(result.message, 'success');
             closePaymentModal();
 
+            // Update local balance
+            const paidAmount = parseFloat(formData.get('amount'));
+            currentBalance = Math.max(0, currentBalance - paidAmount);
+            totalBalance = Math.max(0, totalBalance - paidAmount);
+            updateUI();
+            updateBalanceMessage();
+
             // Handle restaurant payment redirect
             if (isRestaurantPayment && restaurantReservation) {
               try {
@@ -1139,7 +1108,9 @@
 
             // Show receipt for normal payments
             setTimeout(() => {
-              viewReceipt(result.receipt.payment_id);
+              if (result.receipt && result.receipt.payment_id) {
+                viewReceipt(result.receipt.payment_id);
+              }
             }, 500);
           } else {
             if (result.errors) {
@@ -1221,9 +1192,13 @@
       function updateUI() {
         const balanceEl = document.getElementById('currentBalance');
         const pointsEl = document.getElementById('loyaltyPoints');
+        const totalBalanceEl = document.querySelector('.total-balance'); // Add if you have this element
+        const pendingBalanceEl = document.querySelector('.pending-balance'); // Add if you have this element
 
         if (balanceEl) balanceEl.textContent = `₱${currentBalance.toFixed(2)}`;
         if (pointsEl) pointsEl.textContent = loyaltyPoints.toLocaleString();
+        if (totalBalanceEl) totalBalanceEl.textContent = `₱${totalBalance.toFixed(2)}`;
+        if (pendingBalanceEl) pendingBalanceEl.textContent = `₱${pendingBalance.toFixed(2)}`;
       }
 
       // Pay now button
@@ -1231,6 +1206,9 @@
       if (payNowBtn) {
         payNowBtn.addEventListener('click', openPaymentModal);
       }
+
+      // Initialize balance message on load
+      updateBalanceMessage();
     </script>
   </body>
 

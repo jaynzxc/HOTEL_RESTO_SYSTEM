@@ -1,3 +1,9 @@
+<?php
+/**
+ * View - Customer Dashboard
+ */
+require_once '../../controller/customer/get/dashboard.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,8 +13,11 @@
     <title>Lùcas · Customer Dashboard</title>
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../output.css">
     <!-- Font Awesome 6 (free) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       .transition-hover {
         transition: all 0.2s ease;
@@ -21,6 +30,15 @@
       .booking-item:hover {
         background-color: #fef3e2;
       }
+
+      .stat-card {
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
     </style>
   </head>
 
@@ -30,77 +48,7 @@
     <div class="min-h-screen flex flex-col lg:flex-row">
 
       <!-- ========== S I D E B A R ========== -->
-      <aside class="lg:w-72 bg-white border-r border-slate-200 shadow-sm lg:min-h-screen shrink-0">
-        <!-- brand / header -->
-        <div class="px-6 py-7 border-b border-slate-100">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-solid fa-utensils text-xl"></i>
-            <i class="fa-solid fa-bed text-xl"></i>
-            <span class="font-semibold text-xl tracking-tight text-slate-800 ml-1">Lùcas<span
-                class="text-amber-600">.stay</span></span>
-          </div>
-          <p class="text-xs text-slate-500 mt-1 tracking-wide">customer portal · dashboard</p>
-        </div>
-
-        <!-- user quick summary -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-100 bg-slate-50/80">
-          <div
-            class="h-11 w-11 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 border-2 border-white shadow-sm">
-            <span class="font-medium text-lg" id="userInitials">—</span>
-          </div>
-          <div>
-            <p class="font-medium text-slate-800" id="userName">Guest</p>
-            <p class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-gem text-[11px]"></i>
-              <span id="membershipTier">—</span> · <span id="userPoints">0</span> pts</p>
-          </div>
-        </div>
-
-        <!-- navigation menu (12 items) -->
-        <nav class="p-4 space-y-1.5 text-sm">
-          <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-medium"><i
-              class="fa-solid fa-table-cells-large w-5 text-amber-600"></i>Dashboard</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-user w-5 text-slate-400"></i>My Profile</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-hotel w-5 text-slate-400"></i>Hotel Booking</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-calendar-check w-5 text-slate-400"></i>My Reservations</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-clock w-5 text-slate-400"></i>Restaurant Reservation</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-solid fa-bag-shopping w-5 text-slate-400"></i>Menu / Order Food</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-credit-card w-5 text-slate-400"></i>Payments</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition"><i
-              class="fa-regular fa-star w-5 text-slate-400"></i>Loyalty Rewards</a>
-          <a href="#"
-            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition relative"><i
-              class="fa-regular fa-bell w-5 text-slate-400"></i>Notifications<span
-              class="ml-auto bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5 rounded-full"
-              id="notificationCount">0</span></a>
-          <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="#"
-              class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700 transition"><i
-                class="fa-solid fa-arrow-right-from-bracket w-5"></i>Logout</a>
-          </div>
-        </nav>
-
-        <!-- upgrade card -->
-        <div class="mx-4 mt-3 p-4 bg-linear-to-br from-amber-50 to-amber-100/60 rounded-2xl border border-amber-200/60">
-          <div class="flex items-center gap-2 text-amber-700">
-            <i class="fa-regular fa-gem"></i>
-            <span class="font-semibold text-sm">unlock gold status</span>
-          </div>
-          <p class="text-xs text-slate-600 mt-1">Earn <span id="pointsToGold">400</span> more pts → free breakfast</p>
-        </div>
-      </aside>
+      <?php require './components/customer_nav.php' ?>
 
       <!-- ========== M A I N   C O N T E N T  ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto">
@@ -108,20 +56,23 @@
         <!-- top welcome + FIXED NOTIFICATION & SEARCH with icons -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
-            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">good evening, <span class="font-semibold"
-                id="welcomeName">guest</span> 👋</h1>
+            <h1 class="text-2xl lg:text-3xl font-light text-slate-800"><?php echo $greeting; ?>, <span
+                class="font-semibold"
+                id="welcomeName"><?php echo htmlspecialchars($user['first_name'] ?? 'guest'); ?></span> 👋</h1>
             <p class="text-sm text-slate-500 mt-0.5">your stay · <span id="currentDate"></span></p>
           </div>
           <!-- fixed notification + search row (icons added) -->
           <div class="flex items-center gap-3">
-            <!-- notification bell with icon + badge (fixed) -->
-            <div class="relative">
+            <!-- notification bell with icon + badge - now links to notifications -->
+            <a href="./notifications.php" class="relative">
               <i class="fa-regular fa-bell text-2xl text-slate-500 hover:text-amber-600 transition cursor-pointer"></i>
-              <span
-                class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white"
-                id="headerNotificationBadge">3</span>
-            </div>
-            <!-- search bar with icon (fixed) -->
+              <?php if ($unread_count > 0): ?>
+                <span
+                  class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white"
+                  id="headerNotificationBadge"><?php echo $unread_count; ?></span>
+              <?php endif; ?>
+            </a>
+            <!-- search bar with icon -->
             <div
               class="bg-white border border-slate-200 rounded-full px-4 py-2 flex items-center gap-2 text-sm w-64 shadow-sm">
               <i class="fa-solid fa-magnifying-glass text-amber-400"></i>
@@ -134,41 +85,96 @@
 
         <!-- quick actions cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl"><i
-                class="fa-solid fa-bed"></i></div>
+          <!-- Active Booking Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
+            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
+              <i class="fa-solid fa-bed"></i>
+            </div>
             <div>
               <p class="text-xs text-slate-500">active booking</p>
-              <p class="font-semibold text-lg" id="activeBookingRoom">—</p>
-              <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full" id="bookingStatus">no
-                booking</span>
+              <p class="font-semibold text-lg" id="activeBookingRoom">
+                <?php echo $activeBooking['room_name'] ?? '—'; ?>
+              </p>
+              <span class="text-xs px-2 py-0.5 rounded-full" id="bookingStatus" style="background-color: <?php
+              echo $activeBooking['status'] == 'confirmed' ? '#dcfce7' :
+                ($activeBooking['status'] == 'pending' ? '#fef3c7' : '#f1f5f9');
+              ?>; color: <?php
+              echo $activeBooking['status'] == 'confirmed' ? '#166534' :
+                ($activeBooking['status'] == 'pending' ? '#92400e' : '#475569');
+              ?>;">
+                <?php echo $activeBooking['status'] ?? 'no booking'; ?>
+              </span>
             </div>
           </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl"><i
-                class="fa-regular fa-clock"></i></div>
+
+          <!-- Today's Reservation Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
+            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
+              <i class="fa-regular fa-clock"></i>
+            </div>
             <div>
               <p class="text-xs text-slate-500">table tonight?</p>
-              <p class="font-semibold text-lg" id="reservationTime">—</p>
-              <span class="text-xs text-slate-400" id="reservationNotice">no reservation</span>
+              <p class="font-semibold text-lg" id="reservationTime">
+                <?php
+                if ($todayReservation) {
+                  $time = date('g:i A', strtotime($todayReservation['reservation_time']));
+                  echo $time . ' · ' . $todayReservation['guests'] . ' pax';
+                } else {
+                  echo '—';
+                }
+                ?>
+              </p>
+              <span class="text-xs" id="reservationNotice" style="color: <?php
+              echo $todayReservation['status'] == 'confirmed' ? '#166534' :
+                ($todayReservation['status'] == 'pending' ? '#92400e' : '#64748b');
+              ?>;">
+                <?php echo $todayReservation['status'] ?? 'no reservation'; ?>
+              </span>
             </div>
           </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl"><i
-                class="fa-solid fa-bag-shopping"></i></div>
+
+          <!-- Food Order Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
+            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
             <div>
               <p class="text-xs text-slate-500">food order</p>
-              <p class="font-semibold text-lg" id="foodOrderAmount">₱0</p>
-              <span class="text-xs text-slate-500" id="foodOrderStatus">empty</span>
+              <p class="font-semibold text-lg" id="foodOrderAmount">
+                <?php
+                if ($latestOrder) {
+                  echo '₱' . number_format($latestOrder['total_amount'], 2);
+                } else {
+                  echo '₱0';
+                }
+                ?>
+              </p>
+              <span class="text-xs text-slate-500" id="foodOrderStatus">
+                <?php echo $latestOrder['status'] ?? 'empty'; ?>
+              </span>
             </div>
           </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl"><i
-                class="fa-regular fa-star"></i></div>
+
+          <!-- Rewards Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
+            <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
+              <i class="fa-regular fa-star"></i>
+            </div>
             <div>
               <p class="text-xs text-slate-500">rewards</p>
-              <p class="font-semibold text-lg" id="pointsDisplay">0 pts</p>
-              <span class="text-xs text-slate-400" id="pointsMessage">earn points</span>
+              <p class="font-semibold text-lg" id="pointsDisplay"><?php echo number_format($points); ?> pts</p>
+              <span class="text-xs text-slate-400" id="pointsMessage">
+                <?php
+                if ($points >= 5000)
+                  echo '<span class="text-purple-600">platinum</span>';
+                elseif ($points >= 2000)
+                  echo '<span class="text-amber-600">gold</span>';
+                elseif ($points >= 1000)
+                  echo '<span class="text-slate-600">silver</span>';
+                else
+                  echo 'earn points';
+                ?>
+              </span>
             </div>
           </div>
         </div>
@@ -182,26 +188,40 @@
             <!-- Hotel room booking card -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <div class="flex items-center justify-between mb-3">
-                <h2 class="font-semibold text-slate-800 flex items-center gap-2"><i
-                    class="fa-solid fa-hotel text-amber-600"></i> hotel booking · available rooms</h2>
-                <a href="#" class="text-sm text-amber-700 hover:underline">view all</a>
+                <h2 class="font-semibold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-hotel text-amber-600"></i> hotel booking · available rooms
+                </h2>
+                <a href="./hotel_booking.php" class="text-sm text-amber-700 hover:underline">view all</a>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="border rounded-xl p-3 hover:shadow-sm cursor-pointer">
+                <a href="./hotel_booking.php"
+                  class="border rounded-xl p-3 hover:shadow-sm cursor-pointer block transition">
                   <span class="font-medium">deluxe twin</span>
                   <span class="block text-xs text-slate-500">PHP 4,200 / night</span>
-                </div>
-                <div class="border rounded-xl p-3 hover:shadow-sm cursor-pointer">
+                </a>
+                <a href="./hotel_booking.php"
+                  class="border rounded-xl p-3 hover:shadow-sm cursor-pointer block transition">
                   <span class="font-medium">ocean suite</span>
                   <span class="block text-xs text-slate-500">PHP 6,900 / night</span>
-                </div>
+                </a>
               </div>
               <div class="flex gap-3 mt-4 text-sm">
-                <div class="flex items-center gap-1 bg-slate-100 p-2 rounded-lg"><i class="fa-regular fa-calendar"></i>
-                  <span id="defaultDates">select dates</span></div>
-                <button
-                  class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-700 transition">check
-                  availability</button>
+                <div class="flex items-center gap-1 bg-slate-100 p-2 rounded-lg">
+                  <i class="fa-regular fa-calendar"></i>
+                  <span id="defaultDates">
+                    <?php
+                    if ($activeBooking) {
+                      echo date('M d', strtotime($activeBooking['check_in'])) . ' - ' . date('M d', strtotime($activeBooking['check_out']));
+                    } else {
+                      echo 'select dates';
+                    }
+                    ?>
+                  </span>
+                </div>
+                <a href="./hotel_booking.php"
+                  class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-700 transition inline-block">
+                  check availability
+                </a>
               </div>
             </div>
 
@@ -209,28 +229,32 @@
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <div class="flex flex-wrap gap-6">
                 <div class="flex-1">
-                  <h2 class="font-semibold text-slate-800 flex items-center gap-2 mb-2"><i
-                      class="fa-regular fa-clock text-amber-600"></i> restaurant reservation</h2>
+                  <h2 class="font-semibold text-slate-800 flex items-center gap-2 mb-2">
+                    <i class="fa-regular fa-clock text-amber-600"></i> restaurant reservation
+                  </h2>
                   <p class="text-xs text-slate-500 mb-2">today, <span id="todayDate"></span> · 2 guests</p>
                   <select id="reservationTimeSelect" class="border border-slate-200 rounded-lg p-2 text-sm w-full mb-2">
-                    <option>7:00 PM</option>
-                    <option>7:30 PM</option>
-                    <option>8:00 PM</option>
+                    <option value="19:00:00">7:00 PM</option>
+                    <option value="19:30:00">7:30 PM</option>
+                    <option value="20:00:00">8:00 PM</option>
                   </select>
-                  <button onclick="makeReservation()"
-                    class="w-full bg-white border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50 transition">reserve
-                    table</button>
+                  <a href="./restaurant_reservation.php"
+                    class="block w-full text-center bg-white border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50 transition">
+                    reserve table
+                  </a>
                 </div>
                 <div class="flex-1">
-                  <h2 class="font-semibold text-slate-800 flex items-center gap-2 mb-2"><i
-                      class="fa-solid fa-bag-shopping text-amber-600"></i> menu / order</h2>
+                  <h2 class="font-semibold text-slate-800 flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-bag-shopping text-amber-600"></i> menu / order
+                  </h2>
                   <div class="flex justify-between text-sm"><span>🍜 sinigang</span><span>₱320</span></div>
                   <div class="flex justify-between text-sm"><span>🥩 sisig</span><span>₱290</span></div>
                   <div class="flex justify-between text-sm border-b pb-1"><span>🍚 rice</span><span>₱50</span></div>
                   <div class="flex justify-between font-medium mt-1"><span>total</span><span>₱660</span></div>
-                  <button onclick="addToCart()"
-                    class="w-full bg-amber-600 text-white py-2 mt-3 rounded-xl text-sm hover:bg-amber-700 transition">add
-                    to cart</button>
+                  <a href="./order_food.php"
+                    class="block w-full text-center bg-amber-600 text-white py-2 mt-3 rounded-xl text-sm hover:bg-amber-700 transition">
+                    order now
+                  </a>
                 </div>
               </div>
             </div>
@@ -240,27 +264,67 @@
               class="bg-white p-5 rounded-2xl border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
               <div>
                 <span class="text-xs text-slate-400">payment due</span>
-                <p class="font-semibold text-xl" id="paymentDue">₱0 <span class="text-xs text-slate-400">/ no
-                    balance</span></p>
-                <div class="flex gap-2 mt-1" id="paymentMethodsDisplay">
-                  <span class="bg-slate-100 text-xs px-2 py-1 rounded-full">no methods</span>
+                <p class="font-semibold text-xl" id="paymentDue">
+                  <?php
+                  $availableBalance = isset($balance['available_balance']) ? $balance['available_balance'] : 0;
+                  if ($availableBalance > 0):
+                    ?>
+                    ₱<?php echo number_format($availableBalance, 2); ?> <span class="text-xs text-slate-400">/ due</span>
+                  <?php else: ?>
+                    ₱0 <span class="text-xs text-slate-400">/ no balance</span>
+                  <?php endif; ?>
+                </p>
+                <div class="flex gap-2 mt-1 flex-wrap" id="paymentMethodsDisplay">
+                  <?php if (empty($paymentMethods)): ?>
+                    <span class="bg-slate-100 text-xs px-2 py-1 rounded-full">no methods</span>
+                  <?php else: ?>
+                    <?php foreach ($paymentMethods as $method): ?>
+                      <span class="<?php
+                      echo $method['method_type'] == 'gcash' ? 'bg-blue-50 text-blue-700' :
+                        ($method['method_type'] == 'cash' ? 'bg-green-50 text-green-700' : 'bg-slate-100');
+                      ?> text-xs px-2 py-1 rounded-full flex items-center">
+                        <?php
+                        if ($method['method_type'] == 'gcash')
+                          echo '<i class="fa-brands fa-gcash mr-1"></i>';
+                        elseif ($method['method_type'] == 'cash')
+                          echo '<i class="fa-solid fa-money-bill-wave mr-1"></i>';
+                        else
+                          echo '<i class="fa-regular fa-credit-card mr-1"></i>';
+                        echo $method['display_name'] ?? $method['method_type'];
+                        if ($method['is_default'])
+                          echo ' <span class="ml-1 text-[10px]">(default)</span>';
+                        ?>
+                      </span>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
                 </div>
-                <button onclick="window.location.href='#'" class="text-xs text-amber-700 mt-2 hover:underline">manage
-                  payments →</button>
+                <a href="./payments.php" class="text-xs text-amber-700 mt-2 hover:underline block">manage payments →</a>
               </div>
               <div class="border-l pl-4">
                 <p class="text-xs text-amber-700">loyalty points</p>
-                <p class="font-bold text-2xl" id="loyaltyPoints">0</p>
-                <p class="text-xs text-slate-500" id="loyaltyMessage">earn points</p>
-                <button onclick="window.location.href='#'" class="text-xs text-amber-700 mt-2 hover:underline">view
-                  rewards →</button>
+                <p class="font-bold text-2xl" id="loyaltyPoints"><?php echo number_format($points); ?></p>
+                <p class="text-xs text-slate-500" id="loyaltyMessage">
+                  <?php
+                  if ($points >= 5000)
+                    echo 'platinum member · 10% bonus';
+                  elseif ($points >= 2000)
+                    echo 'gold member · 5% bonus';
+                  elseif ($points >= 1000)
+                    echo 'silver member · 2% bonus';
+                  else
+                    echo 'earn points with every purchase';
+                  ?>
+                </p>
+                <a href="./loyalty_rewards.php" class="text-xs text-amber-700 mt-2 hover:underline block">view rewards
+                  →</a>
               </div>
             </div>
 
             <!-- Reviews & feedback -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
-              <h2 class="font-semibold text-slate-800 flex gap-2 items-center"><i
-                  class="fa-regular fa-star text-amber-600"></i> how was your last stay?</h2>
+              <h2 class="font-semibold text-slate-800 flex gap-2 items-center">
+                <i class="fa-regular fa-star text-amber-600"></i> how was your last stay?
+              </h2>
               <div class="flex gap-3 my-2">
                 <div class="flex text-yellow-400 text-xl cursor-pointer" id="starRating">
                   <i class="fa-regular fa-star" data-rating="1"></i>
@@ -283,46 +347,112 @@
           <div class="space-y-5">
             <!-- Booking Management -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
-              <h3 class="font-semibold flex items-center gap-1"><i
-                  class="fa-regular fa-rectangle-list text-amber-600"></i> my bookings</h3>
+              <h3 class="font-semibold flex items-center gap-1">
+                <i class="fa-regular fa-rectangle-list text-amber-600"></i> my bookings
+              </h3>
               <div class="mt-3 space-y-3" id="bookingsList">
-                <div class="text-center text-slate-400 py-4">No bookings yet.</div>
+                <?php if (empty($recentBookings)): ?>
+                  <div class="text-center text-slate-400 py-4">
+                    <i class="fa-regular fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
+                    <p>No bookings yet.</p>
+                    <p class="text-xs mt-1 text-slate-400">book your first stay!</p>
+                  </div>
+                <?php else: ?>
+                  <?php foreach ($recentBookings as $booking): ?>
+                    <div class="flex justify-between items-center border-b pb-2 booking-item p-2 rounded">
+                      <div>
+                        <span class="font-medium text-sm">#<?php echo substr($booking['booking_reference'], -8); ?></span>
+                        <p class="text-xs text-slate-500">
+                          <?php echo $booking['room_name']; ?> ·
+                          <?php echo date('M d', strtotime($booking['check_in'])); ?>-<?php echo date('d', strtotime($booking['check_out'])); ?>
+                        </p>
+                      </div>
+                      <span class="text-xs <?php
+                      echo $booking['status'] == 'confirmed' ? 'bg-green-100 text-green-700' :
+                        ($booking['status'] == 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700');
+                      ?> px-2 py-0.5 rounded-full">
+                        <?php echo $booking['status']; ?>
+                      </span>
+                    </div>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </div>
-              <a href="#" class="text-xs text-amber-700 block mt-2 hover:underline">view all bookings →</a>
+              <a href="./my_reservation.php" class="text-xs text-amber-700 block mt-2 hover:underline">view all bookings
+                →</a>
             </div>
 
-            <!-- Notifications & updates (module #9) with icon fix -->
+            <!-- Notifications & updates -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <div class="flex items-center justify-between">
                 <h3 class="font-semibold flex gap-1"><i class="fa-regular fa-bell text-amber-600"></i> updates</h3>
-                <span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full"
-                  id="notificationBadge">0</span>
+                <?php if ($unread_count > 0): ?>
+                  <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full"
+                    id="notificationBadge"><?php echo $unread_count; ?> new</span>
+                <?php else: ?>
+                  <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full"
+                    id="notificationBadge">0</span>
+                <?php endif; ?>
               </div>
               <ul class="text-sm space-y-2 mt-3" id="notificationsList">
-                <li class="text-slate-400 text-xs text-center py-2">No notifications</li>
+                <?php if (empty($notifications)): ?>
+                  <li class="text-slate-400 text-xs text-center py-4">
+                    <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                    <p>No notifications</p>
+                  </li>
+                <?php else: ?>
+                  <?php foreach ($notifications as $notif): ?>
+                    <li class="flex gap-2 text-xs border-b border-slate-100 pb-2 last:border-0">
+                      <i
+                        class="fa-regular <?php echo $notif['icon'] ?? 'fa-bell'; ?> <?php echo $notif['is_read'] ? 'text-slate-400' : 'text-amber-600'; ?> mt-0.5"></i>
+                      <span>
+                        <span class="font-medium"><?php echo htmlspecialchars($notif['title']); ?></span>
+                        <span
+                          class="text-slate-500 block"><?php echo htmlspecialchars(substr($notif['message'], 0, 40)) . (strlen($notif['message']) > 40 ? '...' : ''); ?></span>
+                        <span class="text-[10px] text-slate-400"><?php echo $notif['time_ago'] ?? ''; ?></span>
+                      </span>
+                    </li>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </ul>
-              <a href="#" class="text-xs text-amber-700 block mt-2 hover:underline">view all →</a>
+              <a href="./notifications.php" class="text-xs text-amber-700 block mt-2 hover:underline">view all →</a>
             </div>
 
             <!-- Support / help center -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
-              <h3 class="font-semibold flex items-center gap-2"><i
+              <h3 class="font-semibold flex items-center gap-2 mb-3"><i
                   class="fa-regular fa-circle-question text-amber-600"></i> help & support</h3>
-              <p class="text-xs mt-2">📞 +63 (2) 1234 5678</p>
-              <p class="text-xs mt-1">💬 chat with concierge</p>
-              <p class="text-xs mt-1">📧 support@lucas.stay</p>
-              <button onclick="alert('FAQ page would open')"
-                class="w-full border border-amber-600 text-amber-700 rounded-xl py-2 mt-4 text-sm hover:bg-amber-50 transition">visit
-                FAQ</button>
+              <div class="space-y-2 text-sm">
+                <p class="flex items-center gap-2"><i class="fa-solid fa-phone text-amber-600 w-4"></i> +63 (2) 1234
+                  5678</p>
+                <p class="flex items-center gap-2"><i class="fa-solid fa-comment text-amber-600 w-4"></i> chat with
+                  concierge</p>
+                <p class="flex items-center gap-2"><i class="fa-solid fa-envelope text-amber-600 w-4"></i>
+                  support@lucas.stay</p>
+              </div>
+              <button onclick="contactSupport()"
+                class="w-full border border-amber-600 text-amber-700 rounded-xl py-2 mt-4 text-sm hover:bg-amber-50 transition">
+                visit FAQ
+              </button>
             </div>
 
             <!-- profile summary -->
-            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-center gap-3">
-              <i class="fa-regular fa-id-card text-2xl text-amber-700"></i>
-              <div>
-                <p class="font-medium text-sm" id="profileName">Guest</p>
-                <p class="text-xs text-slate-600" id="profileContact">—</p>
-                <a href="#" class="text-xs text-amber-700 hover:underline">edit profile</a>
+            <div
+              class="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-2xl border border-amber-200 flex items-center gap-3">
+              <div
+                class="h-12 w-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-lg">
+                <?php echo $initials; ?>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-sm" id="profileName">
+                  <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
+                </p>
+                <p class="text-xs text-slate-600" id="profileContact" class="truncate">
+                  <?php echo htmlspecialchars($user['email'] ?? '—'); ?>
+                </p>
+                <div class="flex gap-3 mt-1">
+                  <a href="./my_profile.php" class="text-xs text-amber-700 hover:underline">edit profile</a>
+                  <a href="./my_profile.php" class="text-xs text-amber-700 hover:underline">view details</a>
+                </div>
               </div>
             </div>
           </div>
@@ -332,133 +462,52 @@
 
     <script>
       (function () {
-        // ---------- LOAD USER DATA FROM STORAGE (if any) ----------
-        function loadUserData() {
-          const savedUser = localStorage.getItem('currentUser');
-          if (savedUser) {
-            try {
-              const user = JSON.parse(savedUser);
-              document.getElementById('userInitials').textContent = user.initials || '—';
-              document.getElementById('userName').textContent = user.name || 'Guest';
-              document.getElementById('membershipTier').textContent = user.tier || '—';
-              document.getElementById('userPoints').textContent = user.points || '0';
-              document.getElementById('welcomeName').textContent = user.firstName || 'guest';
-              document.getElementById('profileName').textContent = user.fullName || 'Guest';
-              document.getElementById('profileContact').textContent = user.contact || '—';
-              document.getElementById('pointsDisplay').textContent = (user.points || '0') + ' pts';
+        // ---------- DATA FROM DATABASE ----------
+        const userData = {
+          id: <?php echo $_SESSION['user_id']; ?>,
+          name: '<?php echo addslashes($user['full_name'] ?? 'Guest'); ?>',
+          firstName: '<?php echo addslashes($user['first_name'] ?? ''); ?>',
+          lastName: '<?php echo addslashes($user['last_name'] ?? ''); ?>',
+          email: '<?php echo addslashes($user['email'] ?? ''); ?>',
+          phone: '<?php echo addslashes($user['phone'] ?? ''); ?>',
+          points: <?php echo $points; ?>,
+          tier: '<?php echo $member_tier; ?>',
+          initials: '<?php echo $initials; ?>',
+          fullName: '<?php echo addslashes($user['full_name'] ?? 'Guest'); ?>'
+        };
 
-              const points = parseInt(user.points) || 0;
-              const needed = 400 - points;
-              document.getElementById('pointsToGold').textContent = needed > 0 ? needed : '0';
+        const balance = {
+          total: <?php echo $balance['total_balance']; ?>,
+          pending: <?php echo $balance['pending_balance']; ?>,
+          available: <?php echo $balance['available_balance']; ?>
+        };
 
-              return user;
-            } catch (e) {
-              console.error('Error parsing user data', e);
-            }
-          }
-          return null;
-        }
+        const activeBooking = <?php echo json_encode($activeBooking); ?>;
+        const todayReservation = <?php echo json_encode($todayReservation); ?>;
+        const recentBookings = <?php echo json_encode($recentBookings); ?>;
+        const notifications = <?php echo json_encode($notifications); ?>;
+        const paymentMethods = <?php echo json_encode($paymentMethods); ?>;
+        const unreadCount = <?php echo $unread_count; ?>;
+        const pointsNeeded = <?php echo $pointsNeeded; ?>;
+        const greeting = '<?php echo $greeting; ?>';
+        const latestOrder = <?php echo json_encode($latestOrder); ?>;
 
-        // ---------- LOAD TRANSACTIONS/BOOKINGS ----------
-        function loadTransactions() {
-          const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-          if (transactions.length > 0) {
-            const latestPaid = transactions.find(t => t.status === 'completed');
-            if (latestPaid) {
-              document.getElementById('paymentDue').innerHTML = `₱${latestPaid.amount.toFixed(2)} <span class="text-xs text-slate-400">/ paid</span>`;
-            }
-          }
-
-          const points = localStorage.getItem('loyaltyPoints');
-          if (points) {
-            document.getElementById('loyaltyPoints').textContent = points;
-            document.getElementById('userPoints').textContent = points;
-
-            const pointsNum = parseInt(points);
-            if (pointsNum >= 400) {
-              document.getElementById('loyaltyMessage').textContent = '✨ gold member · free breakfast';
-              document.getElementById('pointsMessage').textContent = '✨ gold member';
-            } else if (pointsNum >= 200) {
-              document.getElementById('loyaltyMessage').textContent = '🔹 redeem 1 free dessert';
-              document.getElementById('pointsMessage').textContent = '🔹 200+ pts';
-            }
-          }
-
-          const methods = JSON.parse(localStorage.getItem('paymentMethods') || '[]');
-          if (methods.length > 0) {
-            const display = document.getElementById('paymentMethodsDisplay');
-            display.innerHTML = '';
-            methods.slice(0, 2).forEach(m => {
-              const span = document.createElement('span');
-              span.className = m.type === 'gcash' ? 'bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full' : 'bg-slate-100 text-xs px-2 py-1 rounded-full';
-              span.innerHTML = m.type === 'gcash' ? '<i class="fa-brands fa-gcash"></i> GCash' : m.type === 'cash' ? 'cash' : 'card';
-              display.appendChild(span);
-            });
-          }
-        }
-
-        // ---------- LOAD NEW RESERVATION FROM BOOKING FLOW ----------
-        function checkForNewReservation() {
-          const newReservation = sessionStorage.getItem('newReservation');
-          if (newReservation) {
-            try {
-              const reservation = JSON.parse(newReservation);
-
-              document.getElementById('activeBookingRoom').textContent = reservation.title || '—';
-              document.getElementById('bookingStatus').textContent = 'confirmed';
-              document.getElementById('bookingStatus').className = 'text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full';
-
-              const bookingsList = document.getElementById('bookingsList');
-              if (bookingsList.children.length === 1 && bookingsList.children[0].textContent.includes('No bookings')) {
-                bookingsList.innerHTML = '';
-              }
-
-              const newBooking = document.createElement('div');
-              newBooking.className = 'flex justify-between items-center border-b pb-2 booking-item p-2 rounded';
-
-              const checkIn = reservation.details?.checkIn ? new Date(reservation.details.checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-              const checkOut = reservation.details?.checkOut ? new Date(reservation.details.checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-
-              newBooking.innerHTML = `
-              <div><span class="font-medium text-sm">#${reservation.id || 'NEW'}</span><p class="text-xs text-slate-500">${reservation.title?.toLowerCase() || 'room'} · ${checkIn}-${checkOut}</p></div>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">confirmed</span>
-            `;
-
-              bookingsList.prepend(newBooking);
-
-              if (checkIn && checkOut && checkIn !== '—') {
-                document.getElementById('defaultDates').textContent = `${checkIn} - ${checkOut}`;
-              }
-
-              sessionStorage.removeItem('newReservation');
-
-              // update both notification badges (header + sidebar)
-              const notifBadge = document.getElementById('notificationBadge');
-              const headerBadge = document.getElementById('headerNotificationBadge');
-              const sideCount = document.getElementById('notificationCount');
-
-              const currentCount = parseInt(notifBadge.textContent) || 0;
-              const newCount = currentCount + 1;
-              notifBadge.textContent = newCount;
-              if (headerBadge) headerBadge.textContent = newCount;
-              if (sideCount) sideCount.textContent = newCount;
-
-            } catch (e) {
-              console.error('Error processing new reservation', e);
-            }
-          }
-        }
-
-        // ---------- UPDATE DATE ----------
-        function updateDate() {
-          const date = new Date();
+        // ---------- DATE AND TIME ----------
+        function updateDateTime() {
+          const now = new Date();
           const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-          document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options).toLowerCase();
+          const dateEl = document.getElementById('currentDate');
+          if (dateEl) {
+            dateEl.textContent = now.toLocaleDateString('en-US', options).toLowerCase();
+          }
 
           const today = new Date();
           const month = today.toLocaleDateString('en-US', { month: 'short' });
           const day = today.getDate();
-          document.getElementById('todayDate').textContent = `${month} ${day}`;
+          const todayDateEl = document.getElementById('todayDate');
+          if (todayDateEl) {
+            todayDateEl.textContent = `${month} ${day}`;
+          }
         }
 
         // ---------- STAR RATING ----------
@@ -491,61 +540,145 @@
                   s.className = 'fa-regular fa-star text-yellow-400';
                 }
               });
+              localStorage.setItem('lastRating', rating);
             });
           });
         }
 
         // ---------- ACTION FUNCTIONS ----------
         window.makeReservation = function () {
-          const time = document.getElementById('reservationTimeSelect').value;
-          alert(`✅ Restaurant reservation confirmed for ${time} · 2 guests (demo)`);
-
-          document.getElementById('reservationTime').textContent = `${time} · 2 pax`;
-          document.getElementById('reservationNotice').textContent = 'confirmed (demo)';
-          document.getElementById('reservationNotice').className = 'text-xs text-green-600';
+          window.location.href = './restaurant_reservation.php';
         };
 
         window.addToCart = function () {
-          alert('🛒 Items added to cart (demo)');
-          document.getElementById('foodOrderAmount').textContent = '₱660 · 3 items';
-          document.getElementById('foodOrderStatus').textContent = 'in cart (demo)';
-          document.getElementById('foodOrderStatus').className = 'text-xs text-amber-600';
+          window.location.href = './order_food.php';
         };
 
         window.submitReview = function () {
           const review = document.getElementById('reviewText').value;
-          if (review.trim()) {
-            alert('Thank you for your feedback! ⭐ (demo)');
+          const rating = localStorage.getItem('lastRating') || 0;
+
+          if (review.trim() || rating > 0) {
+            Swal.fire({
+              title: 'Thank You!',
+              text: 'Your feedback has been submitted.',
+              icon: 'success',
+              confirmButtonColor: '#d97706',
+              timer: 2000
+            });
             document.getElementById('reviewText').value = '';
+
+            // Reset stars
+            document.querySelectorAll('#starRating i').forEach(s => {
+              s.className = 'fa-regular fa-star text-yellow-400';
+            });
+            localStorage.removeItem('lastRating');
           } else {
-            alert('Please write a review or rate us');
+            Swal.fire({
+              title: 'Oops...',
+              text: 'Please write a review or rate us',
+              icon: 'info',
+              confirmButtonColor: '#d97706'
+            });
           }
         };
 
+        window.contactSupport = function () {
+          Swal.fire({
+            title: 'Contact Support',
+            html: `
+              <div class="text-left">
+                <p><i class="fa-solid fa-phone text-amber-600 mr-2"></i> +63 (2) 1234 5678</p>
+                <p><i class="fa-solid fa-envelope text-amber-600 mr-2"></i> support@lucas.stay</p>
+                <p class="mt-2 text-sm">Available 24/7 for your convenience.</p>
+              </div>
+            `,
+            icon: 'info',
+            confirmButtonColor: '#d97706',
+            confirmButtonText: 'Close'
+          });
+        };
+
+        // ---------- CHECK FOR PENDING RESERVATIONS ----------
+        function checkPendingReservations() {
+          const pendingReservation = sessionStorage.getItem('pendingRestaurantReservation');
+          if (pendingReservation) {
+            try {
+              const reservation = JSON.parse(pendingReservation);
+              // Update UI with pending info
+              const resTimeEl = document.getElementById('reservationTime');
+              const resNoticeEl = document.getElementById('reservationNotice');
+
+              if (resTimeEl) {
+                resTimeEl.textContent = `${reservation.time} · ${reservation.guests} pax`;
+              }
+              if (resNoticeEl) {
+                resNoticeEl.textContent = 'pending payment';
+                resNoticeEl.className = 'text-xs text-amber-600';
+              }
+
+              sessionStorage.removeItem('pendingRestaurantReservation');
+            } catch (e) {
+              console.error('Error parsing pending reservation', e);
+            }
+          }
+
+          const pendingBooking = sessionStorage.getItem('pendingBooking');
+          if (pendingBooking) {
+            try {
+              const booking = JSON.parse(pendingBooking);
+              // Update UI with pending info
+              const activeRoomEl = document.getElementById('activeBookingRoom');
+              const bookingStatusEl = document.getElementById('bookingStatus');
+
+              if (activeRoomEl) {
+                activeRoomEl.textContent = booking.room_name || '—';
+              }
+              if (bookingStatusEl) {
+                bookingStatusEl.textContent = 'pending';
+                bookingStatusEl.className = 'text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full';
+              }
+
+              sessionStorage.removeItem('pendingBooking');
+            } catch (e) {
+              console.error('Error parsing pending booking', e);
+            }
+          }
+        }
+
+        // ---------- UPDATE FOOD ORDER CARD ----------
+        function updateFoodOrderCard() {
+          const amountEl = document.getElementById('foodOrderAmount');
+          const statusEl = document.getElementById('foodOrderStatus');
+
+          if (latestOrder && amountEl && statusEl) {
+            amountEl.textContent = '₱' + parseFloat(latestOrder.total_amount).toFixed(2);
+            statusEl.textContent = latestOrder.status;
+
+            // Add color based on status
+            if (latestOrder.status === 'completed') {
+              statusEl.className = 'text-xs text-green-600';
+            } else if (latestOrder.status === 'pending') {
+              statusEl.className = 'text-xs text-amber-600';
+            } else if (latestOrder.status === 'preparing') {
+              statusEl.className = 'text-xs text-blue-600';
+            } else {
+              statusEl.className = 'text-xs text-slate-500';
+            }
+          }
+        }
+
         // ---------- INITIALIZE ----------
-        updateDate();
-        loadUserData();
-        loadTransactions();
-        checkForNewReservation();
-        initStarRating();
+        document.addEventListener('DOMContentLoaded', function () {
+          updateDateTime();
+          checkPendingReservations();
+          initStarRating();
+          updateFoodOrderCard();
 
-        // set header badge from sidebar or default to 3 for demo
-        const sideCount = document.getElementById('notificationCount');
-        const headerBadge = document.getElementById('headerNotificationBadge');
-        if (sideCount && headerBadge) {
-          headerBadge.textContent = sideCount.textContent || '3';
-        }
+          // Set interval to update time every minute
+          setInterval(updateDateTime, 60000);
+        });
 
-        // Pending payment check
-        const pendingPayment = sessionStorage.getItem('pendingPayment');
-        if (pendingPayment) {
-          try {
-            const payment = JSON.parse(pendingPayment);
-            sessionStorage.removeItem('pendingPayment');
-          } catch (e) { }
-        }
-
-        // additionally fix any missing icons (already done)
       })();
     </script>
   </body>
