@@ -19,25 +19,39 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
-// Check for outstanding balance (unpaid bookings and reservations)
-$outstandingBookings = $db->query(
-    "SELECT COALESCE(SUM(total_amount), 0) as total 
-     FROM bookings 
-     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+// Get outstanding balance from current_balance table
+$balanceData = $db->query(
+    "SELECT total_balance, pending_balance, available_balance 
+     FROM current_balance 
+     WHERE user_id = :user_id",
     ['user_id' => $_SESSION['user_id']]
 )->fetch_one();
 
-$outstandingReservations = $db->query(
-    "SELECT COALESCE(SUM(down_payment), 0) as total 
-     FROM restaurant_reservations 
-     WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
-    ['user_id' => $_SESSION['user_id']]
-)->fetch_one();
+$totalOutstanding = 0;
+if ($balanceData) {
+    $totalOutstanding = $balanceData['total_balance'] ?? 0;
+} else {
+    // Fallback: calculate from bookings and reservations if no current_balance record
+    $outstandingBookings = $db->query(
+        "SELECT COALESCE(SUM(total_amount), 0) as total 
+         FROM bookings 
+         WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
 
-$totalOutstanding = ($outstandingBookings['total'] ?? 0) + ($outstandingReservations['total'] ?? 0);
+    $outstandingReservations = $db->query(
+        "SELECT COALESCE(SUM(down_payment), 0) as total 
+         FROM restaurant_reservations 
+         WHERE user_id = :user_id AND payment_status = 'unpaid' AND status != 'cancelled'",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
+
+    $totalOutstanding = ($outstandingBookings['total'] ?? 0) + ($outstandingReservations['total'] ?? 0);
+}
+
 $hasOutstandingBalance = $totalOutstanding > 0;
 
-// Get points history - FIXED the redemption points to use actual points_cost
+// Get points history
 $pointsHistory = $db->query(
     "SELECT 
         'review' as activity_type,
@@ -54,7 +68,7 @@ $pointsHistory = $db->query(
         'redemption' as activity_type,
         created_at as date,
         CONCAT('Redeemed: ', reward_name, ' (', points_cost, ' pts)') as description,
-        -points_cost as points,  /* FIXED: Use actual points_cost from redemptions table */
+        -points_cost as points,
         'redeemed' as type
      FROM redemptions 
      WHERE user_id = :user_id
@@ -66,6 +80,15 @@ $pointsHistory = $db->query(
 
 if (!$pointsHistory) {
     $pointsHistory = [];
+}
+
+// Get available rewards from database - THIS IS THE KEY PART
+$availableRewards = $db->query(
+    "SELECT * FROM rewards WHERE is_active = 1 ORDER BY points_cost ASC"
+)->find();
+
+if (!$availableRewards) {
+    $availableRewards = [];
 }
 
 $points = $user['loyalty_points'] ?? 0;
@@ -117,6 +140,7 @@ $initials = strtoupper(substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? s
 $viewData = [
     'user' => $user,
     'pointsHistory' => $pointsHistory,
+    'availableRewards' => $availableRewards, // Add this to view data
     'points' => $points,
     'tier' => $tier,
     'nextTier' => $nextTier,

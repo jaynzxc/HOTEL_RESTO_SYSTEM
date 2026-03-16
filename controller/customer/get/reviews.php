@@ -10,28 +10,83 @@ $_SESSION['error'] ??= [];
 $_SESSION['success'] ??= [];
 $_SESSION['form_data'] ??= [];
 
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
+    header('Location: ../../view/auth/login.php');
+    exit();
+}
+
 $user = $db->query(
-    "SELECT id, full_name, email, phone, loyalty_points FROM users WHERE id = :id",
+    "SELECT id, full_name, email, phone, loyalty_points, member_tier, avatar
+     FROM users WHERE id = :id",
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
+// Get user's reviews with admin responses
 $myReviews = $db->query(
-    "SELECT * FROM reviews WHERE user_id = :user_id ORDER BY created_at DESC",
+    "SELECT r.*, 
+            rr.id as response_id, 
+            rr.response_text, 
+            rr.responded_at,
+            CONCAT(ru.first_name, ' ', ru.last_name) as responder_name
+     FROM reviews r
+     LEFT JOIN review_responses rr ON r.id = rr.review_id
+     LEFT JOIN users ru ON rr.responded_by = ru.id
+     WHERE r.user_id = :user_id 
+     ORDER BY r.created_at DESC",
     ['user_id' => $_SESSION['user_id']]
 )->find();
 
+// Get other users' reviews with admin responses
 $guestReviews = $db->query(
-    "SELECT r.*, u.full_name as user_name,
-            SUBSTRING(u.full_name, 1, 1) as initial
-    FROM reviews r 
-    JOIN users u ON r.user_id = u.id 
-    WHERE r.user_id != :user_id 
-    ORDER BY r.created_at DESC 
-    LIMIT 10",
+    "SELECT r.*, 
+            u.full_name as user_name,
+            u.member_tier,
+            SUBSTRING(u.full_name, 1, 1) as initial,
+            rr.id as response_id, 
+            rr.response_text as admin_response, 
+            rr.responded_at as response_date,
+            CONCAT(ru.first_name, ' ', ru.last_name) as responder_name
+     FROM reviews r 
+     JOIN users u ON r.user_id = u.id 
+     LEFT JOIN review_responses rr ON r.id = rr.review_id
+     LEFT JOIN users ru ON rr.responded_by = ru.id
+     WHERE r.user_id != :user_id 
+     ORDER BY r.created_at DESC 
+     LIMIT 10",
     ['user_id' => $_SESSION['user_id']]
 )->find();
+
+// Get unread notifications count
+try {
+    $unread_result = $db->query(
+        "SELECT COUNT(*) as count FROM notifications 
+         WHERE user_id = :user_id AND is_read = 0",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
+    $unread_count = $unread_result['count'] ?? 0;
+} catch (Exception $e) {
+    $unread_count = 0;
+}
 
 $points = $user['loyalty_points'] ?? 0;
 
-$name_parts = explode(' ', $user['full_name']);
+$name_parts = explode(' ', trim($user['full_name']));
 $initials = strtoupper(substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? substr($name_parts[1], 0, 1) : ''));
+
+// Clear session form data
+unset($_SESSION['form_data']);
+
+// Store data for view
+$viewData = [
+    'user' => $user,
+    'myReviews' => $myReviews,
+    'guestReviews' => $guestReviews,
+    'points' => $points,
+    'initials' => $initials,
+    'unread_count' => $unread_count
+];
+
+// Extract variables for view
+extract($viewData);
+?>
