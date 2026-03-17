@@ -41,7 +41,7 @@ try {
     if ($pendingReservations['count'] > 0) {
         // Get the pending reservation details
         $pending = $db->query(
-            "SELECT id, reservation_reference, guests, reservation_date, reservation_time, down_payment
+            "SELECT id, reservation_reference, guests, reservation_date, reservation_time, down_payment, points_earned
              FROM restaurant_reservations 
              WHERE user_id = :user_id 
              AND status = 'pending' 
@@ -110,6 +110,10 @@ try {
     // Calculate down payment (₱100 per guest)
     $down_payment = $guests * 100;
 
+    // Calculate points to earn (1 point per ₱10 spent on down payment)
+    // This is just for display/reference, NOT automatically added to user
+    $points_earned = floor($down_payment / 10);
+
     // Generate unique reservation reference
     $year = date('Y');
     $month = date('m');
@@ -119,18 +123,18 @@ try {
     // Start transaction
     $db->query("START TRANSACTION");
 
-    // Insert restaurant reservation
+    // Insert restaurant reservation with points_earned (for tracking only)
     $db->query(
         "INSERT INTO restaurant_reservations (
             reservation_reference, user_id, guest_first_name, guest_last_name,
             guest_email, guest_phone, reservation_date, reservation_time,
-            guests, special_requests, occasion, down_payment, payment_status,
-            status, created_at, updated_at
+            guests, special_requests, occasion, down_payment, points_earned,
+            payment_status, status, created_at, updated_at
         ) VALUES (
             :reservation_reference, :user_id, :first_name, :last_name,
             :email, :phone, :reservation_date, :reservation_time,
-            :guests, :special_requests, :occasion, :down_payment, 'unpaid',
-            'pending', NOW(), NOW()
+            :guests, :special_requests, :occasion, :down_payment, :points_earned,
+            'unpaid', 'pending', NOW(), NOW()
         )",
         [
             'reservation_reference' => $reservation_reference,
@@ -144,34 +148,31 @@ try {
             'guests' => $guests,
             'special_requests' => $special_requests,
             'occasion' => $occasion,
-            'down_payment' => $down_payment
+            'down_payment' => $down_payment,
+            'points_earned' => $points_earned
         ]
     );
 
     $reservation_id = $db->lastInsertId();
 
-    // Award loyalty points (if applicable - 1 point per ₱10 spent on down payment)
-    $points_earned = floor($down_payment / 10);
+    // Create notification for the user
+    $notification_message = "Your reservation for $guests guests on $reservation_date at $reservation_time has been created. ";
+    $notification_message .= "Down payment: ₱" . number_format($down_payment, 2);
     if ($points_earned > 0) {
-        $db->query(
-            "UPDATE users SET loyalty_points = loyalty_points + :points WHERE id = :user_id",
-            [
-                'points' => $points_earned,
-                'user_id' => $_SESSION['user_id']
-            ]
-        );
+        $notification_message .= " You'll earn $points_earned loyalty points (admin will add after payment).";
     }
 
-    // Create notification for the user
     $db->query(
         "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
          VALUES (:user_id, 'Restaurant Reservation Created', :message, 'success', 'fa-utensils', :link, NOW())",
         [
             'user_id' => $_SESSION['user_id'],
-            'message' => "Your reservation for $guests guests on $reservation_date at $reservation_time has been created. Down payment: ₱" . number_format($down_payment, 2),
+            'message' => $notification_message,
             'link' => '/src/customer_portal/my_reservation.php'
         ]
     );
+
+    // DO NOT UPDATE user loyalty_points here - let admin handle it
 
     // Commit transaction
     $db->query("COMMIT");
@@ -197,7 +198,8 @@ try {
             'down_payment' => $down_payment,
             'points_earned' => $points_earned
         ],
-        'balance' => $balance
+        'balance' => $balance,
+        'note' => 'Points will be added by admin after payment confirmation'
     ]);
 
 } catch (Exception $e) {

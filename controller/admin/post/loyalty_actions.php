@@ -167,7 +167,7 @@ try {
             throw new Exception('Invalid user ID or points amount');
         }
 
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         // Get current points
         $user = $db->query(
@@ -205,7 +205,7 @@ try {
             ]
         );
 
-        $db->query("COMMIT");
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -364,7 +364,7 @@ try {
 
 } catch (Exception $e) {
     if (isset($db)) {
-        $db->query("ROLLBACK");
+        $db->rollBack();
     }
     echo json_encode([
         'success' => false,

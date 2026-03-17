@@ -76,22 +76,22 @@
 
         <!-- Display Messages -->
         <?php if (!empty($_SESSION['success'])): ?>
-            <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
-              <?php foreach ($_SESSION['success'] as $message): ?>
-                  <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
-                  </p>
-              <?php endforeach; ?>
-            </div>
+          <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
+            <?php foreach ($_SESSION['success'] as $message): ?>
+              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              </p>
+            <?php endforeach; ?>
+          </div>
         <?php endif; ?>
 
         <?php if (!empty($_SESSION['error'])): ?>
-            <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
-              <ul class="list-disc list-inside text-sm">
-                <?php foreach ($_SESSION['error'] as $field => $message): ?>
-                    <li><?php echo htmlspecialchars($message); ?></li>
-                <?php endforeach; ?>
-              </ul>
-            </div>
+          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
+            <ul class="list-disc list-inside text-sm">
+              <?php foreach ($_SESSION['error'] as $field => $message): ?>
+                <li><?php echo htmlspecialchars($message); ?></li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
         <?php endif; ?>
 
         <!-- header -->
@@ -182,37 +182,37 @@
               payment methods</h3>
             <div class="mt-3 space-y-2" id="paymentMethodsSummary">
               <?php if (empty($paymentMethods)): ?>
-                  <p class="text-sm text-slate-500 italic">no payment methods added</p>
+                <p class="text-sm text-slate-500 italic">no payment methods added</p>
               <?php else: ?>
-                  <?php foreach (array_slice($paymentMethods, 0, 3) as $method): ?>
-                      <div class="flex items-center gap-2 text-sm">
-                        <?php
-                        $icon = '';
-                        switch ($method['method_type']) {
-                          case 'gcash':
-                            $icon = '<i class="fa-brands fa-gcash text-blue-500 text-lg"></i>';
-                            break;
-                          case 'visa':
-                            $icon = '<i class="fa-brands fa-cc-visa text-slate-400"></i>';
-                            break;
-                          case 'mastercard':
-                            $icon = '<i class="fa-brands fa-cc-mastercard text-slate-400"></i>';
-                            break;
-                          case 'cash':
-                            $icon = '<i class="fa-solid fa-money-bill-wave text-amber-600"></i>';
-                            break;
-                        }
-                        echo $icon;
-                        ?>
-                        <span><?php echo htmlspecialchars($method['account_name']); ?></span>
-                        <?php if ($method['is_default']): ?>
-                            <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full">default</span>
-                        <?php endif; ?>
-                      </div>
-                  <?php endforeach; ?>
-                  <?php if (count($paymentMethods) > 3): ?>
-                      <p class="text-xs text-slate-400 mt-1">+<?php echo count($paymentMethods) - 3; ?> more</p>
-                  <?php endif; ?>
+                <?php foreach (array_slice($paymentMethods, 0, 3) as $method): ?>
+                  <div class="flex items-center gap-2 text-sm">
+                    <?php
+                    $icon = '';
+                    switch ($method['method_type']) {
+                      case 'gcash':
+                        $icon = '<i class="fa-brands fa-gcash text-blue-500 text-lg"></i>';
+                        break;
+                      case 'visa':
+                        $icon = '<i class="fa-brands fa-cc-visa text-slate-400"></i>';
+                        break;
+                      case 'mastercard':
+                        $icon = '<i class="fa-brands fa-cc-mastercard text-slate-400"></i>';
+                        break;
+                      case 'cash':
+                        $icon = '<i class="fa-solid fa-money-bill-wave text-amber-600"></i>';
+                        break;
+                    }
+                    echo $icon;
+                    ?>
+                    <span><?php echo htmlspecialchars($method['account_name']); ?></span>
+                    <?php if ($method['is_default']): ?>
+                      <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full">default</span>
+                    <?php endif; ?>
+                  </div>
+                <?php endforeach; ?>
+                <?php if (count($paymentMethods) > 3): ?>
+                  <p class="text-xs text-slate-400 mt-1">+<?php echo count($paymentMethods) - 3; ?> more</p>
+                <?php endif; ?>
               <?php endif; ?>
             </div>
             <button onclick="openAddPaymentModal()"
@@ -232,16 +232,16 @@
             </p>
             <p class="text-xs text-slate-400 mt-2" id="monthlyComparison">
               <?php if ($lastMonthTotal['total'] > 0): ?>
-                  <?php
-                  $symbol = $percentChange >= 0 ? '↑' : '↓';
-                  $color = $percentChange >= 0 ? 'text-green-600' : 'text-red-600';
-                  ?>
-                  <span class="<?php echo $color; ?>"><?php echo $symbol; ?>
-                    <?php echo number_format(abs($percentChange), 1); ?>% from last month</span>
+                <?php
+                $symbol = $percentChange >= 0 ? '↑' : '↓';
+                $color = $percentChange >= 0 ? 'text-green-600' : 'text-red-600';
+                ?>
+                <span class="<?php echo $color; ?>"><?php echo $symbol; ?>
+                  <?php echo number_format(abs($percentChange), 1); ?>% from last month</span>
               <?php elseif ($monthlyStats['total'] > 0): ?>
-                  <span class="text-green-600">↑ new spending this month</span>
+                <span class="text-green-600">↑ new spending this month</span>
               <?php else: ?>
-                  no transactions this month
+                no transactions this month
               <?php endif; ?>
             </p>
           </div>
@@ -257,69 +257,69 @@
           </div>
           <div id="paymentMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <?php if (empty($paymentMethods)): ?>
-                <div class="col-span-full text-center py-8 text-slate-500">
-                  <i class="fa-regular fa-credit-card text-4xl mb-3 text-slate-300"></i>
-                  <p class="text-sm">No payment methods added yet</p>
-                  <p class="text-xs text-slate-400 mt-1">Add a payment method to get started</p>
-                </div>
+              <div class="col-span-full text-center py-8 text-slate-500">
+                <i class="fa-regular fa-credit-card text-4xl mb-3 text-slate-300"></i>
+                <p class="text-sm">No payment methods added yet</p>
+                <p class="text-xs text-slate-400 mt-1">Add a payment method to get started</p>
+              </div>
             <?php else: ?>
-                <?php foreach ($paymentMethods as $index => $method): ?>
-                    <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 <?php
-                        switch ($method['method_type']) {
-                          case 'gcash':
-                            echo 'bg-blue-100 text-blue-600';
-                            break;
-                          case 'cash':
-                            echo 'bg-amber-100 text-amber-600';
-                            break;
-                          default:
-                            echo 'bg-slate-100 text-slate-600';
-                        }
-                        ?> rounded-full flex items-center justify-center">
-                          <?php
-                          switch ($method['method_type']) {
-                            case 'gcash':
-                              echo '<i class="fa-brands fa-gcash text-xl"></i>';
-                              break;
-                            case 'visa':
-                              echo '<i class="fa-brands fa-cc-visa text-xl"></i>';
-                              break;
-                            case 'mastercard':
-                              echo '<i class="fa-brands fa-cc-mastercard text-xl"></i>';
-                              break;
-                            case 'cash':
-                              echo '<i class="fa-solid fa-money-bill-wave text-xl"></i>';
-                              break;
-                          }
-                          ?>
-                        </div>
-                        <div>
-                          <p class="font-medium"><?php echo htmlspecialchars($method['display_name']); ?></p>
-                          <p class="text-xs text-slate-500">
-                            <?php echo htmlspecialchars($method['account_name']); ?>
-                            <?php if (!empty($method['expiry_date'])): ?>
-                                · <?php echo htmlspecialchars($method['expiry_date']); ?>
-                            <?php endif; ?>
-                          </p>
-                        </div>
-                      </div>
-                      <div class="flex gap-2">
-                        <?php if ($method['is_default']): ?>
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">default</span>
-                        <?php endif; ?>
-                        <button onclick="setDefaultPayment(<?php echo $method['id']; ?>)"
-                          class="text-slate-400 hover:text-amber-600" title="Set as default">
-                          <i class="fa-regular fa-star"></i>
-                        </button>
-                        <button onclick="deletePaymentMethod(<?php echo $method['id']; ?>)"
-                          class="text-slate-400 hover:text-red-600">
-                          <i class="fa-regular fa-trash-can"></i>
-                        </button>
-                      </div>
+              <?php foreach ($paymentMethods as $index => $method): ?>
+                <div class="border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 <?php
+                    switch ($method['method_type']) {
+                      case 'gcash':
+                        echo 'bg-blue-100 text-blue-600';
+                        break;
+                      case 'cash':
+                        echo 'bg-amber-100 text-amber-600';
+                        break;
+                      default:
+                        echo 'bg-slate-100 text-slate-600';
+                    }
+                    ?> rounded-full flex items-center justify-center">
+                      <?php
+                      switch ($method['method_type']) {
+                        case 'gcash':
+                          echo '<i class="fa-brands fa-gcash text-xl"></i>';
+                          break;
+                        case 'visa':
+                          echo '<i class="fa-brands fa-cc-visa text-xl"></i>';
+                          break;
+                        case 'mastercard':
+                          echo '<i class="fa-brands fa-cc-mastercard text-xl"></i>';
+                          break;
+                        case 'cash':
+                          echo '<i class="fa-solid fa-money-bill-wave text-xl"></i>';
+                          break;
+                      }
+                      ?>
                     </div>
-                <?php endforeach; ?>
+                    <div>
+                      <p class="font-medium"><?php echo htmlspecialchars($method['display_name']); ?></p>
+                      <p class="text-xs text-slate-500">
+                        <?php echo htmlspecialchars($method['account_name']); ?>
+                        <?php if (!empty($method['expiry_date'])): ?>
+                          · <?php echo htmlspecialchars($method['expiry_date']); ?>
+                        <?php endif; ?>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <?php if ($method['is_default']): ?>
+                      <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">default</span>
+                    <?php endif; ?>
+                    <button onclick="setDefaultPayment(<?php echo $method['id']; ?>)"
+                      class="text-slate-400 hover:text-amber-600" title="Set as default">
+                      <i class="fa-regular fa-star"></i>
+                    </button>
+                    <button onclick="deletePaymentMethod(<?php echo $method['id']; ?>)"
+                      class="text-slate-400 hover:text-red-600">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              <?php endforeach; ?>
             <?php endif; ?>
           </div>
         </div>
@@ -344,48 +344,48 @@
               </thead>
               <tbody id="transactionsTable" class="divide-y">
                 <?php if (empty($transactions)): ?>
+                  <tr>
+                    <td colspan="5" class="py-12 text-center text-slate-500">
+                      <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
+                      <p class="text-sm">No recent transactions</p>
+                      <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
+                    </td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach (array_slice($transactions, 0, 5) as $transaction): ?>
                     <tr>
-                      <td colspan="5" class="py-12 text-center text-slate-500">
-                        <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
-                        <p class="text-sm">No recent transactions</p>
-                        <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
+                      <td class="py-3">
+                        <?php echo date('M d, Y', strtotime($transaction['created_at'])); ?>
+                      </td>
+                      <td><?php echo htmlspecialchars($transaction['description']); ?></td>
+                      <td class="font-medium">₱<?php echo number_format($transaction['amount'], 2); ?></td>
+                      <td>
+                        <?php
+                        $statusClass = '';
+                        switch ($transaction['status']) {
+                          case 'completed':
+                            $statusClass = 'bg-green-100 text-green-700';
+                            break;
+                          case 'pending':
+                            $statusClass = 'bg-yellow-100 text-yellow-700';
+                            break;
+                          case 'failed':
+                            $statusClass = 'bg-red-100 text-red-700';
+                            break;
+                        }
+                        ?>
+                        <span class="<?php echo $statusClass; ?> px-2 py-0.5 rounded-full text-xs">
+                          <?php echo $transaction['status']; ?>
+                        </span>
+                      </td>
+                      <td>
+                        <?php if ($transaction['status'] === 'completed'): ?>
+                          <button onclick="viewReceipt(<?php echo $transaction['id']; ?>)"
+                            class="text-amber-700 text-xs">receipt</button>
+                        <?php endif; ?>
                       </td>
                     </tr>
-                <?php else: ?>
-                    <?php foreach (array_slice($transactions, 0, 5) as $transaction): ?>
-                        <tr>
-                          <td class="py-3">
-                            <?php echo date('M d, Y', strtotime($transaction['created_at'])); ?>
-                          </td>
-                          <td><?php echo htmlspecialchars($transaction['description']); ?></td>
-                          <td class="font-medium">₱<?php echo number_format($transaction['amount'], 2); ?></td>
-                          <td>
-                            <?php
-                            $statusClass = '';
-                            switch ($transaction['status']) {
-                              case 'completed':
-                                $statusClass = 'bg-green-100 text-green-700';
-                                break;
-                              case 'pending':
-                                $statusClass = 'bg-yellow-100 text-yellow-700';
-                                break;
-                              case 'failed':
-                                $statusClass = 'bg-red-100 text-red-700';
-                                break;
-                            }
-                            ?>
-                            <span class="<?php echo $statusClass; ?> px-2 py-0.5 rounded-full text-xs">
-                              <?php echo $transaction['status']; ?>
-                            </span>
-                          </td>
-                          <td>
-                            <?php if ($transaction['status'] === 'completed'): ?>
-                                <button onclick="viewReceipt(<?php echo $transaction['id']; ?>)"
-                                  class="text-amber-700 text-xs">receipt</button>
-                            <?php endif; ?>
-                          </td>
-                        </tr>
-                    <?php endforeach; ?>
+                  <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
             </table>
@@ -402,10 +402,11 @@
             </div>
           </div>
           <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
-            <i class="fa-regular fa-gem text-2xl text-amber-600"></i>
+            <i class="fa-regular fa-star text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">earn points with every payment</p>
-              <p class="text-xs text-slate-500">5 pts per ₱100 spent</p>
+              <p class="text-xs text-slate-500">5 points per ₱100 spent</p>
+              <p class="text-xs text-amber-600 mt-1">Points added by admin after verification</p>
             </div>
           </div>
         </div>
@@ -494,9 +495,9 @@
                   required>
                   <option value="">Select method</option>
                   <?php foreach ($paymentMethods as $method): ?>
-                      <option value="<?php echo $method['id']; ?>" <?php echo $method['is_default'] ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($method['display_name'] . ' - ' . $method['account_name']); ?>
-                      </option>
+                    <option value="<?php echo $method['id']; ?>" <?php echo $method['is_default'] ? 'selected' : ''; ?>>
+                      <?php echo htmlspecialchars($method['display_name'] . ' - ' . $method['account_name']); ?>
+                    </option>
                   <?php endforeach; ?>
                 </select>
               </div>
@@ -1078,6 +1079,9 @@
             updateUI();
             updateBalanceMessage();
 
+            // IMPORTANT: Do NOT update loyaltyPoints here
+            // Points will be added by admin later
+
             // Handle restaurant payment redirect
             if (isRestaurantPayment && restaurantReservation) {
               try {
@@ -1125,7 +1129,7 @@
         }
       };
 
-      // Receipt functions
+      // Update receipt view to show points note
       window.viewReceipt = function (paymentId) {
         const payment = payments.find(p => p.id == paymentId);
         if (!payment) {
@@ -1139,43 +1143,54 @@
           currency: 'PHP'
         }).format(payment.amount);
 
+        // Get points from the payment if available
+        const pointsEarned = payment.points_earned || Math.floor(payment.amount / 100) * 5;
+
         receiptContent.innerHTML = `
-            <div class="text-center border-b pb-3">
-                <p class="font-bold text-lg">Lùcas.stay</p>
-                <p class="text-xs text-slate-500">Payment Receipt</p>
+        <div class="text-center border-b pb-3">
+            <p class="font-bold text-lg">Lùcas.stay</p>
+            <p class="text-xs text-slate-500">Payment Receipt</p>
+        </div>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Date:</span>
+                <span>${new Date(payment.created_at).toLocaleString()}</span>
             </div>
-            <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Date:</span>
-                    <span>${new Date(payment.created_at).toLocaleString()}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Reference:</span>
-                    <span class="font-mono">${payment.payment_reference}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Description:</span>
-                    <span>${payment.booking_type == 'hotel' ? 'Hotel Booking' : 'Restaurant Reservation'}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-500">Payment Method:</span>
-                    <span>${payment.payment_method}</span>
-                </div>
-                <div class="flex justify-between border-t pt-2 mt-2">
-                    <span class="font-bold">Amount:</span>
-                    <span class="font-bold text-lg">${formattedAmount}</span>
-                </div>
-                <div class="flex justify-between text-xs text-slate-500">
-                    <span>Status:</span>
-                    <span class="text-green-600">${payment.payment_status}</span>
-                </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Reference:</span>
+                <span class="font-mono">${payment.payment_reference}</span>
             </div>
-        `;
+            <div class="flex justify-between">
+                <span class="text-slate-500">Description:</span>
+                <span>${payment.booking_type == 'hotel' ? 'Hotel Booking' : 'Restaurant Reservation'}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Payment Method:</span>
+                <span>${payment.payment_method}</span>
+            </div>
+            <div class="flex justify-between border-t pt-2 mt-2">
+                <span class="font-bold">Amount:</span>
+                <span class="font-bold text-lg">${formattedAmount}</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-500">
+                <span>Status:</span>
+                <span class="text-green-600">${payment.payment_status}</span>
+            </div>
+            <div class="mt-3 pt-2 border-t border-amber-200 bg-amber-50 p-2 rounded-lg">
+                <p class="text-xs text-amber-700 flex items-center gap-1">
+                    <i class="fa-regular fa-star mr-1"></i>
+                    <strong>Points to Earn:</strong> +${pointsEarned} loyalty points
+                </p>
+                <p class="text-xs text-amber-600 mt-1">
+                    (Points will be added by admin after verification)
+                </p>
+            </div>
+        </div>
+    `;
 
         document.getElementById('receiptModal').classList.remove('hidden');
         document.getElementById('receiptModal').classList.add('flex');
       };
-
       window.printReceipt = function () {
         window.print();
       };

@@ -47,7 +47,7 @@ try {
         }
 
         // Start transaction
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         // Get order details first (including points info)
         $order = $db->query(
@@ -113,7 +113,7 @@ try {
             ]
         );
 
-        $db->query("COMMIT");
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -166,7 +166,7 @@ try {
     }
 
     // Start transaction
-    $db->query("START TRANSACTION");
+    $db->beginTransaction();
 
     // Generate unique order reference
     $year = date('Y');
@@ -235,7 +235,7 @@ try {
     );
 
     // Commit transaction
-    $db->query("COMMIT");
+    $db->commit();
 
     echo json_encode([
         'success' => true,
@@ -250,7 +250,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-    $db->query("ROLLBACK");
+    $db->rollBack();
     error_log("Order error: " . $e->getMessage());
     echo json_encode([
         'success' => false,

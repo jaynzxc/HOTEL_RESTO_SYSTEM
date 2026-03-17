@@ -163,8 +163,16 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                     <p class="text-2xl font-bold text-amber-700" id="downPaymentAmount">₱200.00</p>
                   </div>
                 </div>
-                <p class="text-xs text-slate-500 mt-2"><i class="fa-regular fa-circle-info"></i> 50% of down payment
-                  will be converted to loyalty points after visit</p>
+                <div class="mt-3 pt-2 border-t border-amber-200">
+                  <p class="text-xs text-amber-700 flex items-center gap-1">
+                    <i class="fa-regular fa-star"></i>
+                    <span>You'll earn <span id="pointsDisplay">10</span> loyalty points after payment</span>
+                  </p>
+                  <p class="text-xs text-slate-500 mt-1">
+                    <i class="fa-regular fa-circle-info"></i>
+                    Points will be added by admin upon payment confirmation
+                  </p>
+                </div>
               </div>
 
               <div class="flex flex-wrap items-center gap-3 mt-6">
@@ -429,19 +437,23 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
             walkinDisplay.innerText = `incoming: ${currentWalkin.name} · ${currentWalkin.guests} guests · ${currentWalkin.time}`;
           }
 
-          // Update down payment display
+          // Update down payment display and points
           const guestCountDisplay = document.getElementById('guestCountDisplay');
           const downPaymentAmount = document.getElementById('downPaymentAmount');
+          const pointsDisplay = document.getElementById('pointsDisplay');
 
           if (guestCountDisplay) guestCountDisplay.textContent = guests;
           if (downPaymentAmount) {
             const downPayment = guests * 100;
             downPaymentAmount.textContent = `₱${downPayment.toFixed(2)}`;
           }
+          if (pointsDisplay) {
+            const points = Math.floor((guests * 100) / 10);
+            pointsDisplay.textContent = points;
+          }
 
           updateAvailabilityMsg();
         }
-
         function escapeHtml(unsafe) {
           if (!unsafe) return '';
           return unsafe
@@ -509,7 +521,63 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               console.log('Server response:', data);
 
               if (data.success) {
-                // ... existing success code ...
+                // Save to sessionStorage for payment page
+                sessionStorage.setItem('pendingRestaurantReservation', JSON.stringify(data.reservation));
+
+                const pointsFormatted = data.reservation.points_earned.toLocaleString();
+                const downPaymentFormatted = new Intl.NumberFormat('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP',
+                  minimumFractionDigits: 2
+                }).format(data.reservation.down_payment);
+
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+
+                Swal.fire({
+                  title: 'Reservation Created!',
+                  html: `
+            <div class="text-left">
+                <div class="bg-green-50 p-4 rounded-lg mb-4">
+                    <p class="text-green-700 mb-2"><i class="fa-regular fa-circle-check mr-2"></i>Reservation confirmed!</p>
+                    <p class="text-sm"><strong>Reference:</strong> ${data.reservation.reference}</p>
+                    <p class="text-sm"><strong>Guests:</strong> ${data.reservation.guests}</p>
+                    <p class="text-sm"><strong>Date:</strong> ${data.reservation.date}</p>
+                    <p class="text-sm"><strong>Time:</strong> ${data.reservation.time}</p>
+                </div>
+                
+                <div class="bg-amber-50 p-4 rounded-lg mb-4">
+                    <p class="font-semibold text-amber-800 mb-2">Payment Summary</p>
+                    <p class="text-sm"><strong>Down Payment Required:</strong> ${downPaymentFormatted}</p>
+                    <div class="mt-2 pt-2 border-t border-amber-200">
+                        <p class="text-sm text-amber-700">
+                            <i class="fa-regular fa-star mr-1"></i>
+                            <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
+                        </p>
+                        <p class="text-xs text-amber-600 mt-1">
+                            (Points will be added by admin after payment confirmation)
+                        </p>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-slate-500 text-center">
+                    You'll be redirected to payment to complete your reservation.
+                </p>
+            </div>
+        `,
+                  icon: 'success',
+                  confirmButtonColor: '#d97706',
+                  confirmButtonText: 'Proceed to Payment',
+                  showCancelButton: true,
+                  cancelButtonText: 'Later',
+                  cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    window.location.href = './payments.php?type=restaurant&id=' + data.reservation.id;
+                  } else {
+                    window.location.href = './my_reservations.php';
+                  }
+                });
               }
               else if (data.has_pending) {
                 // User has pending reservation
@@ -525,17 +593,23 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 Swal.fire({
                   title: 'Pending Reservation Found',
                   html: `
-        <div class="text-left">
-          <p class="mb-3">${data.message}</p>
-          <div class="bg-amber-50 p-3 rounded-lg">
-            <p><strong>Reference:</strong> ${pending.reservation_reference}</p>
-            <p><strong>Guests:</strong> ${pending.guests}</p>
-            <p><strong>Date:</strong> ${pending.reservation_date}</p>
-            <p><strong>Time:</strong> ${pending.reservation_time}</p>
-            <p><strong>Down Payment:</strong> ${formattedAmount}</p>
-          </div>
-        </div>
-      `,
+                        <div class="text-left">
+                            <p class="mb-3">${data.message}</p>
+                            <div class="bg-amber-50 p-3 rounded-lg">
+                                <p><strong>Reference:</strong> ${pending.reservation_reference}</p>
+                                <p><strong>Guests:</strong> ${pending.guests}</p>
+                                <p><strong>Date:</strong> ${pending.reservation_date}</p>
+                                <p><strong>Time:</strong> ${pending.reservation_time}</p>
+                                <p><strong>Down Payment:</strong> ${formattedAmount}</p>
+                                ${pending.points_earned > 0 ? `
+                                <p class="text-amber-600 mt-2">
+                                    <i class="fa-regular fa-star mr-1"></i>
+                                    Points to earn: +${pending.points_earned}
+                                </p>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `,
                   icon: 'warning',
                   confirmButtonColor: '#d97706',
                   confirmButtonText: 'Pay Now',
@@ -580,7 +654,6 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               });
             });
         }
-
         // ---------- EVENT LISTENERS ----------
         document.addEventListener('DOMContentLoaded', function () {
           // Update date and time

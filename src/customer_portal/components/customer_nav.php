@@ -103,10 +103,19 @@ $nav_items = [
             <p class="font-medium text-slate-800" id="displayName">
                 <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
             </p>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
+            <div class="flex items-center gap-1 text-xs text-slate-500">
                 <i class="fa-regular fa-gem text-[11px]"></i>
-                <span id="loyaltyTier"><?php echo htmlspecialchars($member_tier); ?></span> ·
-                <span id="points"><?php echo number_format($points); ?></span> pts
+                <span id="loyaltyTier"><?php echo htmlspecialchars($member_tier); ?></span>
+                <span class="mx-1">·</span>
+                <span class="flex items-center gap-1">
+                    <i class="fa-regular fa-star text-amber-500"></i>
+                    <span id="points"><?php echo number_format($points); ?></span> pts
+                </span>
+            </div>
+            <!-- Added note about points being admin-managed (only visible on hover for clean UI) -->
+            <p class="text-[10px] text-amber-600 mt-0.5 opacity-70 hover:opacity-100 transition-opacity cursor-help"
+                title="Loyalty points are added by admin after payment verification">
+                <i class="fa-regular fa-circle-info mr-1"></i>admin-managed
             </p>
         </div>
     </div>
@@ -154,7 +163,7 @@ $nav_items = [
             </div>
             <p class="text-xs text-slate-600 mt-1" id="upgradeMessage">
                 <?php if (($pointsNeeded ?? 0) > 0): ?>
-                    Earn <span id="pointsToGold"><?php echo $pointsNeeded ?? 0; ?></span> more pts →
+                    Need <span id="pointsToGold"><?php echo $pointsNeeded ?? 0; ?></span> more pts →
                     <?php
                     echo $nextTier == 'silver' ? '2% bonus' :
                         ($nextTier == 'gold' ? '5% bonus' :
@@ -164,6 +173,34 @@ $nav_items = [
                     ✨ You're at max tier! Enjoy your platinum benefits.
                 <?php endif; ?>
             </p>
+            <!-- Added note in upgrade card about admin-managed points -->
+            <p class="text-[10px] text-amber-500 mt-2 border-t border-amber-200/40 pt-2">
+                <i class="fa-regular fa-clock mr-1"></i>
+                Points updated by admin after payment verification
+            </p>
         </div>
     <?php endif; ?>
 </aside>
+
+<!-- Optional: Add a small script to update points display if needed -->
+<script>
+    // This function can be called after payment to refresh points display
+    // but points will only change when admin updates them
+    function refreshPoints() {
+        fetch('../../controller/customer/get/current_points.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('points').textContent = data.points.toLocaleString();
+                    document.getElementById('loyaltyTier').textContent = data.tier;
+
+                    // Update upgrade card if it exists
+                    if (data.pointsNeeded !== undefined) {
+                        const pointsNeededEl = document.getElementById('pointsToGold');
+                        if (pointsNeededEl) pointsNeededEl.textContent = data.pointsNeeded;
+                    }
+                }
+            })
+            .catch(err => console.error('Failed to refresh points:', err));
+    }
+</script>

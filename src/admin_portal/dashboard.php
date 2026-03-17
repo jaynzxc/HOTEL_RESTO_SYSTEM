@@ -122,7 +122,7 @@ require_once '../../controller/admin/get/dashboard.php';
               <a href="../admin_portal/hotel_management/room_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-bed w-4 text-slate-400"></i> Room Management</a>
-              <a href="../admin_portal/hotel_management/reservation_&_booking.php"
+              <a href="../admin_portal/hotel_management/arrival/reservation_&_booking.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-regular fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
               <a href="../admin_portal/hotel_management/housekeeping_&_maintenance.php"
@@ -535,7 +535,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold"><i class="fa-regular fa-rectangle-list text-amber-600 mr-1"></i> Recent bookings
               </h3>
-              <a href="../admin_portal/hotel_management/reservation_&_booking.php"
+              <a href="../admin_portal/hotel_management/arrival/reservation_&_booking.php"
                 class="text-xs text-amber-700 hover:underline">view all</a>
             </div>
             <table class="w-full text-sm">

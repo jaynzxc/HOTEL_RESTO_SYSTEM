@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid booking ID';
         } else {
             try {
-                $db->query("START TRANSACTION");
+                $db->beginTransaction();
 
                 // Get booking details before cancelling - need to calculate points earned
                 $booking = $db->query(
@@ -101,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ]
                     );
 
-                    $db->query("COMMIT");
+                    $db->commit();
                     $success = 'Hotel booking cancelled successfully' .
                         ($points_earned > 0 ? " and {$points_earned} points deducted." : "");
                 } else {
                     throw new Exception('Failed to cancel booking');
                 }
             } catch (Exception $e) {
-                $db->query("ROLLBACK");
+                $db->rollBack();
                 $error = $e->getMessage();
             }
         }
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Invalid reservation ID';
         } else {
             try {
-                $db->query("START TRANSACTION");
+                $db->beginTransaction();
 
                 // Get reservation details - need to calculate points earned
                 $reservation = $db->query(
@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Failed to cancel reservation');
                 }
             } catch (Exception $e) {
-                $db->query("ROLLBACK");
+                $db->rollBack();
                 $error = $e->getMessage();
             }
         }

@@ -70,7 +70,7 @@ try {
             ['review_id' => $review_id]
         )->fetch_one();
 
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         if ($existing) {
             // Update existing response
@@ -101,7 +101,7 @@ try {
             $message = 'Response submitted successfully';
         }
 
-        $db->query("COMMIT");
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -115,7 +115,7 @@ try {
             throw new Exception('Invalid review ID');
         }
 
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         // Delete any responses first (foreign key will handle this if set to CASCADE)
         $db->query(
@@ -129,7 +129,7 @@ try {
             ['id' => $review_id]
         );
 
-        $db->query("COMMIT");
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -145,7 +145,7 @@ try {
 
         // You could add a spam flag column to reviews table
         // For now, we'll just delete it
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         $db->query(
             "DELETE FROM review_responses WHERE review_id = :review_id",
@@ -157,7 +157,7 @@ try {
             ['id' => $review_id]
         );
 
-        $db->query("COMMIT");
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -224,7 +224,7 @@ try {
 
 } catch (Exception $e) {
     if (isset($db)) {
-        $db->query("ROLLBACK");
+        $db->rollBack();
     }
     echo json_encode([
         'success' => false,

@@ -400,7 +400,10 @@
                 <p><span class="text-slate-600">Subtotal:</span> ₱<span id="summarySubtotal"></span></p>
                 <p><span class="text-slate-600">Tax (12%):</span> ₱<span id="summaryTax"></span></p>
                 <p class="font-semibold text-amber-800">Total: ₱<span id="summaryTotal"></span></p>
-                <p class="text-xs text-green-600">You'll earn <span id="summaryPoints"></span> loyalty points!</p>
+                <p class="text-xs text-amber-600">
+                  <i class="fa-regular fa-star mr-1"></i>
+                  You'll earn <span id="summaryPoints"></span> loyalty points (added by admin after payment)
+                </p>
               </div>
             </div>
 
@@ -417,7 +420,7 @@
 
         <!-- bottom hint -->
         <div class="mt-8 text-center text-xs text-slate-400 border-t pt-4">
-          ✅ Complete your booking to earn loyalty points!
+          ✅ Complete your booking and payment to earn loyalty points (added by admin)
         </div>
       </main>
     </div>
@@ -491,7 +494,29 @@
           });
         }
 
-        // step navigation
+        // Clear field errors
+        function clearFieldError(fieldId) {
+          const input = document.getElementById(fieldId);
+          const errorEl = document.getElementById(fieldId + 'Error');
+          if (input) input.classList.remove('input-error');
+          if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.innerText = '';
+          }
+        }
+
+        // Show field error
+        function showFieldError(fieldId, message) {
+          const input = document.getElementById(fieldId);
+          const errorEl = document.getElementById(fieldId + 'Error');
+          if (input) input.classList.add('input-error');
+          if (errorEl) {
+            errorEl.innerText = message;
+            errorEl.classList.remove('hidden');
+          }
+        }
+
+        // ---------- step navigation ----------
         window.attemptStepChange = function (targetStep) {
           if (targetStep === currentStep) return;
           if (targetStep < currentStep) {
@@ -530,29 +555,7 @@
           currentStep = step;
         }
 
-        // clear field errors
-        function clearFieldError(fieldId) {
-          const input = document.getElementById(fieldId);
-          const errorEl = document.getElementById(fieldId + 'Error');
-          if (input) input.classList.remove('input-error');
-          if (errorEl) {
-            errorEl.classList.add('hidden');
-            errorEl.innerText = '';
-          }
-        }
-
-        // show field error
-        function showFieldError(fieldId, message) {
-          const input = document.getElementById(fieldId);
-          const errorEl = document.getElementById(fieldId + 'Error');
-          if (input) input.classList.add('input-error');
-          if (errorEl) {
-            errorEl.innerText = message;
-            errorEl.classList.remove('hidden');
-          }
-        }
-
-        // step 1 validation
+        // ---------- step 1 validation ----------
         window.validateStep1 = function () {
           // Clear previous errors
           const errorFields = ['firstName', 'lastName', 'email', 'phone', 'step1Checkin', 'step1Checkout'];
@@ -623,6 +626,13 @@
               showFieldError('step1Checkout', 'Check-out must be after check-in');
               isValid = false;
             }
+
+            // Calculate minimum nights
+            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+            if (nights < 1) {
+              showFieldError('step1Checkout', 'Minimum stay is 1 night');
+              isValid = false;
+            }
           }
 
           if (!isValid) return;
@@ -644,7 +654,7 @@
           goToStep(2);
         };
 
-        // step 2 functions
+        // ---------- step 2 functions ----------
         window.selectRoom = function (id, name, price) {
           document.querySelectorAll('.room-card').forEach(el => el.classList.remove('selected'));
           document.getElementById(`room${id}`).classList.add('selected');
@@ -662,20 +672,31 @@
           const subtotal = price * nights;
           const tax = Math.round(subtotal * 0.12 * 100) / 100;
           const total = subtotal + tax;
-          const pointsEarned = Math.floor(subtotal / 100) * 5;
+
+          // Calculate points (5 points per ₱100 spent)
+          const pointsEarned = Math.floor(total / 100) * 5;
 
           document.getElementById('summaryRoomName').innerText = name;
           document.getElementById('summaryPricePerNight').innerText = price.toLocaleString();
           document.getElementById('summaryNights').innerText = nights;
-          document.getElementById('summarySubtotal').innerText = subtotal.toLocaleString();
-          document.getElementById('summaryTax').innerText = tax.toLocaleString();
-          document.getElementById('summaryTotal').innerText = total.toLocaleString();
-          document.getElementById('summaryPoints').innerText = pointsEarned;
+          document.getElementById('summarySubtotal').innerText = subtotal.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          document.getElementById('summaryTax').innerText = tax.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          document.getElementById('summaryTotal').innerText = total.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          document.getElementById('summaryPoints').innerText = pointsEarned.toLocaleString();
 
           document.getElementById('bookingSummary').classList.remove('hidden');
         };
 
-        // create booking via AJAX
+        // ---------- create booking via AJAX ----------
         window.createBooking = function () {
           if (!selectedRoomId) {
             showError('No room selected', 'Please select a room to continue');
@@ -718,26 +739,62 @@
           })
             .then(response => response.json())
             .then(data => {
+              // In the createBooking function, update the success message:
+
               if (data.success) {
                 // Save to sessionStorage for payment page
                 sessionStorage.setItem('pendingBooking', JSON.stringify(data.booking));
 
+                const pointsFormatted = data.booking.points_earned.toLocaleString();
+                const totalFormatted = new Intl.NumberFormat('en-PH', {
+                  style: 'currency',
+                  currency: 'PHP',
+                  minimumFractionDigits: 2
+                }).format(data.booking.total);
+
                 Swal.fire({
                   title: 'Booking Created!',
                   html: `
-                        <div class="text-left">
-                            <p><strong>Reference:</strong> ${data.booking.reference}</p>
-                            <p><strong>Room:</strong> ${data.booking.room_name}</p>
-                            <p><strong>Total:</strong> ₱${data.booking.total.toLocaleString()}</p>
-                            <p><strong>Points Earned:</strong> +${data.booking.points_earned}</p>
-                        </div>
-                    `,
+            <div class="text-left">
+                <div class="bg-green-50 p-4 rounded-lg mb-4">
+                    <p class="text-green-700 mb-2"><i class="fa-regular fa-circle-check mr-2"></i>Booking confirmed!</p>
+                    <p class="text-sm"><strong>Reference:</strong> ${data.booking.reference}</p>
+                    <p class="text-sm"><strong>Room:</strong> ${data.booking.room_name}</p>
+                    <p class="text-sm"><strong>Check-in:</strong> ${data.booking.check_in}</p>
+                    <p class="text-sm"><strong>Check-out:</strong> ${data.booking.check_out}</p>
+                    <p class="text-sm"><strong>Nights:</strong> ${data.booking.nights}</p>
+                </div>
+                
+                <div class="bg-amber-50 p-4 rounded-lg mb-4">
+                    <p class="font-semibold text-amber-800 mb-2">Payment Summary</p>
+                    <p class="text-sm"><strong>Total Amount:</strong> ${totalFormatted}</p>
+                    <div class="mt-2 pt-2 border-t border-amber-200">
+                        <p class="text-sm text-amber-700">
+                            <i class="fa-regular fa-star mr-1"></i>
+                            <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
+                        </p>
+                        <p class="text-xs text-amber-600 mt-1">
+                            (Points will be added by admin after payment confirmation)
+                        </p>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-slate-500 text-center">
+                    You'll be redirected to payment to complete your booking.
+                </p>
+            </div>
+        `,
                   icon: 'success',
                   confirmButtonColor: '#d97706',
-                  confirmButtonText: 'Proceed to Payment'
+                  confirmButtonText: 'Proceed to Payment',
+                  showCancelButton: true,
+                  cancelButtonText: 'Later',
+                  cancelButtonColor: '#6b7280'
                 }).then((result) => {
                   if (result.isConfirmed) {
-                    window.location.href = './payments.php';
+                    window.location.href = './payments.php?type=hotel&id=' + data.booking.id;
+                  } else {
+                    window.location.href = './my_reservations.php';
                   }
                 });
               }
@@ -748,7 +805,8 @@
                 const pending = data.pending_booking;
                 const formattedAmount = new Intl.NumberFormat('en-PH', {
                   style: 'currency',
-                  currency: 'PHP'
+                  currency: 'PHP',
+                  minimumFractionDigits: 2
                 }).format(pending.total_amount);
 
                 Swal.fire({
@@ -756,12 +814,13 @@
                   html: `
                         <div class="text-left">
                             <p class="mb-3">${data.message}</p>
-                            <div class="bg-amber-50 p-3 rounded-lg">
-                                <p><strong>Reference:</strong> ${pending.booking_reference}</p>
-                                <p><strong>Room:</strong> ${pending.room_name}</p>
-                                <p><strong>Check-in:</strong> ${pending.check_in}</p>
-                                <p><strong>Check-out:</strong> ${pending.check_out}</p>
-                                <p><strong>Total:</strong> ${formattedAmount}</p>
+                            <div class="bg-amber-50 p-4 rounded-lg">
+                                <p class="font-medium mb-2">Pending Booking Details:</p>
+                                <p class="text-sm"><strong>Reference:</strong> ${pending.booking_reference}</p>
+                                <p class="text-sm"><strong>Room:</strong> ${pending.room_name}</p>
+                                <p class="text-sm"><strong>Check-in:</strong> ${pending.check_in}</p>
+                                <p class="text-sm"><strong>Check-out:</strong> ${pending.check_out}</p>
+                                <p class="text-sm font-semibold mt-2">Amount Due: ${formattedAmount}</p>
                             </div>
                         </div>
                     `,
@@ -781,7 +840,11 @@
               else {
                 let errorMessage = data.message || 'An error occurred';
                 if (data.errors) {
-                  errorMessage = data.errors.join('<br>');
+                  errorMessage = '<ul class="list-disc list-inside">';
+                  data.errors.forEach(err => {
+                    errorMessage += `<li>${err}</li>`;
+                  });
+                  errorMessage += '</ul>';
                 }
                 Swal.fire({
                   title: 'Error',
@@ -801,7 +864,8 @@
               });
             });
         };
-        // Initialize
+
+        // ---------- initialize ----------
         document.addEventListener('DOMContentLoaded', function () {
           // Set default dates if empty
           const today = new Date();
@@ -819,7 +883,10 @@
 
           // Clear session form data after 1 second (to prevent showing old messages)
           setTimeout(() => {
-            <?php unset($_SESSION['form_data']); ?>
+            <?php
+            // Clear session messages
+            unset($_SESSION['form_data']);
+            ?>
           }, 1000);
         });
 

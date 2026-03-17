@@ -78,7 +78,7 @@ try {
         }
 
         // Start transaction
-        $db->query("START TRANSACTION");
+        $db->beginTransaction();
 
         // Generate unique payment reference
         $year = date('Y');
@@ -86,10 +86,10 @@ try {
         $random = strtoupper(substr(uniqid(), -8));
         $payment_ref = "PAY-{$year}{$month}-{$random}";
 
-        // Calculate points earned (5 points per ₱100)
+        // Calculate points that COULD be earned (for display only - NOT added to user account)
         $points_earned = floor($amount / 100) * 5;
 
-        // Insert into payments table (not transactions)
+        // Insert into payments table
         $db->query(
             "INSERT INTO payments (
                 payment_reference, user_id, booking_type, booking_id, amount, 
@@ -110,16 +110,9 @@ try {
 
         $payment_id = $db->lastInsertId();
 
-        // Update user loyalty points
-        if ($points_earned > 0) {
-            $db->query(
-                "UPDATE users SET loyalty_points = loyalty_points + :points WHERE id = :user_id",
-                [
-                    'points' => $points_earned,
-                    'user_id' => $_SESSION['user_id']
-                ]
-            );
-        }
+        // IMPORTANT: DO NOT update user loyalty_points here
+        // Points will be added manually by admin after verification
+        // The points_earned is just for display/reference
 
         // If this payment is for a booking, update booking status
         if ($booking_id) {
@@ -142,6 +135,16 @@ try {
                         'payment_id' => $payment_id
                     ]
                 );
+
+                // Get booking details for notification
+                $booking = $db->query(
+                    "SELECT room_name, check_in, check_out, points_earned 
+                     FROM bookings WHERE id = :id",
+                    ['id' => $booking_id]
+                )->fetch_one();
+
+                $points_earned = $booking ? $booking['points_earned'] : 0;
+
             } elseif ($booking_type === 'restaurant') {
                 // Check if restaurant_reservations table exists and update it
                 $db->query(
@@ -159,19 +162,44 @@ try {
                         'payment_id' => $payment_id
                     ]
                 );
+
+                // Get reservation details for notification
+                $reservation = $db->query(
+                    "SELECT guests, reservation_date, reservation_time, points_earned 
+                     FROM restaurant_reservations WHERE id = :id",
+                    ['id' => $booking_id]
+                )->fetch_one();
+
+                $points_earned = $reservation ? $reservation['points_earned'] : 0;
             }
         }
 
-        // Commit transaction
-        $db->query("COMMIT");
+        // Create notification for the user - clarify points will be added by admin
+        $notification_message = "Payment of ₱" . number_format($amount, 2) . " processed successfully.";
+        if ($points_earned > 0) {
+            $notification_message .= " You'll earn $points_earned loyalty points (admin will add after verification).";
+        }
 
-        // Get updated user points
-        $updatedUser = $db->query(
+        $db->query(
+            "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
+             VALUES (:user_id, 'Payment Successful', :message, 'success', 'fa-credit-card', :link, NOW())",
+            [
+                'user_id' => $_SESSION['user_id'],
+                'message' => $notification_message,
+                'link' => '/src/customer_portal/payments.php'
+            ]
+        );
+
+        // Commit transaction
+        $db->commit();
+
+        // Get user data (but NOT updated points)
+        $user = $db->query(
             "SELECT loyalty_points FROM users WHERE id = :id",
             ['id' => $_SESSION['user_id']]
         )->fetch_one();
 
-        // Prepare receipt data
+        // Prepare receipt data - points_earned is for display only
         $receipt = [
             'payment_id' => $payment_id,
             'reference' => $payment_ref,
@@ -180,7 +208,7 @@ try {
             'payment_method' => $paymentMethod['display_name'],
             'date' => date('Y-m-d H:i:s'),
             'points_earned' => $points_earned,
-            'new_balance' => $updatedUser['loyalty_points']
+            'note' => 'Points will be added by admin after verification'
         ];
 
         echo json_encode([
@@ -188,7 +216,7 @@ try {
             'message' => 'Payment processed successfully!',
             'receipt' => $receipt,
             'points_earned' => $points_earned,
-            'new_points' => $updatedUser['loyalty_points']
+            'note' => 'Points will be added by admin after verification'
         ]);
 
     } elseif ($action === 'add_payment_method') {
@@ -346,13 +374,15 @@ try {
 
 } catch (Exception $e) {
     // Rollback on error
-    $db->query("ROLLBACK");
+    if (isset($db)) {
+        $db->rollBack();
+    }
 
     error_log("Payment error: " . $e->getMessage());
 
     echo json_encode([
         'success' => false,
-        'message' => 'An error occurred. Please try again. Error: ' . $e->getMessage()
+        'message' => 'An error occurred. Please try again.'
     ]);
 }
 exit();
