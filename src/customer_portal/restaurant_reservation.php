@@ -124,7 +124,8 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 <div>
                   <label class="block text-xs text-slate-500 mb-1">reservation date <span
                       class="text-red-400">*</span></label>
-                  <input type="date" id="resDate" value="2025-05-21"
+                  <input type="date" id="resDate" min="<?php echo date('Y-m-d'); ?>"
+                    value="<?php echo date('Y-m-d\TH:i'); ?>"
                     class="w-full border border-slate-200 rounded-xl p-3 text-sm">
                 </div>
                 <div>
@@ -186,63 +187,6 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               </div>
               <p class="text-xs text-emerald-600 mt-2 flex items-center gap-1" id="validationHint"><i
                   class="fa-regular fa-circle-check"></i> fill required fields</p>
-            </div>
-
-            <!-- 2️⃣ RESERVATION CHECKING + TABLE ASSIGNMENT (dynamic, fully functional) -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <h2 class="font-semibold text-xl flex items-center gap-2 mb-3"><i
-                  class="fa-regular fa-clipboard text-amber-600"></i> reservation checking & table assignment</h2>
-              <div class="flex flex-wrap gap-4 items-center border-b border-slate-100 pb-4">
-                <div class="bg-amber-50 px-4 py-2 rounded-xl"><span class="text-sm" id="currentWalkinDisplay">incoming:
-                    (no guest) · 0 guests · --:--</span></div>
-                <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full"><i
-                    class="fa-regular fa-question"></i> walk‑in (no prior res)</span>
-              </div>
-
-              <!-- walk-in guest handling -->
-              <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="border rounded-xl p-4 bg-slate-50">
-                  <p class="font-medium flex items-center gap-2"><i class="fa-regular fa-person-walking"></i> walk-in
-                    guest</p>
-                  <p class="text-xs text-slate-500 mt-1">check table availability</p>
-                  <div class="mt-3 flex items-center gap-2 text-sm" id="availabilityMessage"><i
-                      class="fa-regular fa-clock"></i> <span class="text-amber-600">enter guest details first</span>
-                  </div>
-                  <button
-                    class="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm py-2 rounded-xl transition flex items-center justify-center gap-2"
-                    id="assignWalkinBtn"><i class="fa-regular fa-bell"></i> assign & notify waiter</button>
-                </div>
-                <div class="border rounded-xl p-4 bg-red-50/40">
-                  <p class="font-medium flex items-center gap-2"><i class="fa-regular fa-timer"></i> if no table
-                    available</p>
-                  <p class="text-xs text-slate-500 mt-1">move to waiting list, show estimated wait.</p>
-                  <div class="flex items-center gap-2 mt-2 text-sm"><i class="fa-regular fa-hourglass-half"></i> est.
-                    wait: 15‑20 min</div>
-                  <button
-                    class="mt-3 w-full bg-slate-600 hover:bg-slate-700 text-white text-sm py-2 rounded-xl transition"
-                    id="addToWaitingBtn"><i class="fa-regular fa-list"></i> add to waiting list</button>
-                </div>
-              </div>
-              <div class="mt-5 border-t pt-3 text-xs text-slate-400 flex flex-wrap gap-6" id="dbStatus">
-                <span><i class="fa-regular fa-floppy-disk"></i> DB: Customers, Reservations</span>
-                <span><i class="fa-regular fa-chair"></i> Table → reserved after assignment</span>
-                <span><i class="fa-regular fa-clock"></i> seating time recorded</span>
-              </div>
-            </div>
-
-            <!-- 3️⃣ WAITING LIST QUEUE (starts empty) -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-5">
-              <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                  class="fa-regular fa-list-timeline text-amber-600"></i> waiting list queue · <span
-                  id="waitingCount">0</span> parties</h3>
-              <div class="space-y-2" id="waitingListContainer">
-                <div class="text-sm text-slate-400 text-center py-4">No parties waiting.</div>
-              </div>
-              <div class="flex justify-between items-center mt-4 text-xs text-slate-500 border-t pt-3">
-                <span><i class="fa-regular fa-arrow-right"></i> when table free → auto‑assign + notify</span>
-                <button class="text-amber-700 hover:underline" id="simulateTableFreeBtn"><i
-                    class="fa-regular fa-bell"></i> simulate table free</button>
-              </div>
             </div>
           </div>
 

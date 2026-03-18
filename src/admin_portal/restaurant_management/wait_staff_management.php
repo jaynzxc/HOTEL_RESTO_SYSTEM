@@ -1,3 +1,12 @@
+<?php
+/**
+ * View - Admin Wait Staff Management
+ */
+require_once '../../../controller/admin/get/restaurant/wait_staff_management.php';
+
+// Set current page for navigation
+$current_page = 'wait_staff_management';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,8 +17,8 @@
     <!-- Tailwind via CDN + Font Awesome 6 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      /* exact same dropdown styles from index2.php */
       .transition-side {
         transition: all 0.2s ease;
       }
@@ -30,7 +39,6 @@
         display: none;
       }
 
-      /* Modal styles */
       .modal {
         display: none;
         position: fixed;
@@ -51,86 +59,73 @@
       .modal-content {
         background-color: white;
         border-radius: 1rem;
-        max-width: 500px;
+        max-width: 600px;
         width: 90%;
         max-height: 85vh;
         overflow-y: auto;
       }
 
-      /* Toast notification */
       .toast {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        background-color: #10b981;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 9999px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transform: translateY(100px);
-        opacity: 0;
-        transition: all 0.3s ease;
+        background: white;
+        border-left: 4px solid #d97706;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         z-index: 1100;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        padding: 12px 24px;
+        border-radius: 8px;
       }
 
       .toast.show {
-        transform: translateY(0);
-        opacity: 1;
+        transform: translateX(0);
       }
 
       .toast.error {
-        background-color: #ef4444;
+        border-left-color: #ef4444;
+      }
+
+      .toast.success {
+        border-left-color: #10b981;
       }
 
       .toast.info {
-        background-color: #3b82f6;
+        border-left-color: #3b82f6;
       }
 
-      /* Hidden row for search/filter */
       .hidden-row {
         display: none;
       }
 
-      /* Performance modal stars */
-      .star-rating {
-        color: #fbbf24;
-        font-size: 1.5rem;
-        cursor: pointer;
-      }
-
-      .star-rating .star {
+      .status-badge {
         transition: all 0.2s;
       }
 
-      .star-rating .star:hover {
-        transform: scale(1.2);
+      .status-badge:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
       }
 
-      /* Edit modal specific styles */
-      .form-group {
-        margin-bottom: 1rem;
+      .hr-api-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
 
-      .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #334155;
-        margin-bottom: 0.25rem;
+      .refresh-btn {
+        transition: all 0.3s;
       }
 
-      .form-input {
-        width: 100%;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
+      .refresh-btn:hover {
+        transform: rotate(180deg);
       }
 
-      .form-input:focus {
-        outline: none;
-        ring: 1px solid #f59e0b;
-        border-color: #f59e0b;
+      .attendance-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
       }
     </style>
   </head>
@@ -138,200 +133,62 @@
   <body class="bg-white font-sans antialiased">
 
     <!-- Toast notification container -->
-    <div id="toast" class="toast"></div>
-
-    <!-- Add Staff Modal -->
-    <div id="addStaffModal" class="modal">
-      <div class="modal-content p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Add New Staff</h3>
-          <button onclick="closeModal('addStaffModal')" class="text-slate-400 hover:text-slate-600">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
+    <div id="toast" class="toast hidden">
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+          <i class="fa-regular fa-bell"></i>
         </div>
-        <form id="addStaffForm" onsubmit="saveNewStaff(event)">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="mb-4 col-span-2">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-              <input type="text" id="newStaffName" required class="w-full border border-slate-200 rounded-lg px-3 py-2">
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Position</label>
-              <select id="newStaffPosition" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="Waiter">Waiter</option>
-                <option value="Senior Waiter">Senior Waiter</option>
-                <option value="Head Waiter">Head Waiter</option>
-                <option value="Trainee">Trainee</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Shift</label>
-              <select id="newStaffShift" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="7:00 AM - 4:00 PM">Morning (7AM - 4PM)</option>
-                <option value="12:00 PM - 9:00 PM">Afternoon (12PM - 9PM)</option>
-                <option value="4:00 PM - 11:00 PM">Evening (4PM - 11PM)</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
-              <select id="newStaffStatus" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="on duty">On Duty</option>
-                <option value="break">Break</option>
-                <option value="off duty">Off Duty</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Assigned Tables</label>
-              <input type="text" id="newStaffTables" placeholder="e.g., Tables 1-4"
-                class="w-full border border-slate-200 rounded-lg px-3 py-2">
-            </div>
-          </div>
-
-          <div class="flex gap-3 mt-4">
-            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">Add
-              Staff</button>
-            <button type="button" onclick="closeModal('addStaffModal')"
-              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Cancel</button>
-          </div>
-        </form>
+        <div>
+          <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
+          <p id="toastTime" class="text-xs text-slate-400">just now</p>
+        </div>
       </div>
     </div>
 
-    <!-- Edit Staff Modal -->
-    <div id="editStaffModal" class="modal">
+    <!-- Add Note Modal -->
+    <div id="noteModal" class="modal">
       <div class="modal-content p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Edit Staff</h3>
-          <button onclick="closeModal('editStaffModal')" class="text-slate-400 hover:text-slate-600">
+          <h3 class="text-xl font-semibold">Add Staff Note</h3>
+          <button onclick="closeModal('noteModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
-        <form id="editStaffForm" onsubmit="saveEditStaff(event)">
-          <input type="hidden" id="editStaffIndex">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="mb-4 col-span-2">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-              <input type="text" id="editStaffName" required
-                class="w-full border border-slate-200 rounded-lg px-3 py-2">
-            </div>
+        <form id="noteForm" onsubmit="saveNote(event)">
+          <input type="hidden" id="noteEmployeeId">
 
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Position</label>
-              <select id="editStaffPosition" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="Waiter">Waiter</option>
-                <option value="Senior Waiter">Senior Waiter</option>
-                <option value="Head Waiter">Head Waiter</option>
-                <option value="Trainee">Trainee</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Shift</label>
-              <select id="editStaffShift" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="7:00 AM - 4:00 PM">Morning (7AM - 4PM)</option>
-                <option value="12:00 PM - 9:00 PM">Afternoon (12PM - 9PM)</option>
-                <option value="4:00 PM - 11:00 PM">Evening (4PM - 11PM)</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
-              <select id="editStaffStatus" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-                <option value="on duty">On Duty</option>
-                <option value="break">Break</option>
-                <option value="off duty">Off Duty</option>
-              </select>
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Assigned Tables</label>
-              <input type="text" id="editStaffTables" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Rating</label>
-              <input type="number" id="editStaffRating" step="0.1" min="0" max="5"
-                class="w-full border border-slate-200 rounded-lg px-3 py-2">
-            </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Note</label>
+            <textarea id="noteContent" rows="4" required
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500"></textarea>
           </div>
 
           <div class="flex gap-3 mt-4">
             <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">Save
-              Changes</button>
-            <button type="button" onclick="closeModal('editStaffModal')"
+              Note</button>
+            <button type="button" onclick="closeModal('noteModal')"
               class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Cancel</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- View Schedule Modal -->
-    <div id="viewScheduleModal" class="modal">
+    <!-- View Notes Modal -->
+    <div id="viewNotesModal" class="modal">
       <div class="modal-content p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold" id="scheduleModalTitle">Staff Schedule</h3>
-          <button onclick="closeModal('viewScheduleModal')" class="text-slate-400 hover:text-slate-600">
+          <h3 class="text-xl font-semibold" id="viewNotesTitle">Staff Notes</h3>
+          <button onclick="closeModal('viewNotesModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
-        <div id="scheduleContent" class="space-y-4">
-          <!-- Dynamic schedule content will be inserted here -->
+        <div id="notesList" class="space-y-3 max-h-96 overflow-y-auto">
+          <!-- Notes will be loaded here -->
         </div>
-        <div class="flex gap-3 mt-6">
-          <button onclick="closeModal('viewScheduleModal')"
+        <div class="flex gap-3 mt-4">
+          <button onclick="closeModal('viewNotesModal')"
             class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Close</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Create Schedule Modal -->
-    <div id="scheduleModal" class="modal">
-      <div class="modal-content p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Create Schedule</h3>
-          <button onclick="closeModal('scheduleModal')" class="text-slate-400 hover:text-slate-600">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
-        </div>
-        <form id="scheduleForm" onsubmit="saveSchedule(event)">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Shift Date</label>
-            <input type="date" id="scheduleDate" required class="w-full border border-slate-200 rounded-lg px-3 py-2">
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Shift Type</label>
-            <select id="scheduleType" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-              <option value="Morning">Morning (7AM - 4PM)</option>
-              <option value="Afternoon">Afternoon (12PM - 9PM)</option>
-              <option value="Evening">Evening (4PM - 11PM)</option>
-            </select>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Assign Staff</label>
-            <div class="space-y-2 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3" id="staffCheckboxes">
-              <!-- Dynamic staff checkboxes will be inserted here -->
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Notes (optional)</label>
-            <textarea id="scheduleNotes" rows="2"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2"></textarea>
-          </div>
-
-          <div class="flex gap-3 mt-4">
-            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">Create
-              Schedule</button>
-            <button type="button" onclick="closeModal('scheduleModal')"
-              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Cancel</button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -345,17 +202,12 @@
           </button>
         </div>
         <form id="assignTablesForm" onsubmit="saveTableAssignment(event)">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Select Staff</label>
-            <select id="assignStaff" class="w-full border border-slate-200 rounded-lg px-3 py-2">
-              <!-- Dynamic staff options will be inserted here -->
-            </select>
-          </div>
+          <input type="hidden" id="assignEmployeeId">
 
           <div class="mb-4">
             <label class="block text-sm font-medium text-slate-700 mb-1">Table Assignment</label>
             <input type="text" id="tableAssignment" placeholder="e.g., Tables 1-4 or Section A"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2">
+              class="w-full border border-slate-200 rounded-lg px-3 py-2" required>
           </div>
 
           <div class="mb-4">
@@ -375,422 +227,355 @@
       </div>
     </div>
 
-    <!-- Performance Review Modal -->
-    <div id="performanceModal" class="modal">
-      <div class="modal-content p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Performance Review</h3>
-          <button onclick="closeModal('performanceModal')" class="text-slate-400 hover:text-slate-600">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
-        </div>
-        <div id="performanceContent">
-          <!-- Dynamic performance content will be inserted here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Export Modal -->
-    <div id="exportModal" class="modal">
-      <div class="modal-content p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Export Staff Data</h3>
-          <button onclick="closeModal('exportModal')" class="text-slate-400 hover:text-slate-600">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
-        </div>
-        <div class="space-y-4">
-          <p class="text-sm text-slate-600">Choose export format:</p>
-          <div class="grid grid-cols-2 gap-3">
-            <button onclick="exportData('csv')"
-              class="border border-slate-200 rounded-lg p-4 text-center hover:bg-amber-50 transition">
-              <i class="fa-solid fa-file-csv text-2xl text-green-600 mb-2"></i>
-              <p class="text-sm font-medium">CSV</p>
-            </button>
-            <button onclick="exportData('excel')"
-              class="border border-slate-200 rounded-lg p-4 text-center hover:bg-amber-50 transition">
-              <i class="fa-solid fa-file-excel text-2xl text-green-600 mb-2"></i>
-              <p class="text-sm font-medium">Excel</p>
-            </button>
-            <button onclick="exportData('pdf')"
-              class="border border-slate-200 rounded-lg p-4 text-center hover:bg-amber-50 transition">
-              <i class="fa-solid fa-file-pdf text-2xl text-red-600 mb-2"></i>
-              <p class="text-sm font-medium">PDF</p>
-            </button>
-            <button onclick="exportData('print')"
-              class="border border-slate-200 rounded-lg p-4 text-center hover:bg-amber-50 transition">
-              <i class="fa-solid fa-print text-2xl text-blue-600 mb-2"></i>
-              <p class="text-sm font-medium">Print</p>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- APP CONTAINER: flex row (sidebar + main) -->
+    <!-- APP CONTAINER -->
     <div class="min-h-screen flex flex-col lg:flex-row">
 
-      <!-- ========== SIDEBAR (exact copy from index2.php) ========== -->
-      <?php require '../components/admin_nav.php' ?>
+      <!-- ========== SIDEBAR ========== -->
+      <?php require_once '../components/admin_nav.php'; ?>
 
-
-      <!-- ========== MAIN CONTENT (WAIT STAFF MANAGEMENT) ========== -->
+      <!-- ========== MAIN CONTENT ========== -->
       <main class="flex-1 p-5 lg:p-8 overflow-y-auto bg-white">
 
         <!-- header with title and date -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Wait Staff Management</h1>
-            <p class="text-sm text-slate-500 mt-0.5">manage schedules, assignments, and performance of wait staff</p>
+            <p class="text-sm text-slate-500 mt-0.5">real-time staff data from HR system</p>
           </div>
           <div class="flex gap-3 text-sm">
-            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i> May 21, 2025</span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fa-regular fa-bell"></i></span>
+            <?php if (!$hrApiConnected): ?>
+              <span
+                class="bg-red-100 text-red-700 border border-red-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+                <i class="fa-regular fa-circle-exclamation"></i> HR API Offline
+              </span>
+            <?php else: ?>
+              <span
+                class="bg-green-100 text-green-700 border border-green-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+                <i class="fa-regular fa-circle-check"></i> HR API Connected
+              </span>
+            <?php endif; ?>
+            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+              <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?>
+            </span>
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
+              id="notificationBell">
+              <i class="fa-regular fa-bell"></i>
+              <?php if ($unread_count > 0): ?>
+                <span
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
+              <?php endif; ?>
+            </span>
           </div>
         </div>
 
-        <!-- ===== STATS CARDS ===== -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <!-- STATS CARDS from HR API -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Total staff</p>
-            <p class="text-2xl font-semibold" id="totalStaff">24</p>
+            <p class="text-2xl font-semibold" id="totalStaff"><?php echo $summary['total_employees']; ?></p>
+          </div>
+          <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
+            onclick="filterByStatus('present')">
+            <p class="text-xs text-slate-500">Present</p>
+            <p class="text-2xl font-semibold text-green-600" id="presentCount"><?php echo $summary['present']; ?></p>
+          </div>
+          <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
+            onclick="filterByStatus('absent')">
+            <p class="text-xs text-slate-500">Absent</p>
+            <p class="text-2xl font-semibold text-red-600" id="absentCount"><?php echo $summary['absent']; ?></p>
+          </div>
+          <div
+            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
+            onclick="filterByStatus('late')">
+            <p class="text-xs text-slate-500">Late</p>
+            <p class="text-2xl font-semibold text-yellow-600" id="lateCount"><?php echo $summary['late']; ?></p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500">On duty</p>
-            <p class="text-2xl font-semibold text-green-600" id="onDutyCount">12</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500">Break</p>
-            <p class="text-2xl font-semibold text-amber-600" id="breakCount">4</p>
-          </div>
-          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500">Off duty</p>
-            <p class="text-2xl font-semibold text-slate-400" id="offDutyCount">8</p>
+            <p class="text-xs text-slate-500">No schedule</p>
+            <p class="text-2xl font-semibold text-purple-600" id="noScheduleCount">
+              <?php echo $summary['no_schedule']; ?>
+            </p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Tables assigned</p>
-            <p class="text-2xl font-semibold" id="tablesAssigned">18/24</p>
+            <p class="text-2xl font-semibold" id="tablesAssigned">
+              <?php echo $tablesAssigned; ?>/<?php echo $totalTables; ?>
+            </p>
           </div>
         </div>
 
-        <!-- ===== ACTION BAR ===== -->
+        <!-- ACTION BAR -->
         <div
           class="bg-white rounded-2xl border border-slate-200 p-4 mb-6 flex flex-wrap gap-3 items-center justify-between">
           <div class="flex gap-2 flex-wrap">
-            <button onclick="openModal('addStaffModal')"
-              class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-amber-700 transition">+ add
-              staff</button>
-            <button onclick="openScheduleModal()"
-              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">create
-              schedule</button>
+            <button onclick="refreshHRData()"
+              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition refresh-btn">
+              <i class="fa-solid fa-rotate-right mr-1"></i> refresh from HR
+            </button>
             <button onclick="openAssignTablesModal()"
               class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">assign
               tables</button>
-            <button onclick="openPerformanceModal()"
-              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">performance</button>
           </div>
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
             <input type="text" id="searchInput" onkeyup="searchStaff()" placeholder="search staff..."
-              class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
+              class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none"
+              value="<?php echo htmlspecialchars($searchFilter); ?>">
           </div>
         </div>
 
-        <!-- ===== STAFF LIST TABLE ===== -->
+        <!-- STAFF LIST TABLE -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h2 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-user text-amber-600"></i> wait
-              staff roster</h2>
-            <div class="flex gap-2">
-              <button onclick="openExportModal()"
-                class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50 transition">export</button>
-            </div>
+            <h2 class="font-semibold flex items-center gap-2">
+              <i class="fa-regular fa-user text-amber-600"></i> restaurant staff roster
+              <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">live from HR</span>
+            </h2>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-sm" id="staffTable">
               <thead class="text-slate-500 text-xs border-b">
                 <tr>
-                  <td class="p-3">Name</td>
+                  <td class="p-3">Employee</td>
                   <td class="p-3">Position</td>
-                  <td class="p-3">Shift</td>
+                  <td class="p-3">Schedule</td>
                   <td class="p-3">Status</td>
+                  <td class="p-3">Attendance</td>
                   <td class="p-3">Assigned tables</td>
-                  <td class="p-3">Performance</td>
                   <td class="p-3">Actions</td>
                 </tr>
               </thead>
               <tbody class="divide-y" id="staffTableBody">
-                <tr data-name="John Doe" data-position="Senior Waiter" data-status="on duty">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        JD</div>
-                      <span class="font-medium">John Doe</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Senior Waiter</td>
-                  <td class="p-3">7:00 AM - 4:00 PM</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">on duty</span>
-                  </td>
-                  <td class="p-3">Tables 1-4</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★★★</span>
-                      <span class="text-xs">5.0</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('John Doe', 0)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('John Doe', 0)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
-                <tr data-name="Jane Smith" data-position="Waiter" data-status="on duty">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        JS</div>
-                      <span class="font-medium">Jane Smith</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Waiter</td>
-                  <td class="p-3">7:00 AM - 4:00 PM</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">on duty</span>
-                  </td>
-                  <td class="p-3">Tables 5-8</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★★☆</span>
-                      <span class="text-xs">4.5</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('Jane Smith', 1)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('Jane Smith', 1)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
-                <tr data-name="Maria Cruz" data-position="Head Waiter" data-status="on duty">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        MC</div>
-                      <span class="font-medium">Maria Cruz</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Head Waiter</td>
-                  <td class="p-3">12:00 PM - 9:00 PM</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">on duty</span>
-                  </td>
-                  <td class="p-3">Section A (Tables 10-15)</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★★★</span>
-                      <span class="text-xs">5.0</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('Maria Cruz', 2)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('Maria Cruz', 2)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
-                <tr data-name="Antonio Reyes" data-position="Waiter" data-status="break">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        AR</div>
-                      <span class="font-medium">Antonio Reyes</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Waiter</td>
-                  <td class="p-3">12:00 PM - 9:00 PM</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">break</span>
-                  </td>
-                  <td class="p-3">Tables 16-19</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★★☆</span>
-                      <span class="text-xs">4.2</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('Antonio Reyes', 3)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('Antonio Reyes', 3)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
-                <tr data-name="Lisa Garcia" data-position="Waiter" data-status="on duty">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        LG</div>
-                      <span class="font-medium">Lisa Garcia</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Waiter</td>
-                  <td class="p-3">4:00 PM - 11:00 PM</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">on duty</span>
-                  </td>
-                  <td class="p-3">Tables 20-24</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★★☆</span>
-                      <span class="text-xs">4.8</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('Lisa Garcia', 4)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('Lisa Garcia', 4)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
-                <tr data-name="Mike Tan" data-position="Waiter" data-status="off duty">
-                  <td class="p-3">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
-                        MT</div>
-                      <span class="font-medium">Mike Tan</span>
-                    </div>
-                  </td>
-                  <td class="p-3">Waiter</td>
-                  <td class="p-3">off</td>
-                  <td class="p-3"><span
-                      class="status-badge bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs">off duty</span>
-                  </td>
-                  <td class="p-3">—</td>
-                  <td class="p-3">
-                    <div class="flex items-center gap-1">
-                      <span class="text-yellow-400">★★★☆☆</span>
-                      <span class="text-xs">3.5</span>
-                    </div>
-                  </td>
-                  <td class="p-3">
-                    <button onclick="editStaff('Mike Tan', 5)"
-                      class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-                    <button onclick="viewSchedule('Mike Tan', 5)"
-                      class="text-blue-600 text-xs hover:underline">schedule</button>
-                  </td>
-                </tr>
+                <?php if (empty($staffMembers)): ?>
+                  <tr>
+                    <td colspan="7" class="p-8 text-center text-slate-500">No staff members found</td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach ($staffMembers as $staff):
+                    $emp = $staff['employee'];
+                    $shift = $staff['shift'];
+                    $attendance = $staff['attendance'];
+                    $status = $staff['status'];
+
+                    $statusColors = [
+                      'present' => 'bg-green-100 text-green-700',
+                      'absent' => 'bg-red-100 text-red-700',
+                      'late' => 'bg-yellow-100 text-yellow-700',
+                      'completed' => 'bg-blue-100 text-blue-700'
+                    ];
+                    $statusColor = $statusColors[$status['status']] ?? 'bg-gray-100 text-gray-700';
+
+                    $fullName = $emp['full_name'] ?? 'Unknown';
+                    $firstName = $emp['first_name'] ?? explode(' ', $fullName)[0];
+                    $lastName = $emp['last_name'] ?? (explode(' ', $fullName)[1] ?? '');
+                    $initials = strtoupper(substr($firstName, 0, 1) . (substr($lastName, 0, 1) ?: ''));
+                    ?>
+                    <tr data-id="<?php echo $emp['employee_number']; ?>" data-name="<?php echo strtolower($fullName); ?>"
+                      data-position="<?php echo strtolower($emp['position'] ?? ''); ?>"
+                      data-status="<?php echo $status['status']; ?>">
+                      <td class="p-3">
+                        <div class="flex items-center gap-2">
+                          <div
+                            class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">
+                            <?php echo $initials; ?>
+                          </div>
+                          <div>
+                            <span class="font-medium"><?php echo htmlspecialchars($fullName); ?></span>
+                            <p class="text-xs text-slate-500"><?php echo $emp['employee_number']; ?></p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="p-3">
+                        <span class="font-medium"><?php echo htmlspecialchars($emp['position'] ?? 'Staff'); ?></span>
+                        <p class="text-xs text-slate-500"><?php echo htmlspecialchars($emp['department'] ?? ''); ?></p>
+                      </td>
+                      <td class="p-3">
+                        <?php if ($shift): ?>
+                          <span class="font-medium"><?php echo $shift['shift_name'] ?? 'Regular Shift'; ?></span>
+                          <p class="text-xs text-slate-500"><?php echo $shift['start_time'] ?? '--'; ?> -
+                            <?php echo $shift['end_time'] ?? '--'; ?>
+                          </p>
+                          <?php if ($shift['is_default_shift'] ?? false): ?>
+                            <span class="text-xs text-amber-600">(default)</span>
+                          <?php endif; ?>
+                        <?php else: ?>
+                          <span class="text-slate-400">No schedule</span>
+                        <?php endif; ?>
+                      </td>
+                      <td class="p-3">
+                        <span class="status-badge <?php echo $statusColor; ?> px-2 py-1 rounded-full text-xs">
+                          <span class="attendance-indicator <?php
+                          echo $status['present'] ? 'bg-green-500' :
+                            ($status['status'] === 'late' ? 'bg-yellow-500' : 'bg-red-500');
+                          ?>"></span>
+                          <?php echo ucfirst($status['status']); ?>
+                          <?php if ($status['is_late']): ?>
+                            <span class="ml-1">(<?php echo $status['late_minutes']; ?> min)</span>
+                          <?php endif; ?>
+                        </span>
+                      </td>
+                      <td class="p-3">
+                        <?php if ($attendance): ?>
+                          <div class="text-xs">
+                            <p><i class="fa-regular fa-clock text-green-500 mr-1"></i> In:
+                              <?php echo date('h:i A', strtotime($attendance['clock_in'])); ?>
+                            </p>
+                            <?php if ($attendance['clock_out']): ?>
+                              <p><i class="fa-regular fa-clock text-red-500 mr-1"></i> Out:
+                                <?php echo date('h:i A', strtotime($attendance['clock_out'])); ?>
+                              </p>
+                            <?php endif; ?>
+                            <p class="text-slate-500 mt-1">Hours: <?php echo $attendance['regular_hours']; ?></p>
+                          </div>
+                        <?php else: ?>
+                          <span class="text-slate-400">No record</span>
+                        <?php endif; ?>
+                      </td>
+                      <td class="p-3" id="tables-<?php echo $emp['employee_number']; ?>">
+                        <?php
+                        // You would fetch this from local DB
+                        echo '—';
+                        ?>
+                      </td>
+                      <td class="p-3">
+                        <button
+                          onclick="openAssignTablesModal('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
+                          class="text-amber-600 hover:text-amber-800 text-xs mr-2" title="Assign Tables">
+                          <i class="fa-regular fa-table"></i>
+                        </button>
+                        <button
+                          onclick="openNoteModal('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
+                          class="text-blue-600 hover:text-blue-800 text-xs mr-2" title="Add Note">
+                          <i class="fa-regular fa-note-sticky"></i>
+                        </button>
+                        <button
+                          onclick="viewNotes('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
+                          class="text-slate-600 hover:text-slate-800 text-xs" title="View Notes">
+                          <i class="fa-regular fa-eye"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
           <div class="p-4 border-t border-slate-200 flex items-center justify-between">
-            <span class="text-xs text-slate-500" id="paginationInfo">Showing 1-6 of 24 staff</span>
+            <span class="text-xs text-slate-500" id="paginationInfo">
+              Showing
+              <?php echo (($currentPage - 1) * $limit + 1); ?>-<?php echo min($currentPage * $limit, $totalStaff); ?> of
+              <?php echo $totalStaff; ?> staff
+            </span>
             <div class="flex gap-2" id="paginationButtons">
-              <button onclick="changePage('prev')"
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">Previous</button>
-              <button onclick="changePage(1)"
-                class="bg-amber-600 text-white px-3 py-1 rounded-lg text-sm page-btn">1</button>
-              <button onclick="changePage(2)"
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 page-btn">2</button>
-              <button onclick="changePage(3)"
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 page-btn">3</button>
-              <button onclick="changePage(4)"
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 page-btn">4</button>
-              <button onclick="changePage('next')"
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">Next</button>
+              <!-- Pagination buttons will be generated by JavaScript -->
             </div>
           </div>
         </div>
 
-        <!-- ===== BOTTOM: SCHEDULE & PERFORMANCE ===== -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          <!-- today's schedule summary -->
-          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
-            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-calendar text-amber-600"></i> today's shift schedule</h2>
+        <!-- BOTTOM: SCHEDULE SUMMARY -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- today's shift schedule -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5">
+            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3">
+              <i class="fa-regular fa-calendar text-amber-600"></i> today's shift schedule
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="shiftSummary">
               <div class="border rounded-xl p-3">
                 <p class="font-medium text-sm">Morning</p>
                 <p class="text-xs text-slate-500">7:00 AM - 4:00 PM</p>
-                <p class="text-lg font-semibold mt-1" id="morningCount">4 staff</p>
-                <p class="text-xs text-green-600" id="morningStaff">John, Jane, etc.</p>
+                <p class="text-lg font-semibold mt-1" id="morningCount">
+                  <?php echo $shiftSummary['morning_count']; ?>
+                  staff
+                </p>
+                <p class="text-xs text-green-600 truncate" id="morningStaff">
+                  <?php echo $shiftSummary['morning_staff']; ?>
+                </p>
               </div>
               <div class="border rounded-xl p-3">
                 <p class="font-medium text-sm">Afternoon</p>
                 <p class="text-xs text-slate-500">12:00 PM - 9:00 PM</p>
-                <p class="text-lg font-semibold mt-1" id="afternoonCount">5 staff</p>
-                <p class="text-xs text-green-600" id="afternoonStaff">Maria, Antonio, etc.</p>
+                <p class="text-lg font-semibold mt-1" id="afternoonCount">
+                  <?php echo $shiftSummary['afternoon_count']; ?> staff
+                </p>
+                <p class="text-xs text-green-600 truncate" id="afternoonStaff">
+                  <?php echo $shiftSummary['afternoon_staff']; ?>
+                </p>
               </div>
               <div class="border rounded-xl p-3">
                 <p class="font-medium text-sm">Evening</p>
                 <p class="text-xs text-slate-500">4:00 PM - 11:00 PM</p>
-                <p class="text-lg font-semibold mt-1" id="eveningCount">3 staff</p>
-                <p class="text-xs text-green-600" id="eveningStaff">Lisa, etc.</p>
+                <p class="text-lg font-semibold mt-1" id="eveningCount">
+                  <?php echo $shiftSummary['evening_count']; ?>
+                  staff
+                </p>
+                <p class="text-xs text-green-600 truncate" id="eveningStaff">
+                  <?php echo $shiftSummary['evening_staff']; ?>
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- top performers -->
+          <!-- attendance summary -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fa-regular fa-star text-amber-600"></i> top
-              performers (this week)</h3>
-            <ul class="space-y-2" id="topPerformersList">
-              <li class="flex justify-between items-center">
-                <span>John Doe</span>
-                <span class="text-yellow-400 text-sm">★★★★★</span>
-              </li>
-              <li class="flex justify-between items-center">
-                <span>Maria Cruz</span>
-                <span class="text-yellow-400 text-sm">★★★★★</span>
-              </li>
-              <li class="flex justify-between items-center">
-                <span>Lisa Garcia</span>
-                <span class="text-yellow-400 text-sm">★★★★☆</span>
-              </li>
-              <li class="flex justify-between items-center">
-                <span>Jane Smith</span>
-                <span class="text-yellow-400 text-sm">★★★★☆</span>
-              </li>
-            </ul>
+            <h3 class="font-semibold flex items-center gap-2 mb-3">
+              <i class="fa-regular fa-chart-line text-amber-600"></i> attendance summary
+            </h3>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span>Completion rate</span>
+                <span class="font-semibold text-lg">
+                  <?php echo $summary['completion_rate']; ?>%
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-amber-600 h-2.5 rounded-full" style="width: <?php echo $summary['completion_rate']; ?>%">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+                <div class="bg-white p-2 rounded-lg">
+                  <p class="text-xs text-slate-500">With attendance</p>
+                  <p class="font-semibold">
+                    <?php echo $summary['with_attendance'] ?? 0; ?> staff
+                  </p>
+                </div>
+                <div class="bg-white p-2 rounded-lg">
+                  <p class="text-xs text-slate-500">With schedule</p>
+                  <p class="font-semibold">
+                    <?php echo ($summary['total_employees'] - $summary['no_schedule']); ?> staff
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
     </div>
 
     <script>
-      // ========== STAFF DATA ==========
-      let staffMembers = [
-        { name: 'John Doe', initials: 'JD', position: 'Senior Waiter', shift: '7:00 AM - 4:00 PM', status: 'on duty', tables: 'Tables 1-4', rating: 5.0 },
-        { name: 'Jane Smith', initials: 'JS', position: 'Waiter', shift: '7:00 AM - 4:00 PM', status: 'on duty', tables: 'Tables 5-8', rating: 4.5 },
-        { name: 'Maria Cruz', initials: 'MC', position: 'Head Waiter', shift: '12:00 PM - 9:00 PM', status: 'on duty', tables: 'Section A (Tables 10-15)', rating: 5.0 },
-        { name: 'Antonio Reyes', initials: 'AR', position: 'Waiter', shift: '12:00 PM - 9:00 PM', status: 'break', tables: 'Tables 16-19', rating: 4.2 },
-        { name: 'Lisa Garcia', initials: 'LG', position: 'Waiter', shift: '4:00 PM - 11:00 PM', status: 'on duty', tables: 'Tables 20-24', rating: 4.8 },
-        { name: 'Mike Tan', initials: 'MT', position: 'Waiter', shift: 'off', status: 'off duty', tables: '—', rating: 3.5 }
-      ];
+      // ========== GLOBAL VARIABLES ==========
+      let currentPage = <?php echo $currentPage; ?>;
+      const totalPages = <?php echo $totalPages; ?>;
+      const itemsPerPage = <?php echo $limit; ?>;
 
-      // Schedule data storage
-      let staffSchedules = {};
+      // ========== TOAST NOTIFICATION ==========
+      function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastTime = document.getElementById('toastTime');
+        const now = new Date();
 
-      // ========== PAGINATION VARIABLES ==========
-      let currentPage = 1;
-      const itemsPerPage = 5;
+        toastMessage.textContent = message;
+        toastTime.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        toast.classList.remove('hidden');
 
-      // ========== INITIALIZATION ==========
-      document.addEventListener('DOMContentLoaded', function () {
-        updateStats();
-        updatePagination();
-        generateTableGrid();
-      });
+        setTimeout(() => { toast.classList.add('show'); }, 10);
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => { toast.classList.add('hidden'); }, 300);
+        }, 3000);
+      }
 
       // ========== MODAL FUNCTIONS ==========
       function openModal(modalId) {
@@ -801,268 +586,171 @@
         document.getElementById(modalId).classList.remove('show');
       }
 
-      // ========== ADD STAFF FUNCTION ==========
-      function saveNewStaff(event) {
+      // ========== REFRESH HR DATA ==========
+      function refreshHRData() {
+        showToast('Refreshing data from HR system...', 'info');
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      }
+
+      // ========== NOTE FUNCTIONS ==========
+      function openNoteModal(employeeId, employeeName) {
+        document.getElementById('noteEmployeeId').value = employeeId;
+        document.getElementById('noteContent').value = '';
+        openModal('noteModal');
+      }
+
+      function saveNote(event) {
         event.preventDefault();
 
-        const name = document.getElementById('newStaffName').value;
-        const position = document.getElementById('newStaffPosition').value;
-        const shift = document.getElementById('newStaffShift').value;
-        const status = document.getElementById('newStaffStatus').value;
-        const tables = document.getElementById('newStaffTables').value || '—';
+        const employeeId = document.getElementById('noteEmployeeId').value;
+        const note = document.getElementById('noteContent').value;
 
-        // Generate initials
-        const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
-
-        // Create new staff object
-        const newStaff = {
-          name: name,
-          initials: initials,
-          position: position,
-          shift: shift,
-          status: status,
-          tables: tables,
-          rating: 0
-        };
-
-        staffMembers.push(newStaff);
-
-        // Add to table
-        addStaffToTable(newStaff, staffMembers.length - 1);
-
-        updateStats();
-        updatePagination();
-
-        closeModal('addStaffModal');
-        document.getElementById('addStaffForm').reset();
-        showToast('Staff added successfully!', 'success');
-      }
-
-      function addStaffToTable(staff, index) {
-        const tbody = document.getElementById('staffTableBody');
-        const newRow = document.createElement('tr');
-        newRow.setAttribute('data-name', staff.name);
-        newRow.setAttribute('data-position', staff.position);
-        newRow.setAttribute('data-status', staff.status);
-
-        // Determine status color
-        let statusClass = '';
-        if (staff.status === 'on duty') statusClass = 'bg-green-100 text-green-700';
-        else if (staff.status === 'break') statusClass = 'bg-amber-100 text-amber-700';
-        else statusClass = 'bg-slate-100 text-slate-600';
-
-        // Generate star rating
-        const stars = getStarRating(staff.rating);
-
-        newRow.innerHTML = `
-        <td class="p-3">
-          <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-xs">${staff.initials}</div>
-            <span class="font-medium">${staff.name}</span>
-          </div>
-        </td>
-        <td class="p-3">${staff.position}</td>
-        <td class="p-3">${staff.shift}</td>
-        <td class="p-3"><span class="status-badge ${statusClass} px-2 py-0.5 rounded-full text-xs">${staff.status}</span></td>
-        <td class="p-3">${staff.tables}</td>
-        <td class="p-3">
-          <div class="flex items-center gap-1">
-            <span class="text-yellow-400">${stars}</span>
-            <span class="text-xs">${staff.rating.toFixed(1)}</span>
-          </div>
-        </td>
-        <td class="p-3">
-          <button onclick="editStaff('${staff.name}', ${index})" class="text-amber-700 text-xs hover:underline mr-2">edit</button>
-          <button onclick="viewSchedule('${staff.name}', ${index})" class="text-blue-600 text-xs hover:underline">schedule</button>
-        </td>
-      `;
-
-        tbody.appendChild(newRow);
-      }
-
-      function getStarRating(rating) {
-        const fullStars = Math.floor(rating);
-        const halfStar = rating % 1 >= 0.5 ? 1 : 0;
-        const emptyStars = 5 - fullStars - halfStar;
-
-        return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
-      }
-
-      // ========== EDIT STAFF FUNCTIONS ==========
-      function editStaff(name, index) {
-        const staff = staffMembers[index];
-        if (!staff) return;
-
-        document.getElementById('editStaffIndex').value = index;
-        document.getElementById('editStaffName').value = staff.name;
-        document.getElementById('editStaffPosition').value = staff.position;
-        document.getElementById('editStaffShift').value = staff.shift;
-        document.getElementById('editStaffStatus').value = staff.status;
-        document.getElementById('editStaffTables').value = staff.tables;
-        document.getElementById('editStaffRating').value = staff.rating;
-
-        openModal('editStaffModal');
-      }
-
-      function saveEditStaff(event) {
-        event.preventDefault();
-
-        const index = document.getElementById('editStaffIndex').value;
-        const name = document.getElementById('editStaffName').value;
-        const position = document.getElementById('editStaffPosition').value;
-        const shift = document.getElementById('editStaffShift').value;
-        const status = document.getElementById('editStaffStatus').value;
-        const tables = document.getElementById('editStaffTables').value;
-        const rating = parseFloat(document.getElementById('editStaffRating').value);
-
-        // Update staff in array
-        staffMembers[index] = {
-          ...staffMembers[index],
-          name: name,
-          position: position,
-          shift: shift,
-          status: status,
-          tables: tables,
-          rating: rating,
-          initials: name.split(' ').map(n => n[0]).join('').toUpperCase()
-        };
-
-        // Refresh table display
-        refreshTable();
-
-        updateStats();
-
-        closeModal('editStaffModal');
-        showToast('Staff information updated successfully!', 'success');
-      }
-
-      function refreshTable() {
-        const tbody = document.getElementById('staffTableBody');
-        tbody.innerHTML = '';
-
-        staffMembers.forEach((staff, index) => {
-          addStaffToTable(staff, index);
-        });
-
-        updatePagination();
-      }
-
-      // ========== SCHEDULE FUNCTIONS ==========
-      function viewSchedule(name, index) {
-        const staff = staffMembers[index];
-        const schedule = staffSchedules[name] || [];
-
-        document.getElementById('scheduleModalTitle').textContent = `${name}'s Schedule`;
-
-        let scheduleHtml = '';
-
-        if (schedule.length === 0) {
-          scheduleHtml = '<p class="text-sm text-slate-500 text-center py-4">No schedule found for this staff member.</p>';
-        } else {
-          scheduleHtml = '<div class="space-y-3">';
-          schedule.forEach((shift, i) => {
-            scheduleHtml += `
-            <div class="border rounded-lg p-3">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="font-medium">${shift.date}</p>
-                  <p class="text-sm text-slate-600">${shift.shift}</p>
-                  <p class="text-xs text-slate-500">${shift.notes || 'No notes'}</p>
-                </div>
-                <span class="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">${shift.shiftType}</span>
-              </div>
-            </div>
-          `;
-          });
-          scheduleHtml += '</div>';
-        }
-
-        document.getElementById('scheduleContent').innerHTML = scheduleHtml;
-        openModal('viewScheduleModal');
-      }
-
-      function openScheduleModal() {
-        // Populate staff checkboxes
-        const container = document.getElementById('staffCheckboxes');
-        container.innerHTML = '';
-
-        staffMembers.forEach((staff, index) => {
-          if (staff.status !== 'off duty') {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            div.innerHTML = `
-            <input type="checkbox" id="staff_${index}" value="${staff.name}" class="rounded border-slate-300">
-            <label for="staff_${index}">${staff.name} (${staff.position})</label>
-          `;
-            container.appendChild(div);
-          }
-        });
-
-        openModal('scheduleModal');
-      }
-
-      function saveSchedule(event) {
-        event.preventDefault();
-
-        const date = document.getElementById('scheduleDate').value;
-        const shiftType = document.getElementById('scheduleType').value;
-        const notes = document.getElementById('scheduleNotes').value;
-
-        // Get shift time based on type
-        let shiftTime = '';
-        if (shiftType === 'Morning') shiftTime = '7:00 AM - 4:00 PM';
-        else if (shiftType === 'Afternoon') shiftTime = '12:00 PM - 9:00 PM';
-        else shiftTime = '4:00 PM - 11:00 PM';
-
-        // Get selected staff
-        const selectedStaff = [];
-        const checkboxes = document.querySelectorAll('#staffCheckboxes input:checked');
-        checkboxes.forEach(cb => {
-          selectedStaff.push(cb.value);
-        });
-
-        if (selectedStaff.length === 0) {
-          showToast('Please select at least one staff member', 'error');
+        if (!note.trim()) {
+          showToast('Please enter a note', 'error');
           return;
         }
 
-        // Save schedule for each selected staff
-        selectedStaff.forEach(staffName => {
-          if (!staffSchedules[staffName]) {
-            staffSchedules[staffName] = [];
+        Swal.fire({
+          title: 'Saving Note...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
           }
-
-          staffSchedules[staffName].push({
-            date: date,
-            shiftType: shiftType,
-            shift: shiftTime,
-            notes: notes
-          });
         });
 
-        showToast(`Schedule created for ${selectedStaff.length} staff members`, 'success');
-        closeModal('scheduleModal');
-        document.getElementById('scheduleForm').reset();
+        const formData = new FormData();
+        formData.append('action', 'add_note');
+        formData.append('employee_id', employeeId);
+        formData.append('note', note);
+
+        fetch('../../../controller/admin/post/restaurant/staff_actions.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text().then(text => {
+              try {
+                return JSON.parse(text);
+              } catch (e) {
+                console.error('Invalid JSON response:', text.substring(0, 200));
+                throw new Error('Server returned invalid JSON. Please check the console for details.');
+              }
+            });
+          })
+          .then(data => {
+            Swal.close();
+            if (data.success) {
+              Swal.fire({
+                title: 'Success!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#d97706'
+              }).then(() => {
+                closeModal('noteModal');
+                document.getElementById('noteContent').value = '';
+              });
+            } else {
+              showToast(data.message, 'error');
+            }
+          })
+          .catch(error => {
+            Swal.close();
+            console.error('Error:', error);
+            showToast('Error: ' + error.message, 'error');
+          });
+      }
+
+      function viewNotes(employeeId, employeeName) {
+        Swal.fire({
+          title: 'Loading Notes...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const formData = new FormData();
+        formData.append('action', 'get_notes');
+        formData.append('employee_id', employeeId);
+
+        fetch('../../../controller/admin/post/restaurant/staff_actions.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text().then(text => {
+              try {
+                return JSON.parse(text);
+              } catch (e) {
+                console.error('Invalid JSON response:', text.substring(0, 200));
+                throw new Error('Server returned invalid JSON');
+              }
+            });
+          })
+          .then(data => {
+            Swal.close();
+            if (data.success) {
+              const notesList = document.getElementById('notesList');
+              document.getElementById('viewNotesTitle').textContent = `Notes - ${employeeName}`;
+
+              if (!data.notes || data.notes.length === 0) {
+                notesList.innerHTML = '<p class="text-center text-slate-500 py-4">No notes found</p>';
+              } else {
+                let html = '';
+                data.notes.forEach(note => {
+                  const date = note.created_at ? new Date(note.created_at).toLocaleString() : 'Unknown date';
+                  html += `
+                    <div class="border rounded-lg p-3 bg-slate-50">
+                        <p class="text-sm">${note.note}</p>
+                        <p class="text-xs text-slate-500 mt-2">${date}</p>
+                    </div>
+                  `;
+                });
+                notesList.innerHTML = html;
+              }
+
+              openModal('viewNotesModal');
+            } else {
+              showToast(data.message || 'Failed to load notes', 'error');
+            }
+          })
+          .catch(error => {
+            Swal.close();
+            console.error('Error:', error);
+            showToast('Error loading notes: ' + error.message, 'error');
+          });
       }
 
       // ========== ASSIGN TABLES FUNCTIONS ==========
-      function openAssignTablesModal() {
-        // Populate staff dropdown
-        const select = document.getElementById('assignStaff');
-        select.innerHTML = '<option value="">Select Staff...</option>';
+      function openAssignTablesModal(employeeId = null, employeeName = null) {
+        // Set the employee ID if provided
+        if (employeeId) {
+          document.getElementById('assignEmployeeId').value = employeeId;
 
-        staffMembers.forEach(staff => {
-          const option = document.createElement('option');
-          option.value = staff.name;
-          option.textContent = `${staff.name} (${staff.position})`;
-          select.appendChild(option);
-        });
+          // Optionally show a toast with the employee name
+          if (employeeName) {
+            console.log(`Assigning tables for ${employeeName}`);
+          }
+        }
 
+        generateTableGrid();
         openModal('assignTablesModal');
       }
 
       function generateTableGrid() {
         const grid = document.getElementById('tableGrid');
+        if (!grid) return;
+
         grid.innerHTML = '';
 
         for (let i = 1; i <= 25; i++) {
@@ -1095,11 +783,11 @@
       function saveTableAssignment(event) {
         event.preventDefault();
 
-        const staffName = document.getElementById('assignStaff').value;
+        const employeeId = document.getElementById('assignEmployeeId').value;
         const tables = document.getElementById('tableAssignment').value;
 
-        if (!staffName) {
-          showToast('Please select a staff member', 'error');
+        if (!employeeId) {
+          showToast('Employee ID is missing', 'error');
           return;
         }
 
@@ -1108,123 +796,89 @@
           return;
         }
 
-        // Update staff's table assignment
-        const staffIndex = staffMembers.findIndex(s => s.name === staffName);
-        if (staffIndex !== -1) {
-          staffMembers[staffIndex].tables = tables;
-
-          // Update table display
-          refreshTable();
-        }
-
-        showToast(`Tables assigned to ${staffName}`, 'success');
-        closeModal('assignTablesModal');
-        document.getElementById('assignTablesForm').reset();
-      }
-
-      // ========== PERFORMANCE FUNCTIONS ==========
-      function openPerformanceModal() {
-        const content = document.getElementById('performanceContent');
-
-        let html = '<div class="space-y-4">';
-
-        // Sort staff by rating
-        const sortedStaff = [...staffMembers].sort((a, b) => b.rating - a.rating);
-
-        sortedStaff.forEach((staff, index) => {
-          const stars = getStarRating(staff.rating);
-          html += `
-          <div class="border-b pb-3">
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="font-medium">${index + 1}. ${staff.name}</p>
-                <p class="text-xs text-slate-500">${staff.position}</p>
-              </div>
-              <div class="text-right">
-                <div class="text-yellow-400">${stars}</div>
-                <p class="text-sm font-medium">${staff.rating.toFixed(1)}</p>
-              </div>
-            </div>
-          </div>
-        `;
+        Swal.fire({
+          title: 'Assigning Tables...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
         });
 
-        html += '</div>';
-        content.innerHTML = html;
+        const formData = new FormData();
+        formData.append('action', 'assign_tables');
+        formData.append('employee_id', employeeId);
+        formData.append('tables', tables);
 
-        openModal('performanceModal');
+        fetch('../../../controller/admin/post/restaurant/staff_actions.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.text().then(text => {
+              try {
+                return JSON.parse(text);
+              } catch (e) {
+                console.error('Invalid JSON response:', text.substring(0, 200));
+                throw new Error('Server returned invalid JSON');
+              }
+            });
+          })
+          .then(data => {
+            Swal.close();
+            if (data.success) {
+              // Update the table cell
+              const tableCell = document.getElementById(`tables-${employeeId}`);
+              if (tableCell) {
+                tableCell.textContent = tables;
+              }
+
+              Swal.fire({
+                title: 'Success!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#d97706'
+              }).then(() => {
+                closeModal('assignTablesModal');
+              });
+            } else {
+              showToast(data.message || 'Failed to assign tables', 'error');
+            }
+          })
+          .catch(error => {
+            Swal.close();
+            console.error('Error:', error);
+            showToast('Error: ' + error.message, 'error');
+          });
       }
 
-      // ========== EXPORT FUNCTIONS ==========
-      function openExportModal() {
-        openModal('exportModal');
-      }
-
-      function exportData(format) {
-        closeModal('exportModal');
-        showToast(`Preparing ${format.toUpperCase()} export...`, 'info');
-
-        setTimeout(() => {
-          // Simulate export completion
-          showToast(`Staff data exported as ${format.toUpperCase()} successfully!`, 'success');
-        }, 2000);
+      // ========== FILTER FUNCTIONS ==========
+      function filterByStatus(status) {
+        const url = new URL(window.location);
+        url.searchParams.set('status', status);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
       }
 
       // ========== SEARCH FUNCTION ==========
       function searchStaff() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const rows = document.querySelectorAll('#staffTableBody tr');
-
-        rows.forEach(row => {
-          const name = row.getAttribute('data-name').toLowerCase();
-          const position = row.getAttribute('data-position').toLowerCase();
-          const status = row.getAttribute('data-status').toLowerCase();
-
-          if (name.includes(searchTerm) || position.includes(searchTerm) || status.includes(searchTerm)) {
-            row.classList.remove('hidden-row');
-          } else {
-            row.classList.add('hidden-row');
-          }
-        });
-
-        currentPage = 1;
-        updatePagination();
-      }
-
-      // ========== UPDATE STATISTICS ==========
-      function updateStats() {
-        const total = staffMembers.length;
-        const onDuty = staffMembers.filter(s => s.status === 'on duty').length;
-        const break_ = staffMembers.filter(s => s.status === 'break').length;
-        const offDuty = staffMembers.filter(s => s.status === 'off duty').length;
-
-        document.getElementById('totalStaff').textContent = total;
-        document.getElementById('onDutyCount').textContent = onDuty;
-        document.getElementById('breakCount').textContent = break_;
-        document.getElementById('offDutyCount').textContent = offDuty;
-
-        // Update shift counts
-        const morning = staffMembers.filter(s => s.shift === '7:00 AM - 4:00 PM').length;
-        const afternoon = staffMembers.filter(s => s.shift === '12:00 PM - 9:00 PM').length;
-        const evening = staffMembers.filter(s => s.shift === '4:00 PM - 11:00 PM').length;
-
-        document.getElementById('morningCount').textContent = morning + ' staff';
-        document.getElementById('afternoonCount').textContent = afternoon + ' staff';
-        document.getElementById('eveningCount').textContent = evening + ' staff';
-
-        // Update staff names in shift summary
-        const morningStaff = staffMembers.filter(s => s.shift === '7:00 AM - 4:00 PM').map(s => s.name.split(' ')[0]).join(', ');
-        const afternoonStaff = staffMembers.filter(s => s.shift === '12:00 PM - 9:00 PM').map(s => s.name.split(' ')[0]).join(', ');
-        const eveningStaff = staffMembers.filter(s => s.shift === '4:00 PM - 11:00 PM').map(s => s.name.split(' ')[0]).join(', ');
-
-        document.getElementById('morningStaff').textContent = morningStaff || 'None';
-        document.getElementById('afternoonStaff').textContent = afternoonStaff || 'None';
-        document.getElementById('eveningStaff').textContent = eveningStaff || 'None';
+        const searchTerm = document.getElementById('searchInput').value;
+        const url = new URL(window.location);
+        if (searchTerm.trim()) {
+          url.searchParams.set('search', searchTerm.trim());
+        } else {
+          url.searchParams.delete('search');
+        }
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
       }
 
       // ========== PAGINATION FUNCTIONS ==========
       function updatePagination() {
-        const rows = document.querySelectorAll('#staffTableBody tr:not(.hidden-row)');
+        const rows = document.querySelectorAll('#staffTableBody tr');
         const totalItems = rows.length;
         const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
@@ -1244,10 +898,10 @@
         document.getElementById('paginationInfo').textContent =
           totalItems > 0 ? `Showing ${start}-${end} of ${totalItems} staff` : 'Showing 0 staff';
 
-        updatePaginationButtons(totalPages);
+        generatePaginationButtons(totalPages);
       }
 
-      function updatePaginationButtons(totalPages) {
+      function generatePaginationButtons(totalPages) {
         const container = document.getElementById('paginationButtons');
         if (!container) return;
 
@@ -1263,7 +917,7 @@
       }
 
       function changePage(direction) {
-        const rows = document.querySelectorAll('#staffTableBody tr:not(.hidden-row)');
+        const rows = document.querySelectorAll('#staffTableBody tr');
         const totalPages = Math.max(1, Math.ceil(rows.length / itemsPerPage));
 
         if (direction === 'prev' && currentPage > 1) {
@@ -1279,24 +933,31 @@
         updatePagination();
       }
 
-      // ========== TOAST NOTIFICATION ==========
-      function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = 'toast';
+      // ========== NOTIFICATION BELL ==========
+      document.getElementById('notificationBell')?.addEventListener('click', function () {
+        window.location.href = '../notifications.php';
+      });
 
-        if (type === 'error') {
-          toast.classList.add('error');
-        } else if (type === 'info') {
-          toast.classList.add('info');
+      // ========== INITIALIZATION ==========
+      document.addEventListener('DOMContentLoaded', function () {
+        updatePagination();
+        // Initialize the assign employee ID field if it exists
+        const assignField = document.getElementById('assignEmployeeId');
+        if (!assignField) {
+          // Create the hidden input if it doesn't exist
+          const modal = document.getElementById('assignTablesModal');
+          if (modal) {
+            const form = modal.querySelector('form');
+            if (form) {
+              const hiddenInput = document.createElement('input');
+              hiddenInput.type = 'hidden';
+              hiddenInput.id = 'assignEmployeeId';
+              hiddenInput.name = 'employee_id';
+              form.prepend(hiddenInput);
+            }
+          }
         }
-
-        toast.classList.add('show');
-
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 3000);
-      }
+      });
 
       // Close modals when clicking outside
       window.addEventListener('click', function (event) {
