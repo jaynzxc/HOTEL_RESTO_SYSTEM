@@ -16,13 +16,13 @@ $current_page = $current_page ?? basename($_SERVER['PHP_SELF'], '.php');
 $admin = $admin ?? ['full_name' => 'Admin User', 'role' => 'administrator'];
 $initials = $initials ?? 'A';
 
-// Define navigation structure
+// Define navigation structure with correct paths based on your directory structure
 $nav_groups = [
     'dashboard' => [
         'type' => 'single',
         'icon' => 'fa-solid fa-table-cells-large',
         'label' => 'Dashboard',
-        'url' => '../dashboard.php'
+        'url' => '/src/admin_portal/dashboard.php'
     ],
     'hotel_management' => [
         'type' => 'group',
@@ -31,27 +31,27 @@ $nav_groups = [
         'items' => [
             'front_desk' => [
                 'label' => 'Front Desk / Reception',
-                'url' => '../hotel_management/front_desk_reception.php',
+                'url' => '/src/admin_portal/hotel_management/front_desk_reception.php',
                 'icon' => 'fa-regular fa-reception'
             ],
             'room_management' => [
                 'label' => 'Room Management',
-                'url' => '../hotel_management/room_management.php',
+                'url' => '/src/admin_portal/hotel_management/room_management.php',
                 'icon' => 'fa-solid fa-bed'
             ],
             'reservations_booking' => [
                 'label' => 'Reservations & Booking',
-                'url' => '../hotel_management/reservation_&_booking.php',
+                'url' => '/src/admin_portal/hotel_management/reservation_&_booking.php',
                 'icon' => 'fa-regular fa-calendar-check'
             ],
             'housekeeping' => [
                 'label' => 'Housekeeping & Maintenance',
-                'url' => '../hotel_management/housekeeping_&_maintenance.php',
+                'url' => '/src/admin_portal/hotel_management/housekeeping_&_maintenance.php',
                 'icon' => 'fa-solid fa-broom'
             ],
             'events_conference' => [
                 'label' => 'Events & Conference',
-                'url' => '../hotel_management/event_&_conference.php',
+                'url' => '/src/admin_portal/hotel_management/event_&_conference.php',
                 'icon' => 'fa-regular fa-calendar'
             ]
         ]
@@ -63,27 +63,27 @@ $nav_groups = [
         'items' => [
             'table_reservation' => [
                 'label' => 'Table Reservation',
-                'url' => '../restaurant_management/table_reservation.php',
+                'url' => '/src/admin_portal/restaurant_management/table_reservation.php',
                 'icon' => 'fa-regular fa-clock'
             ],
             'menu_management' => [
                 'label' => 'Menu Management',
-                'url' => '../restaurant_management/menu_management.php',
+                'url' => '/src/admin_portal/restaurant_management/menu_management.php',
                 'icon' => 'fa-solid fa-bars'
             ],
             'orders_pos' => [
                 'label' => 'Orders / POS',
-                'url' => '../restaurant_management/orders_pos.php',
+                'url' => '/src/admin_portal/restaurant_management/orders_pos.php',
                 'icon' => 'fa-solid fa-cash-register'
             ],
             'kitchen_orders' => [
                 'label' => 'Kitchen Orders (KOT)',
-                'url' => '../restaurant_management/kitchen_orders.php',
+                'url' => '/src/admin_portal/restaurant_management/kitchen_orders.php',
                 'icon' => 'fa-solid fa-fire'
             ],
             'wait_staff' => [
                 'label' => 'Wait Staff Management',
-                'url' => '../restaurant_management/wait_staff_management.php',
+                'url' => '/src/admin_portal/restaurant_management/wait_staff_management.php',
                 'icon' => 'fa-regular fa-user'
             ]
         ]
@@ -95,17 +95,17 @@ $nav_groups = [
         'items' => [
             'crm' => [
                 'label' => 'Guest Relationship (CRM)',
-                'url' => '../customer_management/customer_relationship.php',
+                'url' => '/src/admin_portal/customer_management/customer_relationship.php',
                 'icon' => 'fa-regular fa-handshake'
             ],
             'loyalty_rewards' => [
                 'label' => 'Loyalty & Rewards',
-                'url' => '../customer_management/loyalty_rewards.php',
+                'url' => '/src/admin_portal/customer_management/loyalty_rewards.php',
                 'icon' => 'fa-regular fa-star'
             ],
             'feedback_reviews' => [
                 'label' => 'Customer Feedback & Reviews',
-                'url' => '../customer_management/customer_feedback_&_reviews.php',
+                'url' => '/src/admin_portal/customer_management/customer_feedback_&_reviews.php',
                 'icon' => 'fa-regular fa-pen-to-square'
             ]
         ]
@@ -117,17 +117,17 @@ $nav_groups = [
         'items' => [
             'inventory' => [
                 'label' => 'Inventory & Stock',
-                'url' => '../operations/inventory_&_stocks.php',
+                'url' => '/src/admin_portal/operations/inventory_&_stocks.php',
                 'icon' => 'fa-solid fa-boxes'
             ],
             'billing_payments' => [
                 'label' => 'Billing & Payments',
-                'url' => '../operations/billing_&_payment.php',
+                'url' => '/src/admin_portal/operations/billing_&_payment.php',
                 'icon' => 'fa-regular fa-credit-card'
             ],
             'payment_gateway' => [
                 'label' => 'Payment Gateway',
-                'url' => '../operations/payment_gateway.php',
+                'url' => '/src/admin_portal/operations/payment_gateway.php',
                 'icon' => 'fa-solid fa-wifi'
             ]
         ]
@@ -139,12 +139,12 @@ $nav_groups = [
         'items' => [
             'promotions' => [
                 'label' => 'Hotel Marketing & Promotions',
-                'url' => '../marketing/hotelmarketing_&_promotions.php',
+                'url' => '/src/admin_portal/marketing/hotelmarketing_&_promotions.php',
                 'icon' => 'fa-regular fa-gem'
             ],
             'online_ordering' => [
                 'label' => 'Online Ordering Integration',
-                'url' => '../marketing/online_ordering_integration.php',
+                'url' => '/src/admin_portal/marketing/online_ordering_integration.php',
                 'icon' => 'fa-solid fa-cart-shopping'
             ]
         ]
@@ -156,17 +156,17 @@ $nav_groups = [
         'items' => [
             'sales_reports' => [
                 'label' => 'Sales Reports',
-                'url' => '../reports_&_analytics/sales_report.php',
+                'url' => '/src/admin_portal/reports_&_analytics/sales_report.php',
                 'icon' => 'fa-solid fa-chart-line'
             ],
             'booking_reports' => [
                 'label' => 'Booking Reports',
-                'url' => '../reports_&_analytics/booking_reports.php',
+                'url' => '/src/admin_portal/reports_&_analytics/booking_reports.php',
                 'icon' => 'fa-regular fa-calendar'
             ],
             'analytics_dashboard' => [
                 'label' => 'Analytics Dashboard',
-                'url' => '../reports_&_analytics/analytics_dashboard.php',
+                'url' => '/src/admin_portal/reports_&_analytics/analytics_dashboard.php',
                 'icon' => 'fa-solid fa-chart-pie'
             ]
         ]
@@ -178,17 +178,17 @@ $nav_groups = [
         'items' => [
             'channel_management' => [
                 'label' => 'Channel Management',
-                'url' => '../system/channel_management.php',
+                'url' => '/src/admin_portal/system/channel_management.php',
                 'icon' => 'fa-solid fa-code-branch'
             ],
             'door_lock' => [
                 'label' => 'Door Lock Integration',
-                'url' => '../system/door_lock_integration.php',
+                'url' => '/src/admin_portal/system/door_lock_integration.php',
                 'icon' => 'fa-solid fa-lock'
             ],
             'settings' => [
                 'label' => 'Settings',
-                'url' => '../system/settings.php',
+                'url' => '/src/admin_portal/system/settings.php',
                 'icon' => 'fa-solid fa-sliders'
             ]
         ]
@@ -297,7 +297,7 @@ function isGroupActive($group_items, $current_page)
 
         <!-- logout -->
         <div class="border-t border-slate-200 pt-3 mt-3">
-            <a href="../../controller/auth/logout.php"
+            <a href="/controller/auth/logout.php"
                 class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700">
                 <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
                 <span>Logout</span>

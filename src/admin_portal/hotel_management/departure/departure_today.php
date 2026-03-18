@@ -50,7 +50,7 @@ $current_page = 'departure_today';
         <!-- Header with back button -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div class="flex items-center gap-4">
-            <a href="/src/admin_portal/hotel_management/reservation_&_booking.html"
+            <a href="/src/admin_portal/hotel_management/reservation_&_booking.php"
               class="text-amber-600 hover:text-amber-700">
               <i class="fa-solid fa-arrow-left text-xl"></i>
             </a>

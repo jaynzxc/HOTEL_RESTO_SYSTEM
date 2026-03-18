@@ -94,7 +94,7 @@ $current_page = 'all_upcoming_reservations';
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
-              <a href="../front_desk_reception.html" class="hover:text-amber-600 transition">
+              <a href="../front_desk_reception.php" class="hover:text-amber-600 transition">
                 <i class="fa-regular fa-arrow-left"></i> Back to Front Desk
               </a>
             </div>
