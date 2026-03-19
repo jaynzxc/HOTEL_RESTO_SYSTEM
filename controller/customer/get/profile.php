@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/../../../Class/Database.php';
 
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../src/login-register/login_form.php');
     exit();
 }
 
@@ -31,7 +31,7 @@ $member_tier = $user['member_tier'] ?? 'bronze';
 
 if (!$user) {
     session_destroy();
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../src/login-register/login_form.php');
     exit();
 }
 

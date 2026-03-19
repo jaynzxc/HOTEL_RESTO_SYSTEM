@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../Class/Database.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../src/login-register/login_form.php');
     exit();
 }
 

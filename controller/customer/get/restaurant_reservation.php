@@ -9,15 +9,9 @@ require_once __DIR__ . '/../../../Class/Database.php';
 
 // Check if user is logged in and is staff/admin
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../src/login-register/login_form.php');
     exit();
 }
-
-// // Check if user has staff or admin role
-// if (!in_array($_SESSION['user_role'] ?? 'customer', ['staff', 'admin'])) {
-//     header('Location: ../../view/customer_portal/dashboard.php');
-//     exit();
-// }
 
 $config = require __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
@@ -173,7 +167,7 @@ $viewData = [
     'reservations' => $reservations,
     'waitingList' => $waitingList,
     'notifications' => $notifications,
-    
+
     'downPaymentSummary' => $downPaymentSummary,
     'initials' => $initials,
     'roleDisplay' => $roleDisplay,

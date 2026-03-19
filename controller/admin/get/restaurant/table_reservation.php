@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../../Class/Database.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../../src/login-register/login_form.php');
     exit();
 }
 
@@ -196,13 +196,15 @@ $stats = [
     'upcoming_reservations' => $upcoming_reservations,
     'total_guests' => $total_guests,
     'available_tables' => count(array_filter($tables, function ($t) {
-        return $t['status'] === 'available'; })),
+        return $t['status'] === 'available';
+    })),
     'walk_ins' => $walk_ins,
     'no_shows' => $no_shows,
     'completed_today' => $completed_today,
     'total_unpaid_balance' => $total_unpaid_balance,
     'guests_with_balance' => count(array_filter($reservations, function ($r) {
-        return $r['has_outstanding_balance'] > 0; }))
+        return $r['has_outstanding_balance'] > 0;
+    }))
 ];
 
 // Get available dates for filter dropdown
@@ -251,7 +253,7 @@ $viewData = [
     'statusFilter' => $statusFilter,
     'dateFilter' => $dateFilter,
     'searchFilter' => $searchFilter,
-    
+
     'today' => date('Y-m-d'),
     'todayFormatted' => date('F j, Y')
 ];

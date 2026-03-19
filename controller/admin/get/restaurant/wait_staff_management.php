@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../../Class/Database.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../../../../src/login-register/login_form.php');
     exit();
 }
 
@@ -327,7 +327,7 @@ $viewData = [
     'searchFilter' => $searchFilter,
     'selectedDate' => $date,
     'selectedDepartment' => $department,
-    
+
     'today' => date('F j, Y'), // This will now show March 19, 2026
     'todayDay' => date('j'), // Day of month
     'todayMonth' => date('F'), // Full month name

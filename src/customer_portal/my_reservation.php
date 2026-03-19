@@ -11,7 +11,7 @@ $db = new Database($config['database']);
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    header('Location: ../../view/auth/login.php');
+    header('Location: ../login-register/login_form.php');
     exit();
 }
 
