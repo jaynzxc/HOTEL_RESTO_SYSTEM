@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Mar 17, 2026 at 04:26 PM
+-- Generation Time: Mar 19, 2026 at 11:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,7 +50,7 @@ CREATE TABLE `bookings` (
   `subtotal` decimal(10,2) NOT NULL,
   `tax` decimal(10,2) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `status` enum('pending','confirmed','cancelled','completed') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','Checked-in','confirmed','cancelled','completed') NOT NULL DEFAULT 'pending',
   `payment_status` enum('unpaid','paid','refunded') NOT NULL DEFAULT 'unpaid',
   `payment_method` varchar(50) DEFAULT NULL,
   `payment_date` datetime DEFAULT NULL,
@@ -64,14 +64,6 @@ CREATE TABLE `bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `bookings`
---
-
-INSERT INTO `bookings` (`id`, `booking_reference`, `user_id`, `guest_first_name`, `guest_last_name`, `guest_email`, `guest_phone`, `booking_type`, `check_in`, `check_in_time`, `check_out`, `check_out_time`, `nights`, `room_id`, `room_assigned`, `room_name`, `room_price`, `adults`, `children`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `payment_method`, `payment_date`, `special_requests`, `payment_id`, `points_earned`, `points_awarded`, `points_awarded_at`, `points_used`, `points_discount`, `created_at`, `updated_at`) VALUES
-(63, 'HOT-20260317-C7910C', 7, 'Janzel', 'Dolo', 'janzeldols@gmail.com', '+639565819964', 'hotel', '2026-03-18', NULL, '2026-03-20', NULL, 2, '204', NULL, 'Family Room', 5500.00, 2, 0, 11000.00, 1320.00, 12320.00, 'confirmed', 'unpaid', NULL, NULL, '', NULL, 615, 1, '2026-03-17 20:17:35', 0, 0.00, '2026-03-17 12:10:20', '2026-03-17 12:17:35'),
-(64, 'HOT-20260317-0370E5', 7, 'Janzel', 'Dolo', 'janzeldols@gmail.com', '+639565819964', 'hotel', '2026-03-17', '23:21:16', '2026-03-20', NULL, 3, '201', 'Deluxe Twi', 'Deluxe Twin', 4200.00, 2, 0, 12600.00, 1512.00, 14112.00, '', 'unpaid', NULL, NULL, '', NULL, 705, 1, '2026-03-17 22:44:10', 0, 0.00, '2026-03-17 14:42:40', '2026-03-17 15:21:16');
 
 --
 -- Triggers `bookings`
@@ -137,7 +129,7 @@ CREATE TABLE `current_balance` (
 --
 
 INSERT INTO `current_balance` (`id`, `user_id`, `total_balance`, `pending_balance`, `available_balance`, `last_updated`) VALUES
-(89, 7, 14112.00, 0.00, 14112.00, '2026-03-17 15:21:16');
+(135, 8, 0.00, 0.00, 0.00, '2026-03-19 10:07:30');
 
 -- --------------------------------------------------------
 
@@ -164,15 +156,6 @@ CREATE TABLE `events` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `events`
---
-
-INSERT INTO `events` (`id`, `event_name`, `event_type`, `event_date`, `event_time`, `guests`, `status`, `contact_person`, `contact_phone`, `special_requirements`, `created_by`, `location`, `venue_id`, `description`, `created_at`, `updated_at`) VALUES
-(1, 'Wedding Rehearsal', 'other', '2026-03-17', '15:00:00', 0, 'confirmed', NULL, NULL, NULL, NULL, 'Grand Ballroom', NULL, 'Wedding rehearsal dinner', '2026-03-16 16:35:46', '2026-03-17 14:56:18'),
-(2, 'Corporate Meeting', 'other', '2026-03-17', '10:00:00', 0, 'confirmed', NULL, NULL, NULL, NULL, 'Boardroom A', NULL, 'Executive board meeting', '2026-03-16 16:35:46', '2026-03-17 14:56:18'),
-(3, 'test', 'meeting', '2026-03-17', '14:03:00', 150, 'confirmed', 'd', '09565819961', 's', 7, NULL, 1, NULL, '2026-03-17 15:05:35', '2026-03-17 15:05:35');
-
 -- --------------------------------------------------------
 
 --
@@ -194,6 +177,13 @@ CREATE TABLE `food_orders` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `food_orders`
+--
+
+INSERT INTO `food_orders` (`id`, `order_reference`, `user_id`, `items`, `order_type`, `subtotal`, `service_fee`, `total_amount`, `points_used`, `points_earned`, `status`, `created_at`, `updated_at`) VALUES
+(11, 'FOOD-202603-923E81', 8, '[{\"name\":\"Sizzling Sisig\",\"price\":290,\"quantity\":1,\"isFree\":false},{\"name\":\"Halo-Halo\",\"price\":150,\"quantity\":1,\"isFree\":false},{\"name\":\"Halo-Halo (loyalty free)\",\"price\":0,\"quantity\":1,\"isFree\":true}]', 'dine-in', 440.00, 22.00, 222.00, 240, 20, '', '2026-03-19 10:07:53', '2026-03-19 10:08:56');
 
 -- --------------------------------------------------------
 
@@ -217,12 +207,30 @@ CREATE TABLE `guest_interactions` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `guest_interactions`
+-- Table structure for table `hr_staff_cache`
 --
 
-INSERT INTO `guest_interactions` (`id`, `user_id`, `admin_id`, `type`, `status`, `priority`, `assigned_to`, `subject`, `message`, `response`, `completed_at`, `created_at`, `updated_at`) VALUES
-(3, 7, 7, 'note', 'done', 'medium', NULL, 'Guest Check-in', 'Guest checked in to room Deluxe Twin. ID: Passport - 12', NULL, NULL, '2026-03-17 15:21:16', '2026-03-17 15:21:16');
+CREATE TABLE `hr_staff_cache` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `employee_id` varchar(50) NOT NULL,
+  `employee_number` varchar(50) DEFAULT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `first_name` varchar(50) DEFAULT NULL,
+  `last_name` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL,
+  `hourly_rate` decimal(10,2) DEFAULT 0.00,
+  `shift_id` int(11) DEFAULT NULL,
+  `shift_name` varchar(50) DEFAULT NULL,
+  `shift_start` time DEFAULT NULL,
+  `shift_end` time DEFAULT NULL,
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -260,11 +268,15 @@ INSERT INTO `inventory` (`id`, `item_name`, `category`, `stock`, `reorder_level`
 
 CREATE TABLE `menu_items` (
   `id` int(10) UNSIGNED NOT NULL,
+  `item_code` varchar(20) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
+  `cost` decimal(10,2) DEFAULT 0.00,
+  `stock` int(11) DEFAULT 0,
   `category` enum('appetizers','mains','desserts','beverages') NOT NULL,
   `is_available` tinyint(1) NOT NULL DEFAULT 1,
+  `status` enum('available','out_of_stock','special','disabled') DEFAULT 'available',
   `image_url` varchar(255) DEFAULT NULL,
   `preparation_time` int(11) DEFAULT 15,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -275,13 +287,13 @@ CREATE TABLE `menu_items` (
 -- Dumping data for table `menu_items`
 --
 
-INSERT INTO `menu_items` (`id`, `name`, `description`, `price`, `category`, `is_available`, `image_url`, `preparation_time`, `created_at`, `updated_at`) VALUES
-(1, 'Sinigang na Baboy', 'tamarind soup, pork, veggies', 320.00, 'mains', 1, NULL, 20, '2026-03-16 14:11:26', '2026-03-16 14:11:26'),
-(2, 'Sizzling Sisig', 'chopped pork, onion, egg', 290.00, 'mains', 1, NULL, 15, '2026-03-16 14:11:26', '2026-03-16 14:11:26'),
-(3, 'Crispy Pata', 'deep-fried pork knuckle', 550.00, 'mains', 1, NULL, 25, '2026-03-16 14:11:26', '2026-03-16 14:11:26'),
-(4, 'Halo-Halo', 'shaved ice, fruits, leche flan', 150.00, 'desserts', 1, NULL, 10, '2026-03-16 14:11:26', '2026-03-16 14:11:26'),
-(5, 'Fresh Buko Juice', 'with coconut pulp', 90.00, 'beverages', 1, NULL, 5, '2026-03-16 14:11:26', '2026-03-16 14:11:26'),
-(6, 'Garlic Rice', 'sinangag, plain', 50.00, 'mains', 1, NULL, 5, '2026-03-16 14:11:26', '2026-03-16 14:11:26');
+INSERT INTO `menu_items` (`id`, `item_code`, `name`, `description`, `price`, `cost`, `stock`, `category`, `is_available`, `status`, `image_url`, `preparation_time`, `created_at`, `updated_at`) VALUES
+(1, 'M001', 'Sinigang na Baboy', 'tamarind soup, pork, veggies', 320.00, 160.00, 50, '', 1, 'available', NULL, 20, '2026-03-16 14:11:26', '2026-03-19 10:05:38'),
+(2, 'M002', 'Sizzling Sisig', 'chopped pork, onion, egg', 290.00, 145.00, 50, 'mains', 1, 'available', NULL, 15, '2026-03-16 14:11:26', '2026-03-18 15:40:46'),
+(3, 'M003', 'Crispy Pata', 'deep-fried pork knuckle', 550.00, 275.00, 50, 'mains', 1, 'available', NULL, 25, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
+(4, 'D004', 'Halo-Halo', 'shaved ice, fruits, leche flan', 150.00, 75.00, 50, 'desserts', 1, 'available', NULL, 10, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
+(5, 'B005', 'Fresh Buko Juice', 'with coconut pulp', 90.00, 45.00, 50, 'beverages', 1, 'available', NULL, 5, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
+(6, 'M006', 'Garlic Rice', 'sinangag, plain', 50.00, 25.00, 50, 'mains', 1, 'available', NULL, 5, '2026-03-16 14:11:26', '2026-03-18 15:37:29');
 
 -- --------------------------------------------------------
 
@@ -307,9 +319,75 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `icon`, `link`, `is_read`, `created_at`, `read_at`) VALUES
-(161, 7, 'Check-in Completed', 'Guest Janzel Dolo checked in to room Deluxe Twin', 'success', 'fa-calendar-check', NULL, 0, '2026-03-17 15:21:16', NULL),
-(162, 7, 'Reminder from Front Desk', 'congrats', 'info', 'fa-bell', '/src/customer_portal/my_reservation.php', 0, '2026-03-17 15:21:28', NULL),
-(163, 7, 'New Event Created', 'Event \'test\' created for 2026-03-19', 'success', 'fa-calendar-plus', NULL, 0, '2026-03-17 15:23:03', NULL);
+(172, 7, 'New Task Assigned', 'A new maintenance task has been assigned to you', 'info', 'fa-broom', NULL, 0, '2026-03-18 11:44:14', NULL),
+(200, 7, 'New Task Assigned', 'A new maintenance task has been assigned to you', 'info', 'fa-broom', NULL, 0, '2026-03-18 19:11:55', NULL),
+(202, 8, 'Task Completed', 'Task #2 has been completed', 'success', 'fa-check-circle', NULL, 1, '2026-03-19 03:56:53', '2026-03-19 11:58:51'),
+(203, 8, 'Restaurant Reservation Created', 'Your reservation for 1 guests on 2026-03-20 at 5:30 PM:00 has been created. Down payment: ₱100.00 You\'ll earn 10 loyalty points (admin will add after payment).', 'success', 'fa-utensils', '/src/customer_portal/my_reservation.php', 1, '2026-03-19 03:58:43', '2026-03-19 11:58:51'),
+(204, 8, 'Maintenance Reported', 'Maintenance reported for room 101: g', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:00:24', NULL),
+(205, 8, 'Room Updated', 'Room 101 details were updated', 'success', 'fa-pen-to-square', NULL, 0, '2026-03-19 04:00:37', NULL),
+(206, 8, 'Maintenance Reported', 'Maintenance reported for room 101: g', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:00:49', NULL),
+(207, 8, 'Maintenance Reported', 'Maintenance reported for room 101: hi', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:06:19', NULL),
+(208, 8, 'Task Assigned', 'Task #5 assigned to bstmsn', 'success', 'fa-user-check', NULL, 0, '2026-03-19 04:15:46', NULL),
+(209, 8, 'Task Completed', 'Task #5 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 04:19:39', NULL),
+(210, 8, 'Booking Created', 'Your booking for Family Room from 2026-03-20 to 2026-03-22 has been created. Total: ₱12,320.00 You\'ll earn 615 loyalty points (admin will add after payment).', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 04:51:04', NULL),
+(211, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from pending to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 04:51:22', NULL),
+(212, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 04:51:22', NULL),
+(213, 8, 'Room Updated', 'Room 201 details were updated', 'success', 'fa-pen-to-square', NULL, 0, '2026-03-19 04:52:02', NULL),
+(214, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to pending', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:27:09', NULL),
+(215, 8, 'Booking Status Update', 'Your booking status has been updated to pending (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:27:09', NULL),
+(216, 8, 'Maintenance Reported', 'Maintenance reported for room 101: d', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 06:36:03', NULL),
+(217, 8, 'Task Completed', 'Task #6 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 06:36:44', NULL),
+(218, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from pending to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:07', NULL),
+(219, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:07', NULL),
+(220, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from  to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:25', NULL),
+(221, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:25', NULL),
+(222, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from  to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:35', NULL),
+(223, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:35', NULL),
+(224, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:40:37', NULL),
+(225, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 06:40:57', NULL),
+(226, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 06:44:08', NULL),
+(227, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:44:08', NULL),
+(228, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:44:17', NULL),
+(229, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 06:44:51', NULL),
+(230, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:44:51', NULL),
+(231, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 06:50:11', NULL),
+(232, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:50:15', NULL),
+(233, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 07:03:53', NULL),
+(234, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 07:04:20', NULL),
+(235, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:04:20', NULL),
+(236, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 07:04:29', NULL),
+(237, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:12:02', NULL),
+(238, 8, 'Task Completed', 'Task #7 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:12:27', NULL),
+(239, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:12:47', NULL),
+(240, 8, 'Task Completed', 'Task #8 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:12:59', NULL),
+(241, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:22:05', NULL),
+(242, 8, 'Task Completed', 'Task #9 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:22:36', NULL),
+(243, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 07:22:52', NULL),
+(244, 8, 'Loyalty Points Awarded!', 'You\'ve earned 615 loyalty points for your booking #HOT-20260319-895EE0', 'loyalty', 'fa-star', '/src/customer_portal/loyalty_rewards.php', 0, '2026-03-19 07:23:55', NULL),
+(245, 8, 'Points Awarded', 'Added 615 points to user for booking #HOT-20260319-895EE0', 'success', 'fa-star', NULL, 0, '2026-03-19 07:23:55', NULL),
+(246, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 07:25:09', NULL),
+(247, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:25:09', NULL),
+(248, 8, 'Reservation Updated', 'Reservation #REST-202603-3D78AE status changed from pending to confirmed (Guest has outstanding balance)', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:39:09', NULL),
+(249, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:41:54', NULL),
+(250, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:41:54', NULL),
+(251, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from Checked-in to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:46:49', NULL),
+(252, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:46:49', NULL),
+(253, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:47:37', NULL),
+(254, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:47:37', NULL),
+(255, 8, 'Payment Successful', 'Payment of ₱12,420.00 processed successfully. You\'ll earn 620 loyalty points (admin will add after verification).', 'success', 'fa-credit-card', '/src/customer_portal/payments.php', 0, '2026-03-19 07:48:13', NULL),
+(256, 8, 'Guests Imported', 'Successfully imported 0 guests with 2 errors', 'success', 'fa-file-import', NULL, 0, '2026-03-19 07:49:21', NULL),
+(257, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from Checked-in to pending', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:50:15', NULL),
+(258, 8, 'Booking Status Update', 'Your booking status has been updated to pending (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:50:15', NULL),
+(259, 8, 'New Event Created', 'Event \'test\' created for 2026-03-19', 'success', 'fa-calendar-plus', NULL, 0, '2026-03-19 09:58:31', NULL),
+(260, 8, 'Reminder from Front Desk', 'Reminder about your upcoming stay', 'info', 'fa-bell', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 10:02:59', NULL),
+(261, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 10:03:47', NULL),
+(262, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 10:03:47', NULL),
+(263, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 10:03:56', NULL),
+(264, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 10:04:49', NULL),
+(265, 8, 'Reservation Updated', 'Reservation #REST-202603-3D78AE status changed from confirmed to cancelled', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 10:05:10', NULL),
+(266, 8, 'Order Placed', 'Your order #FOOD-202603-923E81 has been placed. Total: ₱222.00', 'success', 'fa-bag-shopping', '/src/customer_portal/order_food.php', 0, '2026-03-19 10:07:53', NULL),
+(267, 8, 'Order Status Update', 'Order #FOOD-202603-923E81 status changed from pending to preparing', 'info', 'fa-utensils', NULL, 0, '2026-03-19 10:08:35', NULL),
+(268, 8, '⚠️ URGENT ORDER', 'Order #FOOD-202603-923E81 marked as URGENT!', 'warning', 'fa-exclamation-triangle', NULL, 0, '2026-03-19 10:08:56', NULL);
 
 -- --------------------------------------------------------
 
@@ -345,13 +423,6 @@ CREATE TABLE `payments` (
   `payment_date` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `payments`
---
-
-INSERT INTO `payments` (`id`, `payment_reference`, `user_id`, `booking_type`, `booking_id`, `amount`, `payment_method`, `payment_status`, `approval_status`, `approved_by`, `approved_at`, `rejection_reason`, `transaction_id`, `payment_date`, `created_at`) VALUES
-(24, 'PAY-202603-86F56B77', 7, '', 0, 26432.00, 'GCash', 'completed', 'pending', NULL, NULL, NULL, NULL, '2026-03-17 22:42:55', '2026-03-17 14:42:55');
 
 --
 -- Triggers `payments`
@@ -451,7 +522,8 @@ CREATE TABLE `payment_methods` (
 
 INSERT INTO `payment_methods` (`id`, `user_id`, `method_type`, `display_name`, `account_name`, `account_number`, `expiry_date`, `is_default`, `created_at`) VALUES
 (2, 4, 'gcash', 'GCash', 'janzeldols', '09565819961', '2026-04', 1, '2026-03-15 15:45:36'),
-(3, 7, 'gcash', 'GCash', 'sdasd', '123', '2026-04', 1, '2026-03-17 04:20:05');
+(3, 7, 'gcash', 'GCash', 'sdasd', '123', '2026-04', 1, '2026-03-17 04:20:05'),
+(4, 8, 'gcash', 'GCash', 'janzeldols', '1213242', '', 1, '2026-03-18 01:13:12');
 
 -- --------------------------------------------------------
 
@@ -468,14 +540,6 @@ CREATE TABLE `redemptions` (
   `status` enum('pending','completed','cancelled') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `redemptions`
---
-
-INSERT INTO `redemptions` (`id`, `user_id`, `reward_name`, `points_cost`, `experience`, `status`, `created_at`) VALUES
-(20, 7, 'Free Coffee / Tea', 240, 'beverage', 'pending', '2026-03-17 08:03:18'),
-(21, 7, 'Complimentary Breakfast', 480, 'dining', 'pending', '2026-03-17 10:56:34');
 
 -- --------------------------------------------------------
 
@@ -598,13 +662,13 @@ CREATE TABLE `restaurant_tables` (
 
 INSERT INTO `restaurant_tables` (`id`, `table_number`, `capacity`, `location`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'T1', 2, 'Window', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:39:53'),
-(2, 'T2', 4, 'Center', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:39:57'),
-(3, 'T3', 2, 'Window', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:40:02'),
-(4, 'T4', 6, 'Private', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:40:05'),
+(2, 'T2', 4, 'Center', 'available', '2026-03-16 10:28:37', '2026-03-18 15:11:12'),
+(3, 'T3', 2, 'Window', 'available', '2026-03-16 10:28:37', '2026-03-18 14:06:23'),
+(4, 'T4', 6, 'Private', 'occupied', '2026-03-16 10:28:37', '2026-03-18 15:51:28'),
 (5, 'T5', 2, 'Bar', 'reserved', '2026-03-16 10:28:37', '2026-03-16 10:40:09'),
-(6, 'T6', 4, 'Center', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:40:12'),
-(7, 'T7', 2, 'Window', 'reserved', '2026-03-16 10:28:37', '2026-03-16 10:40:17'),
-(8, 'T8', 8, 'Private', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:42:01');
+(6, 'T6', 4, 'Center', 'occupied', '2026-03-16 10:28:37', '2026-03-18 14:03:17'),
+(7, 'T7', 2, 'Window', 'available', '2026-03-16 10:28:37', '2026-03-18 14:06:16'),
+(8, 'T8', 8, 'Private', 'available', '2026-03-16 10:28:37', '2026-03-18 13:58:40');
 
 -- --------------------------------------------------------
 
@@ -665,7 +729,7 @@ CREATE TABLE `rewards` (
 INSERT INTO `rewards` (`id`, `reward_name`, `description`, `points_cost`, `category`, `image_url`, `is_active`, `stock_limit`, `times_redeemed`, `created_at`, `updated_at`) VALUES
 (1, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, NULL, 7, '2026-03-16 17:30:12', '2026-03-17 08:03:18'),
 (2, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, NULL, 2, '2026-03-16 17:30:12', '2026-03-17 10:56:34'),
-(3, 'Late Check-out (2pm)', 'subject to availability', 600, 'hotel', NULL, 1, NULL, 0, '2026-03-16 17:30:12', '2026-03-16 17:30:12'),
+(3, 'Late Check-out (2pm)', 'subject to availability', 600, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-18 02:16:22'),
 (4, 'Room Upgrade', 'deluxe to suite (subject to availability)', 1200, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-16 18:24:35'),
 (5, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, 100, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
 (6, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, 50, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
@@ -688,6 +752,7 @@ CREATE TABLE `rooms` (
   `max_occupancy` int(11) DEFAULT 2,
   `image_url` varchar(255) DEFAULT NULL,
   `is_available` tinyint(1) DEFAULT 1,
+  `needs_cleaning` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -695,18 +760,18 @@ CREATE TABLE `rooms` (
 -- Dumping data for table `rooms`
 --
 
-INSERT INTO `rooms` (`id`, `name`, `description`, `price`, `beds`, `view`, `amenities`, `max_occupancy`, `image_url`, `is_available`, `created_at`) VALUES
-('101', 'Superior Double', NULL, 3500.00, '1 double bed', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 1, '2026-03-17 12:34:03'),
-('102', 'Superior Double', NULL, 3500.00, '1 double bed', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 1, '2026-03-17 12:34:03'),
-('201', 'Deluxe Twin', NULL, 4200.00, '2 single beds', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 0, '2026-03-15 07:19:38'),
-('202', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, '2026-03-15 07:19:38'),
-('203', 'Superior Double', NULL, 3500.00, 'double bed', 'city view', 'Free WiFi, TV', 2, NULL, 1, '2026-03-15 07:19:38'),
-('204', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 0, '2026-03-15 07:19:38'),
-('205', 'Executive Suite', NULL, 8500.00, '1 king bed', 'ocean view', 'Jacuzzi, Living Area, Free WiFi', 2, NULL, 1, '2026-03-15 07:19:38'),
-('301', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, '2026-03-17 12:34:03'),
-('302', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, '2026-03-17 12:34:03'),
-('401', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, '2026-03-17 12:34:03'),
-('402', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, '2026-03-17 12:34:03');
+INSERT INTO `rooms` (`id`, `name`, `description`, `price`, `beds`, `view`, `amenities`, `max_occupancy`, `image_url`, `is_available`, `needs_cleaning`, `created_at`) VALUES
+('101', 'Superior Double', NULL, 3500.00, '1 double bed', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 1, 0, '2026-03-17 12:34:03'),
+('102', 'Superior Double', NULL, 3500.00, '1 double bed', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 1, 0, '2026-03-17 12:34:03'),
+('201', 'Deluxe Twin', NULL, 4200.00, '2 single beds', 'city view', 'Free WiFi, TV, Aircon', 2, NULL, 1, 0, '2026-03-15 07:19:38'),
+('202', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-15 07:19:38'),
+('203', 'Superior Double', NULL, 3500.00, 'double bed', 'city view', 'Free WiFi, TV', 2, NULL, 1, 0, '2026-03-15 07:19:38'),
+('204', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, 0, '2026-03-15 07:19:38'),
+('205', 'Executive Suite', NULL, 8500.00, '1 king bed', 'ocean view', 'Jacuzzi, Living Area, Free WiFi', 2, NULL, 1, 0, '2026-03-15 07:19:38'),
+('301', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-17 12:34:03'),
+('302', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-17 12:34:03'),
+('401', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, 0, '2026-03-17 12:34:03'),
+('402', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, 0, '2026-03-17 12:34:03');
 
 -- --------------------------------------------------------
 
@@ -722,19 +787,14 @@ CREATE TABLE `room_maintenance` (
   `reported_at` datetime NOT NULL,
   `reported_by` int(10) UNSIGNED NOT NULL,
   `assigned_to` int(10) UNSIGNED DEFAULT NULL,
+  `assigned_hr_employee_id` varchar(50) DEFAULT NULL,
+  `employee_id` varchar(50) DEFAULT NULL,
   `cleaned_at` datetime DEFAULT NULL,
   `completed_at` datetime DEFAULT NULL,
   `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `room_maintenance`
---
-
-INSERT INTO `room_maintenance` (`id`, `room_id`, `condition_status`, `priority`, `reported_at`, `reported_by`, `assigned_to`, `cleaned_at`, `completed_at`, `notes`, `created_at`, `updated_at`) VALUES
-(1, '204', 'maintenance', 'medium', '2026-03-17 21:50:10', 7, NULL, NULL, NULL, 'hi (Scheduled: 2026-03-18)', '2026-03-17 13:50:10', '2026-03-17 13:50:10');
 
 -- --------------------------------------------------------
 
@@ -759,6 +819,75 @@ INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `created_at`, `upd
 (2, 'tier_silver', '500', '2026-03-16 17:36:20', '2026-03-16 17:36:20'),
 (3, 'tier_gold', '1000', '2026-03-16 17:36:20', '2026-03-16 17:36:20'),
 (4, 'tier_platinum', '2000', '2026-03-16 17:36:20', '2026-03-16 17:36:20');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_assignments`
+--
+
+CREATE TABLE `staff_assignments` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `employee_id` varchar(50) NOT NULL,
+  `assigned_tables` varchar(255) DEFAULT NULL,
+  `assigned_by` int(10) UNSIGNED DEFAULT NULL,
+  `assigned_date` datetime DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `staff_assignments`
+--
+
+INSERT INTO `staff_assignments` (`id`, `employee_id`, `assigned_tables`, `assigned_by`, `assigned_date`, `updated_at`) VALUES
+(3, 'EMP-083', 'Tables 24', 8, '2026-03-19 18:09:44', '2026-03-19 10:09:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_notes`
+--
+
+CREATE TABLE `staff_notes` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `employee_id` varchar(50) NOT NULL,
+  `note` text NOT NULL,
+  `created_by` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_performance`
+--
+
+CREATE TABLE `staff_performance` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `staff_id` int(10) UNSIGNED NOT NULL,
+  `rating` decimal(3,2) NOT NULL,
+  `feedback` text DEFAULT NULL,
+  `reviewer_id` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_status`
+--
+
+CREATE TABLE `staff_status` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `status` enum('on duty','break','off duty') NOT NULL DEFAULT 'off duty',
+  `shift` varchar(50) DEFAULT NULL,
+  `assigned_tables` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `date` date NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -814,7 +943,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `first_name`, `last_name`, `email`, `phone`, `alternative_phone`, `date_of_birth`, `gender`, `nationality`, `address`, `city`, `postal_code`, `country`, `preferred_language`, `loyalty_points`, `preferences`, `allergies`, `birthday`, `anniversary`, `role`, `status`, `email_verified`, `email_verification_token`, `email_verification_expires`, `phone_verified`, `notify_email`, `notify_sms`, `notify_promo`, `notify_loyalty`, `avatar`, `member_tier`, `join_date`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`, `last_login`) VALUES
 (4, 'Dolo dols', 'Dolo', 'dols', 'janzeldol1s@gmail.com', '+639565819961', '+639565819961', '2026-03-16', 'prefer not to say', 'ako ay', 'Sampaloc', 'caloocan city', 'NONE', 'Philippines', 'English', 285, '', '', '2026-03-18', '0000-00-00', 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 1, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$LSPIJZd7kcJxavwyEteiEehuiwbeIZKh1oM1DRXKF2zIuvh5Fsxma', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-17 03:09:18', NULL),
-(7, 'Janzel', NULL, NULL, 'janzeldols@gmail.com', '+639565819964', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 1320, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-17 02:41:59', '$2y$12$rAvNuAJvNvuKu.h.NhWoJutf4N9ZQ5z9mWFuHQazyx0gROkH9Wr2y', NULL, NULL, '2026-03-17 02:41:59', '2026-03-17 14:44:10', NULL);
+(7, 'Janzel', NULL, NULL, 'janzeldols@gmail.com', '+639565819964', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 1320, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-17 02:41:59', '$2y$12$rAvNuAJvNvuKu.h.NhWoJutf4N9ZQ5z9mWFuHQazyx0gROkH9Wr2y', NULL, NULL, '2026-03-17 02:41:59', '2026-03-17 14:44:10', NULL),
+(8, 'jzel dols', 'jzel', 'dols', 'janzeldol4@gmail.com', '+639565819969', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 410, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-18 01:01:04', '$2y$12$l53nMaAIcd2Nq0NLFfLqwOlm4KP.6cVMjuMw8QQUAZftZT9KnnWQy', NULL, NULL, '2026-03-18 01:01:04', '2026-03-19 10:07:53', NULL);
 
 -- --------------------------------------------------------
 
@@ -862,7 +992,7 @@ INSERT INTO `venues` (`id`, `name`, `capacity`, `location`, `description`, `amen
 (1, 'Grand Ballroom', 300, 'Ground Floor', 'Perfect for weddings and large conferences', 'Stage, Sound System, Projector, Catering Kitchen, Dance Floor', 'occupied', 15000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 15:05:35'),
 (2, 'Boardroom A', 30, '2nd Floor', 'Executive meeting room', 'Whiteboard, TV Screen, Conference Phone, Wi-Fi', 'available', 3000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 14:55:50'),
 (3, 'Boardroom B', 20, '2nd Floor', 'Small meeting room', 'Whiteboard, TV Screen, Wi-Fi', 'available', 2000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 14:55:50'),
-(4, 'Function Room C', 80, '3rd Floor', 'Ideal for birthday parties and social events', 'Stage, Sound System, Bar Area, Dance Floor', 'available', 8000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 14:55:50'),
+(4, 'Function Room C', 80, '3rd Floor', 'Ideal for birthday parties and social events', 'Stage, Sound System, Bar Area, Dance Floor', 'available', 8000.00, NULL, '2026-03-17 14:55:50', '2026-03-18 01:11:49'),
 (5, 'Garden Pavilion', 150, 'Outdoor Garden', 'Open-air venue for garden weddings', 'Garden Setting, Stage, Lighting, Backup Indoor Space', 'available', 12000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 14:55:50'),
 (6, 'Executive Lounge', 50, '12th Floor', 'Premium venue with city view', 'Bar, Lounge Seating, TV Screens, Private Balcony', 'available', 10000.00, NULL, '2026-03-17 14:55:50', '2026-03-17 14:55:50');
 
@@ -953,6 +1083,13 @@ ALTER TABLE `guest_interactions`
   ADD KEY `user_id` (`user_id`),
   ADD KEY `admin_id` (`admin_id`),
   ADD KEY `fk_guest_interactions_assigned_to` (`assigned_to`);
+
+--
+-- Indexes for table `hr_staff_cache`
+--
+ALTER TABLE `hr_staff_cache`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `employee_id` (`employee_id`);
 
 --
 -- Indexes for table `inventory`
@@ -1053,7 +1190,8 @@ ALTER TABLE `rewards`
 -- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_needs_cleaning` (`needs_cleaning`);
 
 --
 -- Indexes for table `room_maintenance`
@@ -1063,7 +1201,9 @@ ALTER TABLE `room_maintenance`
   ADD KEY `room_id` (`room_id`),
   ADD KEY `reported_by` (`reported_by`),
   ADD KEY `fk_room_maintenance_assigned_to` (`assigned_to`),
-  ADD KEY `idx_status` (`cleaned_at`,`assigned_to`);
+  ADD KEY `idx_status` (`cleaned_at`,`assigned_to`),
+  ADD KEY `idx_employee_id` (`employee_id`),
+  ADD KEY `idx_hr_employee_id` (`assigned_hr_employee_id`);
 
 --
 -- Indexes for table `settings`
@@ -1071,6 +1211,36 @@ ALTER TABLE `room_maintenance`
 ALTER TABLE `settings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `setting_key` (`setting_key`);
+
+--
+-- Indexes for table `staff_assignments`
+--
+ALTER TABLE `staff_assignments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_employee` (`employee_id`);
+
+--
+-- Indexes for table `staff_notes`
+--
+ALTER TABLE `staff_notes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `employee_id` (`employee_id`);
+
+--
+-- Indexes for table `staff_performance`
+--
+ALTER TABLE `staff_performance`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `staff_id` (`staff_id`),
+  ADD KEY `reviewer_id` (`reviewer_id`);
+
+--
+-- Indexes for table `staff_status`
+--
+ALTER TABLE `staff_status`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_date` (`user_id`,`date`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `users`
@@ -1103,31 +1273,37 @@ ALTER TABLE `waiting_list`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `current_balance`
 --
 ALTER TABLE `current_balance`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `food_orders`
 --
 ALTER TABLE `food_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `guest_interactions`
 --
 ALTER TABLE `guest_interactions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `hr_staff_cache`
+--
+ALTER TABLE `hr_staff_cache`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `inventory`
@@ -1145,25 +1321,25 @@ ALTER TABLE `menu_items`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=164;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=269;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
 --
 ALTER TABLE `payment_methods`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `redemptions`
 --
 ALTER TABLE `redemptions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `response_templates`
@@ -1175,7 +1351,7 @@ ALTER TABLE `response_templates`
 -- AUTO_INCREMENT for table `restaurant_reservations`
 --
 ALTER TABLE `restaurant_reservations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `restaurant_tables`
@@ -1205,7 +1381,7 @@ ALTER TABLE `rewards`
 -- AUTO_INCREMENT for table `room_maintenance`
 --
 ALTER TABLE `room_maintenance`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -1214,10 +1390,34 @@ ALTER TABLE `settings`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `staff_assignments`
+--
+ALTER TABLE `staff_assignments`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `staff_notes`
+--
+ALTER TABLE `staff_notes`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `staff_performance`
+--
+ALTER TABLE `staff_performance`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `staff_status`
+--
+ALTER TABLE `staff_status`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `venues`
@@ -1229,7 +1429,7 @@ ALTER TABLE `venues`
 -- AUTO_INCREMENT for table `waiting_list`
 --
 ALTER TABLE `waiting_list`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
@@ -1309,6 +1509,19 @@ ALTER TABLE `review_responses`
 --
 ALTER TABLE `room_maintenance`
   ADD CONSTRAINT `fk_room_maintenance_assigned_to` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `staff_performance`
+--
+ALTER TABLE `staff_performance`
+  ADD CONSTRAINT `staff_performance_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `staff_performance_ibfk_2` FOREIGN KEY (`reviewer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `staff_status`
+--
+ALTER TABLE `staff_status`
+  ADD CONSTRAINT `staff_status_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
