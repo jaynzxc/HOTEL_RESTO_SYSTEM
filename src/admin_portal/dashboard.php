@@ -118,19 +118,19 @@ require_once '../../controller/admin/get/dashboard.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../admin_portal/hotel_management/front_desk_reception.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-reception w-4 text-slate-400"></i> Front Desk / Reception</a>
+                  class="fas fa-reception w-4 text-slate-400"></i> Front Desk / Reception</a>
               <a href="../admin_portal/hotel_management/room_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-bed w-4 text-slate-400"></i> Room Management</a>
               <a href="../admin_portal/hotel_management/arrival/reservation_&_booking.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
+                  class="fas fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
               <a href="../admin_portal/hotel_management/housekeeping_&_maintenance.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-broom w-4 text-slate-400"></i> Housekeeping & Maintenance</a>
               <a href="../admin_portal/hotel_management/event_&_conference.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
+                  class="fas fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
             </div>
           </details>
 
@@ -145,7 +145,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../admin_portal/restaurant_management/table_reservation.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-clock w-4"></i> Table Reservation</a>
+                  class="fas fa-clock w-4"></i> Table Reservation</a>
               <a href="../admin_portal/restaurant_management/menu_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-bars w-4"></i> Menu Management</a>
@@ -157,7 +157,7 @@ require_once '../../controller/admin/get/dashboard.php';
                   class="fa-solid fa-fire w-4"></i> Kitchen Orders (KOT)</a>
               <a href="../admin_portal/restaurant_management/wait_staff_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-user w-4"></i> Wait Staff Management</a>
+                  class="fas fa-user w-4"></i> Wait Staff Management</a>
             </div>
           </details>
 
@@ -165,20 +165,20 @@ require_once '../../controller/admin/get/dashboard.php';
           <details class="group" open>
             <summary
               class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
-              <i class="fa-regular fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
+              <i class="fas fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
               <span class="font-medium">CUSTOMER MANAGEMENT</span>
               <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
             </summary>
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../admin_portal/customer_management/customer_relationship.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-handshake w-4"></i> Guest Relationship (CRM)</a>
+                  class="fas fa-handshake w-4"></i> Guest Relationship (CRM)</a>
               <a href="../admin_portal/customer_management/loyalty_rewards.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-star w-4"></i> Loyalty & Rewards</a>
+                  class="fas fa-star w-4"></i> Loyalty & Rewards</a>
               <a href="../admin_portal/customer_management/customer_feedback_&_reviews.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
+                  class="fas fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
             </div>
           </details>
 
@@ -196,7 +196,7 @@ require_once '../../controller/admin/get/dashboard.php';
                   class="fa-solid fa-boxes w-4"></i> Inventory & Stock</a>
               <a href="../admin_portal/operations/billing_&_payment.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-credit-card w-4"></i> Billing & Payments</a>
+                  class="fas fa-credit-card w-4"></i> Billing & Payments</a>
               <a href="../admin_portal/operations/payment_gateway.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-wifi w-4"></i> Payment Gateway</a>
@@ -214,7 +214,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../admin_portal/marketing/hotelmarketing_&_promotions.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-gem w-4"></i> Hotel Marketing & Promotions</a>
+                  class="fas fa-gem w-4"></i> Hotel Marketing & Promotions</a>
               <a href="../admin_portal/marketing/online_ordering_integration.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-cart-shopping w-4"></i> Online Ordering Integration</a>
@@ -235,7 +235,7 @@ require_once '../../controller/admin/get/dashboard.php';
                   class="fa-solid fa-chart-line w-4"></i> Sales Reports</a>
               <a href="../admin_portal/reports_&_analytics/booking_reports.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar w-4"></i> Booking Reports</a>
+                  class="fas fa-calendar w-4"></i> Booking Reports</a>
               <a href="../admin_portal/reports_&_analytics/analytics_dashboard.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-chart-pie w-4"></i> Analytics Dashboard</a>
@@ -282,11 +282,11 @@ require_once '../../controller/admin/get/dashboard.php';
           <h1 class="text-2xl font-semibold text-slate-800">Dashboard overview</h1>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2">
-              <i class="fa-regular fa-calendar text-slate-400"></i>
+              <i class="fas fa-calendar text-slate-400"></i>
               <?php echo date('F j, Y'); ?>
             </span>
             <span class="bg-white border rounded-full px-4 py-2">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
             </span>
           </div>
         </div>
@@ -311,7 +311,7 @@ require_once '../../controller/admin/get/dashboard.php';
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-3 shadow-sm">
             <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700"><i
-                class="fa-regular fa-calendar-check"></i></div>
+                class="fas fa-calendar-check"></i></div>
             <div>
               <p class="text-xs text-slate-500">Today's bookings</p>
               <p class="text-xl font-semibold"><?php echo $todayBookings; ?></p>
@@ -343,7 +343,7 @@ require_once '../../controller/admin/get/dashboard.php';
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-3 shadow-sm lg:col-span-2">
             <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700"><i
-                class="fa-regular fa-clock"></i></div>
+                class="fas fa-clock"></i></div>
             <div>
               <p class="text-xs text-slate-500">check-ins today / pending</p>
               <p class="text-xl font-semibold"><?php echo $todayCheckins; ?> / <?php echo $pendingCheckins; ?></p>
@@ -359,7 +359,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <!-- upcoming check-ins -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-2 text-slate-700"><i
-                  class="fa-regular fa-calendar-check text-amber-600"></i> Upcoming check-ins</h3>
+                  class="fas fa-calendar-check text-amber-600"></i> Upcoming check-ins</h3>
               <ul class="mt-3 space-y-2 text-sm">
                 <?php if (empty($upcomingCheckins)): ?>
                   <li class="text-slate-400 text-center py-2">No upcoming check-ins</li>
@@ -381,7 +381,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <!-- upcoming check-outs -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-2 text-slate-700"><i
-                  class="fa-regular fa-calendar-xmark text-amber-600"></i> Upcoming check-outs</h3>
+                  class="fas fa-calendar-xmark text-amber-600"></i> Upcoming check-outs</h3>
               <ul class="mt-3 space-y-2 text-sm">
                 <?php if (empty($upcomingCheckouts)): ?>
                   <li class="text-slate-400 text-center py-2">No upcoming check-outs</li>
@@ -403,7 +403,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <!-- table reservations -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-2 text-slate-700"><i
-                  class="fa-regular fa-clock text-amber-600"></i> Table reservations</h3>
+                  class="fas fa-clock text-amber-600"></i> Table reservations</h3>
               <ul class="mt-3 space-y-2 text-sm">
                 <?php if (empty($tableReservations)): ?>
                   <li class="text-slate-400 text-center py-2">No table reservations today</li>
@@ -421,7 +421,7 @@ require_once '../../controller/admin/get/dashboard.php';
             <!-- events -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-2 text-slate-700"><i
-                  class="fa-regular fa-calendar-plus text-amber-600"></i> Events today</h3>
+                  class="fas fa-calendar-plus text-amber-600"></i> Events today</h3>
               <ul class="mt-3 space-y-2 text-sm">
                 <?php if (empty($todayEvents)): ?>
                   <li class="text-slate-400 text-center py-2">No events scheduled today</li>
@@ -533,7 +533,7 @@ require_once '../../controller/admin/get/dashboard.php';
           <!-- recent bookings table -->
           <div class="bg-white p-5 rounded-2xl border border-slate-200">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="font-semibold"><i class="fa-regular fa-rectangle-list text-amber-600 mr-1"></i> Recent bookings
+              <h3 class="font-semibold"><i class="fas fa-rectangle-list text-amber-600 mr-1"></i> Recent bookings
               </h3>
               <a href="../admin_portal/hotel_management/arrival/reservation_&_booking.php"
                 class="text-xs text-amber-700 hover:underline">view all</a>

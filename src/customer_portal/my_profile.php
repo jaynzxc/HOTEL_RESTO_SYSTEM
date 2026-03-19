@@ -45,7 +45,7 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <i class="fas fa-calendar text-slate-400"></i>
             <span id="currentDateTime"></span>
           </div>
         </div>
@@ -54,7 +54,7 @@
         <?php if (!empty($_SESSION['success'])): ?>
           <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
             <?php foreach ($_SESSION['success'] as $message): ?>
-              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              <p class="text-sm"><i class="fas fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
               </p>
             <?php endforeach; ?>
           </div>
@@ -106,7 +106,7 @@
               </p>
               <div class="flex justify-center gap-2 mt-3">
                 <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                  <i class="fa-regular fa-gem"></i> <span
+                  <i class="fas fa-gem"></i> <span
                     class="user-membership"><?php echo $user['member_tier']; ?></span> tier
                 </span>
                 <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full">
@@ -116,16 +116,16 @@
               <div class="border-t border-slate-100 mt-5 pt-4 text-left">
                 <p class="text-xs text-slate-400 flex items-center gap-2">
                   <i
-                    class="fa-regular fa-circle-check <?php echo ($user['email_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
+                    class="fas fa-circle-check <?php echo ($user['email_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
                   email <?php echo ($user['email_verified'] ?? 0) ? 'verified' : 'unverified'; ?>
                 </p>
                 <p class="text-xs text-slate-400 flex items-center gap-2 mt-2">
                   <i
-                    class="fa-regular fa-circle-check <?php echo ($user['phone_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
+                    class="fas fa-circle-check <?php echo ($user['phone_verified'] ?? 0) ? 'text-green-600' : 'text-slate-300'; ?> w-4"></i>
                   phone <?php echo ($user['phone_verified'] ?? 0) ? 'verified' : 'unverified'; ?>
                 </p>
                 <p class="text-xs text-slate-400 flex items-center gap-2 mt-2">
-                  <i class="fa-regular fa-id-card w-4"></i>
+                  <i class="fas fa-id-card w-4"></i>
                   <?php echo ucfirst($user['role'] ?? 'customer'); ?> account
                 </p>
               </div>
@@ -134,7 +134,7 @@
             <!-- Loyalty Progress -->
             <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl border border-amber-200 p-5">
               <div class="flex items-center gap-3">
-                <i class="fa-regular fa-star text-2xl text-amber-600"></i>
+                <i class="fas fa-star text-2xl text-amber-600"></i>
                 <div class="flex-1">
                   <p class="font-medium text-sm">loyalty progress</p>
                   <?php if ($next_tier_name !== 'platinum (max)'): ?>
@@ -156,7 +156,7 @@
             <!-- Account Actions -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <h3 class="font-semibold text-sm flex items-center gap-2"><i
-                  class="fa-regular fa-trash-can text-rose-400"></i> account actions</h3>
+                  class="fas fa-trash-can text-rose-400"></i> account actions</h3>
               <button onclick="deactivateAccount()"
                 class="w-full text-left text-sm text-rose-600 hover:bg-rose-50 p-2 rounded-lg mt-2 transition">deactivate
                 account</button>
@@ -174,7 +174,7 @@
               <input type="hidden" name="action" value="update_profile">
 
               <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
-                <i class="fa-regular fa-user text-amber-600"></i> personal information
+                <i class="fas fa-user text-amber-600"></i> personal information
               </h2>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -223,7 +223,7 @@
               <!-- Contact Details -->
               <div class="bg-white rounded-2xl border border-slate-200 p-6 mt-6">
                 <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
-                  <i class="fa-regular fa-address-book text-amber-600"></i> contact details
+                  <i class="fas fa-address-book text-amber-600"></i> contact details
                 </h2>
 
                 <div class="space-y-4 mt-5">
@@ -272,7 +272,7 @@
               <!-- Address & Preferences -->
               <div class="bg-white rounded-2xl border border-slate-200 p-6">
                 <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
-                  <i class="fa-regular fa-map text-amber-600"></i> address & preferences
+                  <i class="fas fa-map text-amber-600"></i> address & preferences
                 </h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -319,7 +319,7 @@
               <!-- Notification Preferences -->
               <div class="bg-white rounded-2xl border border-slate-200 p-6">
                 <h2 class="font-semibold text-lg flex items-center gap-2 border-b pb-3">
-                  <i class="fa-regular fa-bell text-amber-600"></i> notification preferences
+                  <i class="fas fa-bell text-amber-600"></i> notification preferences
                 </h2>
                 <div class="space-y-3 mt-4">
                   <label class="flex items-center gap-3 text-sm cursor-pointer">
@@ -452,7 +452,7 @@
 
           toast.className = `toast ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3`;
           toast.innerHTML = `
-                    <i class="fa-regular ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
+                    <i class="fas ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
                     <span class="text-sm font-medium">${message}</span>
                 `;
 

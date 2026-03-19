@@ -63,7 +63,7 @@ $current_page = 'room_management';
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -89,14 +89,14 @@ $current_page = 'room_management';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i>
+              <i class="fas fa-calendar text-slate-400"></i>
               <span id="currentDate">
                 <?php echo $today; ?>
               </span>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
               id="notificationBell">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
@@ -108,7 +108,7 @@ $current_page = 'room_management';
         </div>
 
         <!-- ROOM STATISTICS CARDS -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Total rooms</p>
             <p class="text-2xl font-semibold" id="totalRooms">
@@ -122,19 +122,27 @@ $current_page = 'room_management';
             </p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500">Reserved</p>
+            <p class="text-2xl font-semibold text-purple-600" id="reservedRooms">
+              <?php echo $stats['reserved'] ?? 0; ?>
+            </p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Occupied</p>
             <p class="text-2xl font-semibold text-blue-600" id="occupiedRooms">
               <?php echo $stats['occupied']; ?>
             </p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500">Dirty / cleaning</p>
-            <p class="text-2xl font-semibold text-amber-600" id="dirtyRooms">0</p>
+            <p class="text-xs text-slate-500">Needs cleaning</p>
+            <p class="text-2xl font-semibold text-amber-600" id="dirtyRooms">
+              <?php echo $stats['dirty']; ?>
+            </p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p class="text-xs text-slate-500">Out of order</p>
+            <p class="text-xs text-slate-500">Maintenance</p>
             <p class="text-2xl font-semibold text-rose-600" id="outOfOrderRooms">
-              <?php echo count($maintenanceItems); ?>
+              <?php echo $stats['maintenance']; ?>
             </p>
           </div>
         </div>
@@ -150,14 +158,17 @@ $current_page = 'room_management';
               class="filter-btn <?php echo $statusFilter == 'available' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
               data-filter="available">available</button>
             <button
+              class="filter-btn <?php echo $statusFilter == 'reserved' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
+              data-filter="reserved">reserved</button>
+            <button
               class="filter-btn <?php echo $statusFilter == 'occupied' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
               data-filter="occupied">occupied</button>
             <button
               class="filter-btn <?php echo $statusFilter == 'dirty' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
               data-filter="dirty">dirty</button>
             <button
-              class="filter-btn <?php echo $statusFilter == 'out of order' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
-              data-filter="out of order">maintenance</button>
+              class="filter-btn <?php echo $statusFilter == 'maintenance' ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?> px-4 py-2 rounded-xl text-sm"
+              data-filter="maintenance">maintenance</button>
           </div>
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -166,7 +177,6 @@ $current_page = 'room_management';
               class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
           </div>
         </div>
-
         <!-- ROOMS TABLE -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="overflow-x-auto">
@@ -196,40 +206,60 @@ $current_page = 'room_management';
                     </td>
                     <td class="p-4">
                       <span class="status-badge px-2 py-1 rounded-full text-xs font-medium
-                    <?php
-                    switch ($room['status']) {
-                      case 'available':
-                        echo 'bg-green-100 text-green-700';
-                        break;
-                      case 'occupied':
-                        echo 'bg-blue-100 text-blue-700';
-                        break;
-                      default:
-                        echo 'bg-slate-100 text-slate-700';
-                    }
-                    ?>">
+    <?php
+    switch ($room['status']) {
+      case 'available':
+        echo 'bg-green-100 text-green-700';
+        break;
+      case 'reserved':
+        echo 'bg-purple-100 text-purple-700';
+        break;
+      case 'occupied':
+        echo 'bg-blue-100 text-blue-700';
+        break;
+      case 'dirty':
+        echo 'bg-amber-100 text-amber-700';
+        break;
+      case 'maintenance':
+        echo 'bg-rose-100 text-rose-700';
+        break;
+      default:
+        echo 'bg-slate-100 text-slate-700';
+    }
+    ?>">
                         <?php echo $room['status']; ?>
+                        <?php if ($room['status'] === 'maintenance' && isset($room['maintenance_priority'])): ?>
+                          <span class="ml-1 text-xs opacity-75">
+                            (<?php echo $room['maintenance_priority'] === 'damage' ? 'urgent' : 'scheduled'; ?>)
+                          </span>
+                        <?php endif; ?>
                       </span>
                     </td>
                     <td class="p-4">
                       <span class="px-2 py-1 rounded-full text-xs font-medium
-                    <?php
-                    switch ($room['housekeeping']) {
-                      case 'clean':
-                        echo 'bg-green-100 text-green-700';
-                        break;
-                      case 'pending':
-                        echo 'bg-amber-100 text-amber-700';
-                        break;
-                      case 'maintenance':
-                        echo 'bg-rose-100 text-rose-700';
-                        break;
-                      default:
-                        echo 'bg-slate-100 text-slate-700';
-                    }
-                    ?>">
+    <?php
+    switch ($room['housekeeping']) {
+      case 'clean':
+        echo 'bg-green-100 text-green-700';
+        break;
+      case 'dirty':
+        echo 'bg-amber-100 text-amber-700';
+        break;
+      case 'maintenance':
+        echo 'bg-rose-100 text-rose-700';
+        break;
+      default:
+        echo 'bg-slate-100 text-slate-700';
+    }
+    ?>">
                         <?php echo $room['housekeeping']; ?>
                       </span>
+                      <?php if ($room['housekeeping'] === 'dirty'): ?>
+                        <button onclick="markAsClean('<?php echo $room['room_number']; ?>')"
+                          class="ml-2 text-xs text-green-600 hover:underline" title="Mark as clean">
+                          <i class="fas fa-circle-check"></i>
+                        </button>
+                      <?php endif; ?>
                     </td>
                     <td class="p-4 <?php echo $room['guest'] ? '' : 'text-slate-400'; ?>">
                       <?php echo $room['guest'] ? htmlspecialchars($room['guest']) : '—'; ?>
@@ -238,19 +268,37 @@ $current_page = 'room_management';
                       <div class="flex gap-2">
                         <button onclick="editRoom('<?php echo $room['room_number']; ?>')"
                           class="text-amber-700 hover:underline text-xs" title="Edit">
-                          <i class="fa-regular fa-pen-to-square"></i>
+                          <i class="fas fa-pen-to-square"></i>
                         </button>
                         <button onclick="showRoomDetails('<?php echo $room['room_number']; ?>')"
                           class="text-blue-600 hover:underline text-xs" title="Details">
-                          <i class="fa-regular fa-eye"></i>
+                          <i class="fas fa-eye"></i>
                         </button>
+
                         <?php if ($room['status'] === 'available'): ?>
                           <button onclick="assignRoom('<?php echo $room['room_number']; ?>')"
                             class="text-green-600 hover:underline text-xs" title="Assign Guest">
-                            <i class="fa-regular fa-user-plus"></i>
+                            <i class="fas fa-user-plus"></i>
                           </button>
                         <?php endif; ?>
-                        <?php if ($room['status'] !== 'out of order'): ?>
+
+                        <?php if ($room['status'] === 'reserved'): ?>
+                          <button
+                            onclick="checkInGuest('<?php echo $room['room_number']; ?>', '<?php echo $room['booking_reference']; ?>')"
+                            class="text-purple-600 hover:underline text-xs" title="Check in guest">
+                            <i class="fas fa-calendar-check"></i>
+                          </button>
+                        <?php endif; ?>
+
+                        <?php if ($room['status'] === 'occupied'): ?>
+                          <button
+                            onclick="checkoutGuest('<?php echo $room['room_number']; ?>', '<?php echo $room['booking_reference']; ?>')"
+                            class="text-blue-600 hover:underline text-xs" title="Check out guest">
+                            <i class="fas fa-door-open"></i>
+                          </button>
+                        <?php endif; ?>
+
+                        <?php if ($room['status'] !== 'maintenance'): ?>
                           <button onclick="reportMaintenance('<?php echo $room['room_number']; ?>')"
                             class="text-rose-600 hover:underline text-xs" title="Report Maintenance">
                             <i class="fa-solid fa-wrench"></i>
@@ -335,7 +383,7 @@ $current_page = 'room_management';
           <!-- quick actions -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3">
-              <i class="fa-regular fa-bolt text-amber-600"></i> quick actions
+              <i class="fas fa-bolt text-amber-600"></i> quick actions
             </h3>
             <div class="grid grid-cols-2 gap-2">
               <button class="bg-white border border-slate-200 rounded-xl p-3 text-sm hover:bg-amber-100"
@@ -663,10 +711,10 @@ $current_page = 'room_management';
         // Set icon based on type
         const icon = toast.querySelector('.h-8.w-8 i');
         if (icon) {
-          icon.className = type === 'success' ? 'fa-regular fa-circle-check' :
-            type === 'error' ? 'fa-regular fa-circle-exclamation' :
-              type === 'warning' ? 'fa-regular fa-triangle-exclamation' :
-                'fa-regular fa-bell';
+          icon.className = type === 'success' ? 'fas fa-circle-check' :
+            type === 'error' ? 'fas fa-circle-exclamation' :
+              type === 'warning' ? 'fas fa-triangle-exclamation' :
+                'fas fa-bell';
         }
 
         toastMessage.textContent = message;
@@ -788,7 +836,7 @@ $current_page = 'room_management';
                     <p class="text-xs text-amber-700 font-medium mb-2">Current Guest</p>
                     <p class="font-medium">${r.current_guest}</p>
                     <p class="text-xs text-slate-600 mt-1">
-                      <i class="fa-regular fa-calendar mr-1"></i>
+                      <i class="fas fa-calendar mr-1"></i>
                       Check-in: ${r.check_in} | Check-out: ${r.check_out}
                     </p>
                     <p class="text-xs text-slate-500 mt-1">Booking: ${r.booking_reference || 'N/A'}</p>
@@ -1047,6 +1095,109 @@ $current_page = 'room_management';
         closeAssignModal();
       }
 
+      // Check out guest
+      function checkoutGuest(roomNumber, bookingReference) {
+        Swal.fire({
+          title: 'Check Out Guest',
+          text: `Mark guest as checked out from room ${roomNumber}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#d97706',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Yes, check out'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const formData = new FormData();
+            formData.append('action', 'checkout_guest');
+            formData.append('room_id', roomNumber);
+            formData.append('booking_id', bookingReference);
+
+            fetch('../../../controller/admin/post/room_actions.php', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#d97706'
+                  }).then(() => {
+                    location.reload();
+                  });
+                } else {
+                  Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#d97706'
+                  });
+                }
+              });
+          }
+        });
+      }
+
+      // Mark room as clean
+      function markAsClean(roomNumber) {
+        Swal.fire({
+          title: 'Mark as Clean',
+          text: `Mark room ${roomNumber} as clean and ready for guests?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#d97706',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Yes, mark clean'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const formData = new FormData();
+            formData.append('action', 'mark_as_clean');
+            formData.append('room_id', roomNumber);
+
+            fetch('../../../controller/admin/post/room_actions.php', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#d97706'
+                  }).then(() => {
+                    location.reload();
+                  });
+                } else {
+                  Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#d97706'
+                  });
+                }
+              });
+          }
+        });
+      }
+
       // Maintenance
       function reportMaintenance(roomNumber) {
         document.getElementById('maintenanceRoomNumber').value = roomNumber;
@@ -1063,6 +1214,58 @@ $current_page = 'room_management';
         document.getElementById('maintenanceModal').classList.add('hidden');
         document.getElementById('maintenanceModal').classList.remove('flex');
         document.getElementById('maintenanceIssue').value = '';
+      }
+
+      // Check in guest
+      function checkInGuest(roomNumber, bookingReference) {
+        Swal.fire({
+          title: 'Check In Guest',
+          text: `Mark guest as checked in to room ${roomNumber}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#d97706',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Yes, check in'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const formData = new FormData();
+            formData.append('action', 'checkin_guest');
+            formData.append('room_id', roomNumber);
+            formData.append('booking_id', bookingReference);
+
+            fetch('../../../controller/admin/post/room_actions.php', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#d97706'
+                  }).then(() => {
+                    location.reload();
+                  });
+                } else {
+                  Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#d97706'
+                  });
+                }
+              });
+          }
+        });
       }
 
       function submitMaintenance() {
@@ -1334,7 +1537,7 @@ $current_page = 'room_management';
                       <div class="flex justify-between items-center mt-3">
                         <span class="text-xs text-slate-500">Reported by: ${item.reported_by_name || 'Unknown'}</span>
                         <button onclick="completeMaintenance(${item.id})" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">
-                          <i class="fa-regular fa-circle-check mr-1"></i>Mark Complete
+                          <i class="fas fa-circle-check mr-1"></i>Mark Complete
                         </button>
                       </div>
                     </div>

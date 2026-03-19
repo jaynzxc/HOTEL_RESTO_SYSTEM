@@ -81,7 +81,7 @@ $current_page = 'arrivals_today';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-clock text-slate-400"></i>
+              <i class="fas fa-clock text-slate-400"></i>
               <span id="currentTime"></span>
             </span>
             <button class="bg-white border rounded-full px-4 py-2 shadow-sm hover:bg-slate-50 transition"
@@ -193,7 +193,7 @@ $current_page = 'arrivals_today';
                         <?php endif; ?>
                       </div>
                       <div class="flex justify-between items-center">
-                        <span class="text-xs"><i class="fa-regular fa-clock mr-1"></i>
+                        <span class="text-xs"><i class="fas fa-clock mr-1"></i>
                           <?php echo $arrival['displayTime'] ?? '2:00 PM'; ?>
                         </span>
                         <span class="<?php
@@ -206,7 +206,7 @@ $current_page = 'arrivals_today';
                       </div>
                       <?php if ($arrival['specialRequests']): ?>
                         <div class="text-xs text-slate-400 mt-2">
-                          <i class="fa-regular fa-note-sticky mr-1"></i>
+                          <i class="fas fa-note-sticky mr-1"></i>
                           <?php echo htmlspecialchars(substr($arrival['specialRequests'], 0, 30)) . (strlen($arrival['specialRequests']) > 30 ? '...' : ''); ?>
                         </div>
                       <?php endif; ?>
@@ -224,7 +224,7 @@ $current_page = 'arrivals_today';
                         <?php endif; ?>
                         <button onclick="contactGuest(<?php echo $arrival['id']; ?>)"
                           class="border border-slate-200 text-xs py-1.5 rounded-lg hover:bg-slate-50 transition px-2">
-                          <i class="fa-regular fa-message"></i>
+                          <i class="fas fa-message"></i>
                         </button>
                       </div>
                     </div>

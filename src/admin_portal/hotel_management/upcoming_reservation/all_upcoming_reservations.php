@@ -72,7 +72,7 @@ $current_page = 'all_upcoming_reservations';
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -95,17 +95,17 @@ $current_page = 'all_upcoming_reservations';
           <div>
             <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
               <a href="../front_desk_reception.php" class="hover:text-amber-600 transition">
-                <i class="fa-regular fa-arrow-left"></i> Back to Front Desk
+                <i class="fas fa-arrow-left"></i> Back to Front Desk
               </a>
             </div>
             <h1 class="text-2xl lg:text-3xl font-light text-slate-800 flex items-center gap-2">
-              <i class="fa-regular fa-rectangle-list text-amber-600"></i> All Upcoming Reservations
+              <i class="fas fa-rectangle-list text-amber-600"></i> All Upcoming Reservations
             </h1>
             <p class="text-sm text-slate-500 mt-0.5">complete list of all future reservations</p>
           </div>
           <div class="flex gap-2">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm text-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate"></span>
+              <i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span>
             </span>
           </div>
         </div>
@@ -117,7 +117,7 @@ $current_page = 'all_upcoming_reservations';
             onclick="filterByStatus('all')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                <i class="fa-regular fa-calendar"></i>
+                <i class="fas fa-calendar"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Total Reservations</p>
@@ -130,7 +130,7 @@ $current_page = 'all_upcoming_reservations';
             onclick="filterByStatus('confirmed')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-700">
-                <i class="fa-regular fa-circle-check"></i>
+                <i class="fas fa-circle-check"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Confirmed</p>
@@ -143,7 +143,7 @@ $current_page = 'all_upcoming_reservations';
             onclick="filterByStatus('pending')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700">
-                <i class="fa-regular fa-clock"></i>
+                <i class="fas fa-clock"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Pending</p>
@@ -156,7 +156,7 @@ $current_page = 'all_upcoming_reservations';
             onclick="filterByStatus('cancelled')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-700">
-                <i class="fa-regular fa-ban"></i>
+                <i class="fas fa-ban"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Cancelled</p>
@@ -185,7 +185,7 @@ $current_page = 'all_upcoming_reservations';
         <div class="flex flex-wrap gap-3 mb-6">
           <div class="flex-1 min-w-50">
             <div class="relative">
-              <i class="fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
               <input type="text" id="searchInput" placeholder="Search by guest name or room..."
                 class="w-full border border-slate-200 rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
             </div>
@@ -200,7 +200,7 @@ $current_page = 'all_upcoming_reservations';
           </select>
           <button onclick="exportReservations()"
             class="border border-amber-600 text-amber-700 px-4 py-2 rounded-xl hover:bg-amber-50 transition flex items-center gap-2">
-            <i class="fa-regular fa-file-excel"></i> Export
+            <i class="fas fa-file-excel"></i> Export
           </button>
         </div>
 
@@ -234,14 +234,14 @@ $current_page = 'all_upcoming_reservations';
               <button
                 class="pagination-btn px-3 py-1 border rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 id="prevPage" onclick="changePage('prev')">
-                <i class="fa-regular fa-chevron-left"></i> Prev
+                <i class="fas fa-chevron-left"></i> Prev
               </button>
               <span class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-sm"
                 id="currentPage">1</span>
               <button
                 class="pagination-btn px-3 py-1 border rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 id="nextPage" onclick="changePage('next')">
-                Next <i class="fa-regular fa-chevron-right"></i>
+                Next <i class="fas fa-chevron-right"></i>
               </button>
             </div>
           </div>
@@ -331,9 +331,9 @@ $current_page = 'all_upcoming_reservations';
         // Set icon based on type
         const icon = toast.querySelector('.h-8.w-8 i');
         if (icon) {
-          icon.className = type === 'success' ? 'fa-regular fa-circle-check' :
-            type === 'error' ? 'fa-regular fa-circle-exclamation' :
-              'fa-regular fa-bell';
+          icon.className = type === 'success' ? 'fas fa-circle-check' :
+            type === 'error' ? 'fas fa-circle-exclamation' :
+              'fas fa-bell';
         }
 
         toastMessage.textContent = message;
@@ -460,10 +460,10 @@ $current_page = 'all_upcoming_reservations';
             actionButtons = `
                     <div class="flex gap-2">
                         <button onclick="confirmReservation(${reservation.id})" class="text-xs text-green-600 border border-green-600 px-2 py-1 rounded hover:bg-green-50 transition">
-                            <i class="fa-regular fa-circle-check mr-1"></i>confirm
+                            <i class="fas fa-circle-check mr-1"></i>confirm
                         </button>
                         <button onclick="viewReservationDetails(${reservation.id})" class="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition">
-                            <i class="fa-regular fa-eye mr-1"></i>view
+                            <i class="fas fa-eye mr-1"></i>view
                         </button>
                     </div>
                 `;
@@ -471,10 +471,10 @@ $current_page = 'all_upcoming_reservations';
             actionButtons = `
                     <div class="flex gap-2">
                         <button onclick="viewReservationDetails(${reservation.id})" class="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition">
-                            <i class="fa-regular fa-eye mr-1"></i>view
+                            <i class="fas fa-eye mr-1"></i>view
                         </button>
                         <button onclick="cancelReservation(${reservation.id})" class="text-xs text-red-600 border border-red-600 px-2 py-1 rounded hover:bg-red-50 transition">
-                            <i class="fa-regular fa-ban mr-1"></i>cancel
+                            <i class="fas fa-ban mr-1"></i>cancel
                         </button>
                     </div>
                 `;
@@ -482,7 +482,7 @@ $current_page = 'all_upcoming_reservations';
             actionButtons = `
                     <div class="flex gap-2">
                         <button onclick="viewReservationDetails(${reservation.id})" class="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition">
-                            <i class="fa-regular fa-eye mr-1"></i>view
+                            <i class="fas fa-eye mr-1"></i>view
                         </button>
                     </div>
                 `;
@@ -626,7 +626,7 @@ $current_page = 'all_upcoming_reservations';
                     <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4">
                         <div class="flex">
                             <div class="flex-shrink-0">
-                                <i class="fa-regular fa-circle-exclamation text-red-600 text-xl"></i>
+                                <i class="fas fa-circle-exclamation text-red-600 text-xl"></i>
                             </div>
                             <div class="ml-3">
                                 <p class="text-red-700 font-medium">This guest has an unpaid balance</p>
@@ -670,9 +670,9 @@ $current_page = 'all_upcoming_reservations';
           confirmButtonColor: '#d97706',
           cancelButtonColor: '#dc2626',
           denyButtonColor: '#6b7280',
-          confirmButtonText: '<i class="fa-regular fa-check mr-1"></i> Confirm Anyway',
-          cancelButtonText: '<i class="fa-regular fa-ban mr-1"></i> Cancel Reservation',
-          denyButtonText: '<i class="fa-regular fa-arrow-left mr-1"></i> Go Back',
+          confirmButtonText: '<i class="fas fa-check mr-1"></i> Confirm Anyway',
+          cancelButtonText: '<i class="fas fa-ban mr-1"></i> Cancel Reservation',
+          denyButtonText: '<i class="fas fa-arrow-left mr-1"></i> Go Back',
           reverseButtons: true
         }).then((result) => {
           if (result.isConfirmed) {
@@ -695,7 +695,7 @@ $current_page = 'all_upcoming_reservations';
                     <p class="mb-3">Are you sure you want to cancel this reservation due to outstanding balance?</p>
                     <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
                         <p class="text-sm text-red-700">
-                            <i class="fa-regular fa-circle-exclamation mr-1"></i>
+                            <i class="fas fa-circle-exclamation mr-1"></i>
                             The guest will be notified that their reservation was cancelled due to unpaid balance of ${new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(balanceAmount)}.
                         </p>
                     </div>
@@ -765,7 +765,7 @@ $current_page = 'all_upcoming_reservations';
                             <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 text-left">
                                 <div class="flex">
                                     <div class="flex-shrink-0">
-                                        <i class="fa-regular fa-triangle-exclamation text-yellow-600"></i>
+                                        <i class="fas fa-triangle-exclamation text-yellow-600"></i>
                                     </div>
                                     <div class="ml-3">
                                         <p class="text-yellow-700 font-medium">Outstanding Balance Reminder</p>
@@ -982,7 +982,7 @@ $current_page = 'all_upcoming_reservations';
                             ${hasBalance ? `
                             <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-3 mb-4">
                                 <div class="flex items-start">
-                                    <i class="fa-regular fa-circle-exclamation text-red-600 mr-2 mt-0.5"></i>
+                                    <i class="fas fa-circle-exclamation text-red-600 mr-2 mt-0.5"></i>
                                     <div>
                                         <p class="text-red-700 font-medium text-sm">Outstanding Balance</p>
                                         <p class="text-red-600 font-bold">${balanceFormatted}</p>
@@ -996,7 +996,7 @@ $current_page = 'all_upcoming_reservations';
                                 <p class="font-semibold text-lg">${b.guest_first_name} ${b.guest_last_name}</p>
                                 <p class="text-sm text-slate-600">${b.guest_email || 'No email'}</p>
                                 <p class="text-sm text-slate-600">${b.guest_phone || 'No phone'}</p>
-                                ${b.member_tier ? `<p class="text-xs text-amber-600 mt-1"><i class="fa-regular fa-gem mr-1"></i>${b.member_tier} member (${b.loyalty_points || 0} pts)</p>` : ''}
+                                ${b.member_tier ? `<p class="text-xs text-amber-600 mt-1"><i class="fas fa-gem mr-1"></i>${b.member_tier} member (${b.loyalty_points || 0} pts)</p>` : ''}
                                 ${pointsToEarn}
                             </div>
                             

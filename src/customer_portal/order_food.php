@@ -82,7 +82,7 @@ require_once '../../controller/customer/get/menu.php';
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> wednesday, 21 may 2025
+            <i class="fas fa-calendar text-slate-400"></i> wednesday, 21 may 2025
           </div>
         </div>
 
@@ -117,7 +117,7 @@ require_once '../../controller/customer/get/menu.php';
                       <img src="<?php echo htmlspecialchars($item['image_url']); ?>"
                         alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full h-full object-cover rounded-xl">
                     <?php else: ?>
-                      <i class="fa-regular fa-image"></i>
+                      <i class="fas fa-image"></i>
                     <?php endif; ?>
                   </div>
                   <div class="flex-1">
@@ -173,7 +173,7 @@ require_once '../../controller/customer/get/menu.php';
             <!-- loyalty / promo card -->
             <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
               <div class="flex items-center gap-2 text-amber-700">
-                <i class="fa-regular fa-star"></i>
+                <i class="fas fa-star"></i>
                 <span class="font-semibold text-sm">loyalty reward</span>
               </div>
               <p class="text-xs text-slate-600 mt-1">use 240 pts to get 1 free halo-halo!</p>
@@ -185,7 +185,7 @@ require_once '../../controller/customer/get/menu.php';
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <div class="flex items-center justify-between mb-3">
                 <h3 class="font-semibold flex items-center gap-2">
-                  <i class="fa-regular fa-clock-rotate-left text-amber-600"></i> recent orders
+                  <i class="fas fa-clock-rotate-left text-amber-600"></i> recent orders
                 </h3>
                 <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full" id="orderCount">
                   <?php echo count($orderHistory); ?>
@@ -195,7 +195,7 @@ require_once '../../controller/customer/get/menu.php';
               <div id="orderHistoryContainer" class="space-y-3 max-h-60 overflow-y-auto">
                 <?php if (empty($orderHistory)): ?>
                   <div class="text-sm text-slate-400 text-center py-4">
-                    <i class="fa-regular fa-receipt text-2xl mb-2 text-slate-300"></i>
+                    <i class="fas fa-receipt text-2xl mb-2 text-slate-300"></i>
                     <p>No order history yet.</p>
                     <p class="text-xs mt-1">Your orders will appear here</p>
                   </div>
@@ -227,12 +227,12 @@ require_once '../../controller/customer/get/menu.php';
                         <div class="flex gap-2">
                           <button onclick="viewOrderDetails(<?php echo $order['id']; ?>)"
                             class="text-xs text-amber-700 hover:underline">
-                            <i class="fa-regular fa-eye mr-1"></i>view
+                            <i class="fas fa-eye mr-1"></i>view
                           </button>
                           <?php if (in_array($order['status'], ['pending', 'preparing'])): ?>
                             <button onclick="cancelOrder(<?php echo $order['id']; ?>)"
                               class="text-xs text-red-600 hover:underline">
-                              <i class="fa-regular fa-times-circle mr-1"></i>cancel
+                              <i class="fas fa-times-circle mr-1"></i>cancel
                             </button>
                           <?php endif; ?>
                         </div>
@@ -245,7 +245,7 @@ require_once '../../controller/customer/get/menu.php';
 
               <?php if (!empty($orderHistory)): ?>
                 <a href="./order_history.php" class="block text-center text-xs text-amber-700 mt-3 hover:underline">
-                  view all orders <i class="fa-regular fa-arrow-right ml-1"></i>
+                  view all orders <i class="fas fa-arrow-right ml-1"></i>
                 </a>
               <?php endif; ?>
             </div>
@@ -315,7 +315,7 @@ require_once '../../controller/customer/get/menu.php';
             <div class="text-right">
               ${priceDisplay}
               <button class="text-rose-500 text-xs block mt-1 trash-btn" data-id="${item.id}" data-name="${item.name}">
-                <i class="fa-regular fa-trash-can"></i>
+                <i class="fas fa-trash-can"></i>
               </button>
             </div>
           `;

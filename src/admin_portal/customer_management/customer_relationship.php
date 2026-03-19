@@ -67,8 +67,8 @@ $current_page = 'customer_relationship';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fa-regular fa-bell"></i></span>
+                class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ $current_page = 'customer_relationship';
         <!-- ===== GUEST LIST TABLE ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h2 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-address-book text-amber-600"></i>
+            <h2 class="font-semibold flex items-center gap-2"><i class="fas fa-address-book text-amber-600"></i>
               guest directory</h2>
             <div class="flex gap-2">
               <button onclick="showFilter()"
@@ -235,7 +235,7 @@ $current_page = 'customer_relationship';
           <!-- recent guest interactions -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-clock text-amber-600"></i> recent interactions</h2>
+                class="fas fa-clock text-amber-600"></i> recent interactions</h2>
             <div class="space-y-3">
               <?php if (empty($recentInteractions)): ?>
                 <p class="text-sm text-slate-400 text-center py-4">No recent interactions</p>
@@ -263,7 +263,7 @@ $current_page = 'customer_relationship';
           <!-- upcoming birthdays / special occasions -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-cake-candles text-amber-600"></i> upcoming celebrations</h3>
+                class="fas fa-cake-candles text-amber-600"></i> upcoming celebrations</h3>
             <ul class="space-y-2">
               <?php if (empty($celebrations)): ?>
                 <li class="text-sm text-slate-500 italic">No upcoming celebrations</li>

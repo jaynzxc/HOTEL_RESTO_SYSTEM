@@ -133,7 +133,7 @@ $current_page = 'orders_pos';
   <div id="toast" class="toast hidden">
     <div class="flex items-center gap-3">
       <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-        <i class="fa-regular fa-bell"></i>
+        <i class="fas fa-bell"></i>
       </div>
       <div>
         <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -178,10 +178,10 @@ $current_page = 'orders_pos';
         </div>
         <div class="flex gap-3 text-sm">
           <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?>
+            <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
           </span>
           <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative" id="notificationBell">
-            <i class="fa-regular fa-bell"></i>
+            <i class="fas fa-bell"></i>
             <?php if ($unread_count > 0): ?>
                 <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
             <?php endif; ?>
@@ -321,7 +321,7 @@ $current_page = 'orders_pos';
         <!-- kitchen queue summary -->
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-clock text-amber-600"></i>kitchen queue</h3>
+            <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-clock text-amber-600"></i>kitchen queue</h3>
             <a href="../restaurant_management/kitchen_orders.php" class="text-xs text-amber-600 hover:underline">view full kitchen display →</a>
           </div>
           <ul class="space-y-3" id="kitchenQueue">
@@ -357,7 +357,7 @@ $current_page = 'orders_pos';
 
         <!-- ready for pickup/delivery queue -->
         <div class="bg-green-50 border border-green-200 rounded-2xl p-5">
-          <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fa-regular fa-circle-check text-green-600"></i> ready for pickup/delivery</h3>
+          <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-circle-check text-green-600"></i> ready for pickup/delivery</h3>
           <ul class="space-y-3" id="readyQueue">
             <?php if (empty($readyQueue)): ?>
                 <li class="text-sm text-slate-500 text-center py-4">No orders ready</li>

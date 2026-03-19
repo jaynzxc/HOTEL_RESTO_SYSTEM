@@ -70,7 +70,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <i class="fas fa-calendar text-slate-400"></i>
             <?php echo strtolower(date('l, F j, Y')); ?> ·
             <span class="text-amber-600 font-medium">service:
               <?php echo date('g:i A'); ?>
@@ -87,7 +87,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
             <!-- 1️⃣ ONLINE RESERVATION FORM WITH DOWN PAYMENT -->
             <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <h2 class="font-semibold text-xl flex items-center gap-2 mb-5">
-                <i class="fa-regular fa-pen-to-square text-amber-600"></i> online reservation · new booking
+                <i class="fas fa-pen-to-square text-amber-600"></i> online reservation · new booking
                 <span class="payment-badge text-white text-xs px-3 py-1 rounded-full ml-2">down payment required</span>
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -166,11 +166,11 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 </div>
                 <div class="mt-3 pt-2 border-t border-amber-200">
                   <p class="text-xs text-amber-700 flex items-center gap-1">
-                    <i class="fa-regular fa-star"></i>
+                    <i class="fas fa-star"></i>
                     <span>You'll earn <span id="pointsDisplay">10</span> loyalty points after payment</span>
                   </p>
                   <p class="text-xs text-slate-500 mt-1">
-                    <i class="fa-regular fa-circle-info"></i>
+                    <i class="fas fa-circle-info"></i>
                     Points will be added by admin upon payment confirmation
                   </p>
                 </div>
@@ -179,14 +179,14 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               <div class="flex flex-wrap items-center gap-3 mt-6">
                 <button class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-xl font-medium transition"
                   id="submitReservationBtn">
-                  <i class="fa-regular fa-credit-card mr-2"></i>submit & pay down payment
+                  <i class="fas fa-credit-card mr-2"></i>submit & pay down payment
                 </button>
                 <button
                   class="border border-slate-300 text-slate-600 hover:bg-slate-50 px-6 py-3 rounded-xl font-medium transition text-sm"
-                  id="validateFieldsBtn"><i class="fa-regular fa-circle-check"></i> validate fields</button>
+                  id="validateFieldsBtn"><i class="fas fa-circle-check"></i> validate fields</button>
               </div>
               <p class="text-xs text-emerald-600 mt-2 flex items-center gap-1" id="validationHint"><i
-                  class="fa-regular fa-circle-check"></i> fill required fields</p>
+                  class="fas fa-circle-check"></i> fill required fields</p>
             </div>
           </div>
 
@@ -195,7 +195,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
 
             <!-- real-time table monitoring (clean state) -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
-              <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fa-regular fa-grid-2 text-amber-600"></i>
+              <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-grid-2 text-amber-600"></i>
                 real‑time table status</h3>
               <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="tableGrid">
                 <!-- injected via JS (all available initially) -->
@@ -209,25 +209,25 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 <span><span class="inline-block w-3 h-3 bg-red-100 border border-red-300 rounded"></span>
                   occupied</span>
               </div>
-              <p class="text-xs text-slate-400 mt-2"><i class="fa-regular fa-comment"></i> click table to toggle status
+              <p class="text-xs text-slate-400 mt-2"><i class="fas fa-comment"></i> click table to toggle status
                 (demo)</p>
             </div>
 
             <!-- staff notification panel (empty at start) -->
             <div class="bg-white border border-slate-200 rounded-2xl p-5">
-              <h4 class="font-medium flex items-center gap-2"><i class="fa-regular fa-bell text-amber-600"></i> recent
+              <h4 class="font-medium flex items-center gap-2"><i class="fas fa-bell text-amber-600"></i> recent
                 staff notifications</h4>
               <ul class="text-xs space-y-3 mt-3" id="notificationList">
                 <li class="text-slate-400 text-center">No notifications yet.</li>
               </ul>
               <button
                 class="w-full border border-amber-600 text-amber-700 hover:bg-amber-50 mt-4 py-2 rounded-xl text-sm transition"
-                id="refreshNotifications"><i class="fa-regular fa-rotate"></i> refresh notifications</button>
+                id="refreshNotifications"><i class="fas fa-rotate"></i> refresh notifications</button>
             </div>
 
             <!-- seating time demo (dynamic seating recorded separately) -->
             <div class="bg-slate-100 border border-slate-300 rounded-2xl p-5">
-              <h4 class="font-medium flex items-center gap-2"><i class="fa-regular fa-clock text-amber-600"></i> seating
+              <h4 class="font-medium flex items-center gap-2"><i class="fas fa-clock text-amber-600"></i> seating
                 time recording</h4>
               <div class="text-xs text-slate-500 mt-2">Seating times are logged when tables become occupied.</div>
               <div class="mt-2 text-xs" id="seatingTimesDemo">No active seating times.</div>
@@ -236,7 +236,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
             <!-- payment summary badge -->
             <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-5 text-white">
               <div class="flex items-center gap-3 mb-2">
-                <i class="fa-regular fa-credit-card text-2xl"></i>
+                <i class="fas fa-credit-card text-2xl"></i>
                 <div>
                   <p class="text-sm opacity-90">down payment summary</p>
                   <p class="text-xs opacity-75">per guest: ₱100</p>
@@ -248,7 +248,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
 
             <!-- db hint -->
             <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 text-xs">
-              <p class="font-medium mb-1"><i class="fa-regular fa-database"></i> database schema active</p>
+              <p class="font-medium mb-1"><i class="fas fa-database"></i> database schema active</p>
               <ul class="list-disc list-inside text-slate-600">
                 <li>customers, reservations, tables, waiting_list</li>
                 <li>real-time status: available / reserved / occupied</li>
@@ -483,7 +483,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   html: `
             <div class="text-left">
                 <div class="bg-green-50 p-4 rounded-lg mb-4">
-                    <p class="text-green-700 mb-2"><i class="fa-regular fa-circle-check mr-2"></i>Reservation confirmed!</p>
+                    <p class="text-green-700 mb-2"><i class="fas fa-circle-check mr-2"></i>Reservation confirmed!</p>
                     <p class="text-sm"><strong>Reference:</strong> ${data.reservation.reference}</p>
                     <p class="text-sm"><strong>Guests:</strong> ${data.reservation.guests}</p>
                     <p class="text-sm"><strong>Date:</strong> ${data.reservation.date}</p>
@@ -495,7 +495,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                     <p class="text-sm"><strong>Down Payment Required:</strong> ${downPaymentFormatted}</p>
                     <div class="mt-2 pt-2 border-t border-amber-200">
                         <p class="text-sm text-amber-700">
-                            <i class="fa-regular fa-star mr-1"></i>
+                            <i class="fas fa-star mr-1"></i>
                             <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
                         </p>
                         <p class="text-xs text-amber-600 mt-1">
@@ -547,7 +547,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                                 <p><strong>Down Payment:</strong> ${formattedAmount}</p>
                                 ${pending.points_earned > 0 ? `
                                 <p class="text-amber-600 mt-2">
-                                    <i class="fa-regular fa-star mr-1"></i>
+                                    <i class="fas fa-star mr-1"></i>
                                     Points to earn: +${pending.points_earned}
                                 </p>
                                 ` : ''}
@@ -635,7 +635,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   icon: 'warning',
                   confirmButtonColor: '#d97706'
                 });
-                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
+                document.getElementById('validationHint').innerHTML = '<i class="fas fa-circle-exclamation"></i> required fields missing';
                 return;
               }
 
@@ -656,7 +656,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   icon: 'warning',
                   confirmButtonColor: '#d97706'
                 });
-                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid email format';
+                document.getElementById('validationHint').innerHTML = '<i class="fas fa-circle-exclamation"></i> invalid email format';
                 return;
               }
 
@@ -667,7 +667,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   icon: 'warning',
                   confirmButtonColor: '#d97706'
                 });
-                document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid phone format';
+                document.getElementById('validationHint').innerHTML = '<i class="fas fa-circle-exclamation"></i> invalid phone format';
                 return;
               }
 
@@ -705,7 +705,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               };
 
               // Update validation hint
-              document.getElementById('validationHint').innerHTML = '<i class="fa-regular fa-circle-check"></i> processing reservation...';
+              document.getElementById('validationHint').innerHTML = '<i class="fas fa-circle-check"></i> processing reservation...';
 
               // Process down payment and redirect
               processDownPaymentAndRedirect(reservation);
@@ -722,7 +722,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               const hint = document.getElementById('validationHint');
 
               if (!name || !phone || !email) {
-                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> required fields missing';
+                if (hint) hint.innerHTML = '<i class="fas fa-circle-exclamation"></i> required fields missing';
                 Swal.fire({
                   title: 'Validation',
                   text: 'Please fill in all required fields.',
@@ -731,7 +731,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   timer: 2000
                 });
               } else if (!isValidEmail(email)) {
-                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid email format';
+                if (hint) hint.innerHTML = '<i class="fas fa-circle-exclamation"></i> invalid email format';
                 Swal.fire({
                   title: 'Validation',
                   text: 'Please enter a valid email address.',
@@ -740,7 +740,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   timer: 2000
                 });
               } else if (!isValidPhone(phone)) {
-                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-exclamation"></i> invalid phone format';
+                if (hint) hint.innerHTML = '<i class="fas fa-circle-exclamation"></i> invalid phone format';
                 Swal.fire({
                   title: 'Validation',
                   text: 'Please enter a valid phone number.',
@@ -749,7 +749,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   timer: 2000
                 });
               } else {
-                if (hint) hint.innerHTML = '<i class="fa-regular fa-circle-check"></i> all required fields look good';
+                if (hint) hint.innerHTML = '<i class="fas fa-circle-check"></i> all required fields look good';
                 Swal.fire({
                   title: 'Validation',
                   text: 'All fields are valid! You can now submit.',
@@ -832,7 +832,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
           // You can add this to your HTML if needed
           const clearBtn = document.createElement('button');
           clearBtn.className = 'fixed bottom-4 left-4 bg-slate-200 text-slate-700 px-3 py-1 rounded-lg text-xs z-50 hover:bg-slate-300 transition';
-          clearBtn.innerHTML = '<i class="fa-regular fa-trash-can mr-1"></i> Clear Pending';
+          clearBtn.innerHTML = '<i class="fas fa-trash-can mr-1"></i> Clear Pending';
           clearBtn.onclick = function () {
             clearPendingSessions();
             Swal.fire({

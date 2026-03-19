@@ -47,20 +47,25 @@ $whereConditions = ["1=1"];
 $queryParams = [];
 
 if ($statusFilter !== 'all') {
-    $whereConditions[] = "r.is_available = :status";
-    // Convert filter to is_available value
-    $statusValue = 1; // available by default
     switch ($statusFilter) {
         case 'available':
-            $statusValue = 1;
+            $whereConditions[] = "r.is_available = 1 AND rm.id IS NULL AND r.needs_cleaning = 0";
+            break;
+        case 'reserved':
+            $whereConditions[] = "b.id IS NOT NULL AND b.status = 'confirmed' AND b.check_out >= CURDATE()";
             break;
         case 'occupied':
+            $whereConditions[] = "b.id IS NOT NULL AND b.status = 'checked-in' AND b.check_out >= CURDATE()";
+            break;
         case 'dirty':
+            $whereConditions[] = "r.is_available = 1 AND b.id IS NULL AND rm.id IS NULL";
+            $whereConditions[] = "r.needs_cleaning = 1";
+            break;
+        case 'maintenance':
         case 'out of order':
-            $statusValue = 0;
+            $whereConditions[] = "rm.id IS NOT NULL AND rm.cleaned_at IS NULL AND rm.completed_at IS NULL";
             break;
     }
-    $queryParams['status'] = $statusValue;
 }
 
 if (!empty($searchFilter)) {
@@ -73,12 +78,20 @@ if (!empty($searchFilter)) {
 $whereClause = implode(' AND ', $whereConditions);
 
 // Get total count for pagination
-$countQuery = "SELECT COUNT(*) as total FROM rooms r WHERE $whereClause";
+$countQuery = "SELECT COUNT(DISTINCT r.id) as total 
+               FROM rooms r
+               LEFT JOIN bookings b ON r.id = b.room_id 
+                  AND b.status IN ('confirmed', 'checked-in')
+                  AND b.check_out >= CURDATE()
+               LEFT JOIN room_maintenance rm ON r.id = rm.room_id 
+                  AND rm.cleaned_at IS NULL 
+                  AND rm.completed_at IS NULL
+               WHERE $whereClause";
 $countResult = $db->query($countQuery, $queryParams)->fetch_one();
 $totalRooms = $countResult['total'];
 $totalPages = ceil($totalRooms / $limit);
 
-// Get all rooms with current booking info
+// Get all rooms with current booking and maintenance info
 $rooms = $db->query(
     "SELECT 
         r.id as room_id,
@@ -90,21 +103,46 @@ $rooms = $db->query(
         r.view,
         r.amenities,
         r.is_available,
+        r.needs_cleaning,
         CASE 
-            WHEN r.is_available = 1 THEN 'available'
-            ELSE 'occupied'
+            WHEN rm.id IS NOT NULL AND rm.cleaned_at IS NULL AND rm.completed_at IS NULL THEN 'maintenance'
+            WHEN b.id IS NOT NULL AND b.status = 'checked-in' AND b.check_out >= CURDATE() THEN 'occupied'
+            WHEN b.id IS NOT NULL AND b.status = 'confirmed' AND b.check_out >= CURDATE() THEN 'reserved'
+            WHEN r.needs_cleaning = 1 THEN 'dirty'
+            ELSE 'available'
         END as status,
-        'clean' as housekeeping, -- Default, you can add housekeeping table later
+        CASE 
+            WHEN rm.id IS NOT NULL AND rm.cleaned_at IS NULL AND rm.completed_at IS NULL THEN 'maintenance'
+            WHEN r.needs_cleaning = 1 THEN 'dirty'
+            ELSE 'clean'
+        END as housekeeping,
         CONCAT(b.guest_first_name, ' ', b.guest_last_name) as guest,
         b.check_in,
         b.check_out,
-        b.booking_reference
+        b.booking_reference,
+        b.status as booking_status,
+        rm.id as maintenance_id,
+        rm.condition_status as maintenance_priority,
+        rm.notes as maintenance_notes,
+        rm.reported_at as maintenance_reported
      FROM rooms r
      LEFT JOIN bookings b ON r.id = b.room_id 
         AND b.status IN ('confirmed', 'checked-in')
         AND b.check_out >= CURDATE()
+     LEFT JOIN room_maintenance rm ON r.id = rm.room_id 
+        AND rm.cleaned_at IS NULL 
+        AND rm.completed_at IS NULL
      WHERE $whereClause
-     ORDER BY r.id ASC
+     ORDER BY 
+        CASE 
+            WHEN rm.condition_status = 'damage' THEN 1
+            WHEN rm.condition_status = 'maintenance' THEN 2
+            WHEN r.needs_cleaning = 1 THEN 3
+            WHEN b.status = 'checked-in' THEN 4
+            WHEN b.status = 'confirmed' THEN 5
+            ELSE 6
+        END,
+        r.id ASC
      LIMIT $limit OFFSET $offset",
     $queryParams
 )->find() ?: [];
@@ -112,25 +150,44 @@ $rooms = $db->query(
 // Get room statistics
 $stats = $db->query(
     "SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN is_available = 1 THEN 1 ELSE 0 END) as available,
-        SUM(CASE WHEN is_available = 0 THEN 1 ELSE 0 END) as occupied
-     FROM rooms",
+        COUNT(DISTINCT r.id) as total,
+        SUM(CASE WHEN b.id IS NOT NULL AND b.status = 'checked-in' AND b.check_out >= CURDATE() THEN 1 ELSE 0 END) as occupied,
+        SUM(CASE WHEN b.id IS NOT NULL AND b.status = 'confirmed' AND b.check_out >= CURDATE() THEN 1 ELSE 0 END) as reserved,
+        SUM(CASE WHEN rm.id IS NOT NULL AND rm.cleaned_at IS NULL AND rm.completed_at IS NULL THEN 1 ELSE 0 END) as maintenance,
+        SUM(CASE WHEN r.needs_cleaning = 1 AND b.id IS NULL AND rm.id IS NULL THEN 1 ELSE 0 END) as dirty,
+        SUM(CASE WHEN r.is_available = 1 AND b.id IS NULL AND rm.id IS NULL AND r.needs_cleaning = 0 THEN 1 ELSE 0 END) as available
+     FROM rooms r
+     LEFT JOIN bookings b ON r.id = b.room_id 
+        AND b.status IN ('confirmed', 'checked-in')
+        AND b.check_out >= CURDATE()
+     LEFT JOIN room_maintenance rm ON r.id = rm.room_id 
+        AND rm.cleaned_at IS NULL 
+        AND rm.completed_at IS NULL",
     []
 )->fetch_one();
 
 // Get maintenance schedules
-// Get maintenance schedules - FIXED: Removed completed_at reference
 $maintenanceItems = $db->query(
     "SELECT 
         rm.*,
         r.id as room_number,
-        u.full_name as reported_by_name
+        u.full_name as reported_by_name,
+        CASE 
+            WHEN rm.condition_status = 'damage' THEN 'urgent'
+            WHEN rm.condition_status = 'maintenance' THEN 'high'
+            ELSE 'normal'
+        END as priority_level
      FROM room_maintenance rm
      LEFT JOIN rooms r ON rm.room_id = r.id
      LEFT JOIN users u ON rm.reported_by = u.id
-     WHERE rm.cleaned_at IS NULL  -- Using cleaned_at instead of completed_at
-     ORDER BY rm.reported_at ASC
+     WHERE rm.cleaned_at IS NULL AND rm.completed_at IS NULL
+     ORDER BY 
+        CASE 
+            WHEN rm.condition_status = 'damage' THEN 1
+            WHEN rm.condition_status = 'maintenance' THEN 2
+            ELSE 3
+        END,
+        rm.reported_at ASC
      LIMIT 10",
     []
 )->find() ?: [];

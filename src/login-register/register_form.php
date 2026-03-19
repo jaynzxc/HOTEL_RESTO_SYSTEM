@@ -46,7 +46,7 @@ $_SESSION['old'] ??= [];
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
               <div class="relative">
-                <i class="fa-regular fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input type="text" id="fullName" name="full_name"
                   value="<?php echo htmlspecialchars($_SESSION['old']['full_name'] ?? ''); ?>" placeholder="John Doe"
                   class="w-full border <?php echo isset($_SESSION['error']['full_name']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
@@ -65,7 +65,7 @@ $_SESSION['old'] ??= [];
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <div class="relative">
-                <i class="fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input type="email" id="email" name="email"
                   value="<?php echo htmlspecialchars($_SESSION['old']['email'] ?? ''); ?>" placeholder="you@example.com"
                   class="w-full border <?php echo isset($_SESSION['error']['email']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
@@ -110,7 +110,7 @@ $_SESSION['old'] ??= [];
                   required>
                 <button type="button"
                   class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <i class="fa-regular fa-eye-slash text-sm"></i>
+                  <i class="fas fa-eye-slash text-sm"></i>
                 </button>
               </div>
               <?php if (isset($_SESSION['error']['password'])): ?>
@@ -137,7 +137,7 @@ $_SESSION['old'] ??= [];
                   required>
                 <button type="button"
                   class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                  <i class="fa-regular fa-eye-slash text-sm"></i>
+                  <i class="fas fa-eye-slash text-sm"></i>
                 </button>
               </div>
               <?php if (isset($_SESSION['error']['confirm_password'])): ?>

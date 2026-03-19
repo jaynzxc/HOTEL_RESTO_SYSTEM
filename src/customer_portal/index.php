@@ -65,7 +65,7 @@ require_once '../../controller/customer/get/dashboard.php';
           <div class="flex items-center gap-3">
             <!-- notification bell with icon + badge - now links to notifications -->
             <a href="./notifications.php" class="relative">
-              <i class="fa-regular fa-bell text-2xl text-slate-500 hover:text-amber-600 transition cursor-pointer"></i>
+              <i class="fas fa-bell text-2xl text-slate-500 hover:text-amber-600 transition cursor-pointer"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-white"
@@ -110,7 +110,7 @@ require_once '../../controller/customer/get/dashboard.php';
           <!-- Today's Reservation Card -->
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
             <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
-              <i class="fa-regular fa-clock"></i>
+              <i class="fas fa-clock"></i>
             </div>
             <div>
               <p class="text-xs text-slate-500">table tonight?</p>
@@ -158,7 +158,7 @@ require_once '../../controller/customer/get/dashboard.php';
           <!-- Rewards Card -->
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 stat-card">
             <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl">
-              <i class="fa-regular fa-star"></i>
+              <i class="fas fa-star"></i>
             </div>
             <div>
               <p class="text-xs text-slate-500">rewards</p>
@@ -207,7 +207,7 @@ require_once '../../controller/customer/get/dashboard.php';
               </div>
               <div class="flex gap-3 mt-4 text-sm">
                 <div class="flex items-center gap-1 bg-slate-100 p-2 rounded-lg">
-                  <i class="fa-regular fa-calendar"></i>
+                  <i class="fas fa-calendar"></i>
                   <span id="defaultDates">
                     <?php
                     if ($activeBooking) {
@@ -230,7 +230,7 @@ require_once '../../controller/customer/get/dashboard.php';
               <div class="flex flex-wrap gap-6">
                 <div class="flex-1">
                   <h2 class="font-semibold text-slate-800 flex items-center gap-2 mb-2">
-                    <i class="fa-regular fa-clock text-amber-600"></i> restaurant reservation
+                    <i class="fas fa-clock text-amber-600"></i> restaurant reservation
                   </h2>
                   <p class="text-xs text-slate-500 mb-2">today, <span id="todayDate"></span> · 2 guests</p>
                   <select id="reservationTimeSelect" class="border border-slate-200 rounded-lg p-2 text-sm w-full mb-2">
@@ -289,7 +289,7 @@ require_once '../../controller/customer/get/dashboard.php';
                         elseif ($method['method_type'] == 'cash')
                           echo '<i class="fa-solid fa-money-bill-wave mr-1"></i>';
                         else
-                          echo '<i class="fa-regular fa-credit-card mr-1"></i>';
+                          echo '<i class="fas fa-credit-card mr-1"></i>';
                         echo $method['display_name'] ?? $method['method_type'];
                         if ($method['is_default'])
                           echo ' <span class="ml-1 text-[10px]">(default)</span>';
@@ -323,15 +323,15 @@ require_once '../../controller/customer/get/dashboard.php';
             <!-- Reviews & feedback -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h2 class="font-semibold text-slate-800 flex gap-2 items-center">
-                <i class="fa-regular fa-star text-amber-600"></i> how was your last stay?
+                <i class="fas fa-star text-amber-600"></i> how was your last stay?
               </h2>
               <div class="flex gap-3 my-2">
                 <div class="flex text-yellow-400 text-xl cursor-pointer" id="starRating">
-                  <i class="fa-regular fa-star" data-rating="1"></i>
-                  <i class="fa-regular fa-star" data-rating="2"></i>
-                  <i class="fa-regular fa-star" data-rating="3"></i>
-                  <i class="fa-regular fa-star" data-rating="4"></i>
-                  <i class="fa-regular fa-star" data-rating="5"></i>
+                  <i class="fas fa-star" data-rating="1"></i>
+                  <i class="fas fa-star" data-rating="2"></i>
+                  <i class="fas fa-star" data-rating="3"></i>
+                  <i class="fas fa-star" data-rating="4"></i>
+                  <i class="fas fa-star" data-rating="5"></i>
                 </div>
                 <span class="text-xs text-slate-500">tap to rate</span>
               </div>
@@ -348,12 +348,12 @@ require_once '../../controller/customer/get/dashboard.php';
             <!-- Booking Management -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-1">
-                <i class="fa-regular fa-rectangle-list text-amber-600"></i> my bookings
+                <i class="fas fa-rectangle-list text-amber-600"></i> my bookings
               </h3>
               <div class="mt-3 space-y-3" id="bookingsList">
                 <?php if (empty($recentBookings)): ?>
                   <div class="text-center text-slate-400 py-4">
-                    <i class="fa-regular fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
+                    <i class="fas fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
                     <p>No bookings yet.</p>
                     <p class="text-xs mt-1 text-slate-400">book your first stay!</p>
                   </div>
@@ -384,7 +384,7 @@ require_once '../../controller/customer/get/dashboard.php';
             <!-- Notifications & updates -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <div class="flex items-center justify-between">
-                <h3 class="font-semibold flex gap-1"><i class="fa-regular fa-bell text-amber-600"></i> updates</h3>
+                <h3 class="font-semibold flex gap-1"><i class="fas fa-bell text-amber-600"></i> updates</h3>
                 <?php if ($unread_count > 0): ?>
                   <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full"
                     id="notificationBadge"><?php echo $unread_count; ?> new</span>
@@ -396,14 +396,14 @@ require_once '../../controller/customer/get/dashboard.php';
               <ul class="text-sm space-y-2 mt-3" id="notificationsList">
                 <?php if (empty($notifications)): ?>
                   <li class="text-slate-400 text-xs text-center py-4">
-                    <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                    <i class="fas fa-bell-slash text-2xl mb-2 text-slate-300"></i>
                     <p>No notifications</p>
                   </li>
                 <?php else: ?>
                   <?php foreach ($notifications as $notif): ?>
                     <li class="flex gap-2 text-xs border-b border-slate-100 pb-2 last:border-0">
                       <i
-                        class="fa-regular <?php echo $notif['icon'] ?? 'fa-bell'; ?> <?php echo $notif['is_read'] ? 'text-slate-400' : 'text-amber-600'; ?> mt-0.5"></i>
+                        class="fas <?php echo $notif['icon'] ?? 'fa-bell'; ?> <?php echo $notif['is_read'] ? 'text-slate-400' : 'text-amber-600'; ?> mt-0.5"></i>
                       <span>
                         <span class="font-medium"><?php echo htmlspecialchars($notif['title']); ?></span>
                         <span
@@ -420,7 +420,7 @@ require_once '../../controller/customer/get/dashboard.php';
             <!-- Support / help center -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200">
               <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                  class="fa-regular fa-circle-question text-amber-600"></i> help & support</h3>
+                  class="fas fa-circle-question text-amber-600"></i> help & support</h3>
               <div class="space-y-2 text-sm">
                 <p class="flex items-center gap-2"><i class="fa-solid fa-phone text-amber-600 w-4"></i> +63 (2) 1234
                   5678</p>
@@ -520,14 +520,14 @@ require_once '../../controller/customer/get/dashboard.php';
                 if (index < rating) {
                   s.className = 'fa-solid fa-star text-yellow-400';
                 } else {
-                  s.className = 'fa-regular fa-star text-yellow-400';
+                  s.className = 'fas fa-star text-yellow-400';
                 }
               });
             });
 
             star.addEventListener('mouseleave', function () {
               stars.forEach(s => {
-                s.className = 'fa-regular fa-star text-yellow-400';
+                s.className = 'fas fa-star text-yellow-400';
               });
             });
 
@@ -537,7 +537,7 @@ require_once '../../controller/customer/get/dashboard.php';
                 if (index < rating) {
                   s.className = 'fa-solid fa-star text-yellow-400';
                 } else {
-                  s.className = 'fa-regular fa-star text-yellow-400';
+                  s.className = 'fas fa-star text-yellow-400';
                 }
               });
               localStorage.setItem('lastRating', rating);
@@ -570,7 +570,7 @@ require_once '../../controller/customer/get/dashboard.php';
 
             // Reset stars
             document.querySelectorAll('#starRating i').forEach(s => {
-              s.className = 'fa-regular fa-star text-yellow-400';
+              s.className = 'fas fa-star text-yellow-400';
             });
             localStorage.removeItem('lastRating');
           } else {

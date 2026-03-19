@@ -73,8 +73,8 @@ $current_page = 'customer_feedback_&_reviews';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fa-regular fa-bell"></i></span>
+                class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@ $current_page = 'customer_feedback_&_reviews';
               <?php
               $avg = round($stats['avg_rating'] ?? 0);
               for ($i = 1; $i <= 5; $i++) {
-                echo $i <= $avg ? '<i class="fa-solid fa-star text-yellow-400"></i>' : '<i class="fa-regular fa-star text-yellow-400"></i>';
+                echo $i <= $avg ? '<i class="fa-solid fa-star text-yellow-400"></i>' : '<i class="fas fa-star text-yellow-400"></i>';
               }
               ?>
             </div>
@@ -115,7 +115,7 @@ $current_page = 'customer_feedback_&_reviews';
         <!-- ===== RATING DISTRIBUTION ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
           <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-              class="fa-regular fa-chart-bar text-amber-600"></i> rating distribution</h2>
+              class="fas fa-chart-bar text-amber-600"></i> rating distribution</h2>
           <div class="space-y-2">
             <?php foreach ($ratingDistribution as $dist): ?>
               <div class="flex items-center gap-2">
@@ -170,7 +170,7 @@ $current_page = 'customer_feedback_&_reviews';
         <div id="reviewsContainer" class="space-y-4 mb-8">
           <?php if (empty($reviews)): ?>
             <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-              <i class="fa-regular fa-message text-4xl text-slate-300 mb-3"></i>
+              <i class="fas fa-message text-4xl text-slate-300 mb-3"></i>
               <p class="text-slate-500">No reviews yet</p>
               <p class="text-xs text-slate-400 mt-1">Customer reviews will appear here</p>
             </div>
@@ -188,7 +188,7 @@ $current_page = 'customer_feedback_&_reviews';
                 } elseif ($i - 0.5 <= $rating) {
                   $stars .= '<i class="fa-solid fa-star-half-alt text-yellow-400"></i>';
                 } else {
-                  $stars .= '<i class="fa-regular fa-star text-yellow-400"></i>';
+                  $stars .= '<i class="fas fa-star text-yellow-400"></i>';
                 }
               }
 
@@ -246,7 +246,7 @@ $current_page = 'customer_feedback_&_reviews';
                       <?php if ($hasResponse): ?>
                         <div class="mt-3 p-3 bg-slate-50 rounded-xl border-l-2 border-amber-300">
                           <div class="flex items-center gap-2 mb-1">
-                            <i class="fa-regular fa-reply text-amber-600 text-xs"></i>
+                            <i class="fas fa-reply text-amber-600 text-xs"></i>
                             <p class="text-xs font-medium text-amber-600">Management response:</p>
                             <span class="text-[10px] text-slate-400">by
                               <?php echo htmlspecialchars($review['responder_name'] ?? 'Admin'); ?></span>
@@ -261,7 +261,7 @@ $current_page = 'customer_feedback_&_reviews';
 
                       <div class="flex items-center gap-3 mt-3">
                         <span class="text-xs text-slate-400"><i
-                            class="fa-regular fa-clock mr-1"></i><?php echo $timeAgo; ?></span>
+                            class="fas fa-clock mr-1"></i><?php echo $timeAgo; ?></span>
                       </div>
                     </div>
                   </div>
@@ -322,7 +322,7 @@ $current_page = 'customer_feedback_&_reviews';
           <!-- common topics -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-message text-amber-600"></i> common feedback topics</h2>
+                class="fas fa-message text-amber-600"></i> common feedback topics</h2>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div class="border rounded-xl p-3 text-center">
                 <p
@@ -360,7 +360,7 @@ $current_page = 'customer_feedback_&_reviews';
           <!-- quick response templates -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-file-lines text-amber-600"></i> response templates</h3>
+                class="fas fa-file-lines text-amber-600"></i> response templates</h3>
             <ul class="space-y-2 max-h-48 overflow-y-auto">
               <?php if (empty($templates)): ?>
                 <li class="text-sm text-slate-500 italic">No templates available</li>

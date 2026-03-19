@@ -209,7 +209,7 @@
         <?php if (!empty($_SESSION['success'])): ?>
           <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
             <?php foreach ($_SESSION['success'] as $message): ?>
-              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              <p class="text-sm"><i class="fas fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
               </p>
             <?php endforeach; ?>
           </div>
@@ -233,7 +233,7 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDateDisplay"></span>
+            <i class="fas fa-calendar text-slate-400"></i> <span id="currentDateDisplay"></span>
           </div>
         </div>
 
@@ -257,7 +257,7 @@
         <div id="step1-content" class="block">
           <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <h2 class="text-xl font-semibold mb-6 flex items-center gap-2"><i
-                class="fa-regular fa-user text-amber-600"></i> Guest Details</h2>
+                class="fas fa-user text-amber-600"></i> Guest Details</h2>
 
             <div id="step1Errors" class="hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
             </div>
@@ -354,7 +354,7 @@
 
               <div class="flex justify-end">
                 <button onclick="validateStep1()" class="btn btn-primary">
-                  Continue to room selection <i class="fa-regular fa-arrow-right"></i>
+                  Continue to room selection <i class="fas fa-arrow-right"></i>
                 </button>
               </div>
             </div>
@@ -364,7 +364,7 @@
         <!-- STEP 2: Select Room -->
         <div id="step2-content" class="hidden">
           <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 class="text-xl font-semibold mb-4"><i class="fa-regular fa-bed text-amber-600"></i> Select your room
+            <h2 class="text-xl font-semibold mb-4"><i class="fas fa-bed text-amber-600"></i> Select your room
             </h2>
 
             <div id="roomSelectionContainer" class="space-y-3">
@@ -376,16 +376,16 @@
                       <span class="text-lg font-semibold">Room <?php echo $room['id']; ?> ·
                         <?php echo htmlspecialchars($room['name']); ?></span>
                       <?php if (!empty($room['amenities'])): ?>
-                        <span class="ml-2 amenity-tag"><i class="fa-regular fa-wifi"></i>
+                        <span class="ml-2 amenity-tag"><i class="fas fa-wifi"></i>
                           <?php echo htmlspecialchars($room['amenities']); ?></span>
                       <?php endif; ?>
                     </div>
                     <div class="room-price">₱<?php echo number_format($room['price']); ?> <small>/night</small></div>
                   </div>
                   <div class="mt-1 text-sm text-gray-600">
-                    <span class="mr-4"><i class="fa-regular fa-bed"></i>
+                    <span class="mr-4"><i class="fas fa-bed"></i>
                       <?php echo htmlspecialchars($room['beds']); ?></span>
-                    <span><i class="fa-regular fa-mountain"></i> <?php echo htmlspecialchars($room['view']); ?></span>
+                    <span><i class="fas fa-mountain"></i> <?php echo htmlspecialchars($room['view']); ?></span>
                   </div>
                 </div>
               <?php endforeach; ?>
@@ -401,7 +401,7 @@
                 <p><span class="text-slate-600">Tax (12%):</span> ₱<span id="summaryTax"></span></p>
                 <p class="font-semibold text-amber-800">Total: ₱<span id="summaryTotal"></span></p>
                 <p class="text-xs text-amber-600">
-                  <i class="fa-regular fa-star mr-1"></i>
+                  <i class="fas fa-star mr-1"></i>
                   You'll earn <span id="summaryPoints"></span> loyalty points (added by admin after payment)
                 </p>
               </div>
@@ -409,10 +409,10 @@
 
             <div class="flex gap-3 mt-6">
               <button onclick="attemptBackToStep(1)" class="flex-1 btn btn-outline">
-                <i class="fa-regular fa-arrow-left"></i> Back
+                <i class="fas fa-arrow-left"></i> Back
               </button>
               <button onclick="createBooking()" class="flex-1 btn btn-primary" id="proceedBtn" disabled>
-                Proceed to payment <i class="fa-regular fa-credit-card"></i>
+                Proceed to payment <i class="fas fa-credit-card"></i>
               </button>
             </div>
           </div>
@@ -757,7 +757,7 @@
                   html: `
             <div class="text-left">
                 <div class="bg-green-50 p-4 rounded-lg mb-4">
-                    <p class="text-green-700 mb-2"><i class="fa-regular fa-circle-check mr-2"></i>Booking confirmed!</p>
+                    <p class="text-green-700 mb-2"><i class="fas fa-circle-check mr-2"></i>Booking confirmed!</p>
                     <p class="text-sm"><strong>Reference:</strong> ${data.booking.reference}</p>
                     <p class="text-sm"><strong>Room:</strong> ${data.booking.room_name}</p>
                     <p class="text-sm"><strong>Check-in:</strong> ${data.booking.check_in}</p>
@@ -770,7 +770,7 @@
                     <p class="text-sm"><strong>Total Amount:</strong> ${totalFormatted}</p>
                     <div class="mt-2 pt-2 border-t border-amber-200">
                         <p class="text-sm text-amber-700">
-                            <i class="fa-regular fa-star mr-1"></i>
+                            <i class="fas fa-star mr-1"></i>
                             <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
                         </p>
                         <p class="text-xs text-amber-600 mt-1">

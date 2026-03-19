@@ -4,49 +4,42 @@
  * Handles updating room status, maintenance, assignments, and room management
  */
 
+// Enable error logging but disable display
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
 session_start();
 require_once __DIR__ . '/../../../Class/Database.php';
 
 // Set JSON header for AJAX response
 header('Content-Type: application/json');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Please login to continue'
-    ]);
-    exit();
-}
-
-$config = require __DIR__ . '/../../../config/config.php';
-$db = new Database($config['database']);
-
-// Get user role from database
-$user = $db->query(
-    "SELECT role FROM users WHERE id = :id",
-    ['id' => $_SESSION['user_id']]
-)->fetch_one();
-
-// Check if user has admin or staff role
-if (!$user || !in_array($user['role'], ['admin', 'staff'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Unauthorized access'
-    ]);
-    exit();
-}
-
-// Check if it's a POST request
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid request method'
-    ]);
-    exit();
-}
-
 try {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
+        throw new Exception('Please login to continue');
+    }
+
+    $config = require __DIR__ . '/../../../config/config.php';
+    $db = new Database($config['database']);
+
+    // Get user role from database
+    $user = $db->query(
+        "SELECT role FROM users WHERE id = :id",
+        ['id' => $_SESSION['user_id']]
+    )->fetch_one();
+
+    // Check if user has admin or staff role
+    if (!$user || !in_array($user['role'], ['admin', 'staff'])) {
+        throw new Exception('Unauthorized access');
+    }
+
+    // Check if it's a POST request
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Invalid request method');
+    }
+
     $action = $_POST['action'] ?? '';
 
     // GET ALL ROOMS (for quick actions)
@@ -229,8 +222,8 @@ try {
         }
 
         $db->query(
-            "INSERT INTO rooms (id, name, price, max_occupancy, beds, view, amenities, is_available, created_at)
-             VALUES (:id, :name, :price, :max_occupancy, :beds, :view, :amenities, 1, NOW())",
+            "INSERT INTO rooms (id, name, price, max_occupancy, beds, view, amenities, is_available, needs_cleaning, created_at)
+             VALUES (:id, :name, :price, :max_occupancy, :beds, :view, :amenities, 1, 0, NOW())",
             [
                 'id' => $room_id,
                 'name' => $name,
@@ -303,6 +296,8 @@ try {
             throw new Exception('Room ID and issue description required');
         }
 
+        $db->beginTransaction();
+
         $db->query(
             "INSERT INTO room_maintenance (room_id, condition_status, reported_at, reported_by, notes)
              VALUES (:room_id, :status, NOW(), :reported_by, :notes)",
@@ -314,11 +309,13 @@ try {
             ]
         );
 
-        // Update room availability
+        // Update room availability and mark as not available
         $db->query(
-            "UPDATE rooms SET is_available = 0 WHERE id = :id",
+            "UPDATE rooms SET is_available = 0, needs_cleaning = 0 WHERE id = :id",
             ['id' => $room_id]
         );
+
+        $db->commit();
 
         // Create notification
         $db->query(
@@ -370,6 +367,8 @@ try {
             throw new Exception('Maintenance ID required');
         }
 
+        $db->beginTransaction();
+
         // Get room_id before completing
         $maintenance = $db->query(
             "SELECT room_id FROM room_maintenance WHERE id = :id",
@@ -388,13 +387,15 @@ try {
             ['room_id' => $maintenance['room_id']]
         )->fetch_one();
 
-        // If no other pending maintenance, make room available
+        // If no other pending maintenance, make room available but needs cleaning
         if ($pending['count'] == 0) {
             $db->query(
-                "UPDATE rooms SET is_available = 1 WHERE id = :id",
+                "UPDATE rooms SET is_available = 1, needs_cleaning = 1 WHERE id = :id",
                 ['id' => $maintenance['room_id']]
             );
         }
+
+        $db->commit();
 
         echo json_encode([
             'success' => true,
@@ -479,9 +480,9 @@ try {
             ]
         );
 
-        // Update room availability
+        // Update room availability and cleaning status
         $db->query(
-            "UPDATE rooms SET is_available = 0 WHERE id = :id",
+            "UPDATE rooms SET is_available = 0, needs_cleaning = 0 WHERE id = :id",
             ['id' => $room_id]
         );
 
@@ -501,6 +502,89 @@ try {
             'success' => true,
             'message' => 'Room assigned successfully',
             'booking_reference' => $reference
+        ]);
+        exit();
+    }
+
+    // CHECK-OUT GUEST
+    elseif ($action === 'checkout_guest') {
+        $booking_id = $_POST['booking_id'] ?? '';
+        $room_id = $_POST['room_id'] ?? '';
+
+        if (empty($booking_id) || empty($room_id)) {
+            throw new Exception('Booking ID and Room ID required');
+        }
+
+        $db->beginTransaction();
+
+        // Update booking status
+        $db->query(
+            "UPDATE bookings SET 
+                status = 'completed',
+                updated_at = NOW()
+             WHERE booking_reference = :reference OR id = :id",
+            [
+                'reference' => $booking_id,
+                'id' => is_numeric($booking_id) ? $booking_id : 0
+            ]
+        );
+
+        // Mark room as needing cleaning but available
+        $db->query(
+            "UPDATE rooms SET 
+                is_available = 1,
+                needs_cleaning = 1
+             WHERE id = :id",
+            ['id' => $room_id]
+        );
+
+        $db->commit();
+
+        // Create notification
+        $db->query(
+            "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
+             VALUES (:user_id, 'Guest Checked Out', :message, 'info', 'fa-door-open', NOW())",
+            [
+                'user_id' => $_SESSION['user_id'],
+                'message' => "Guest checked out from room {$room_id}. Room marked for cleaning."
+            ]
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Guest checked out successfully. Room marked for cleaning.'
+        ]);
+        exit();
+    }
+
+    // MARK ROOM AS CLEAN
+    elseif ($action === 'mark_as_clean') {
+        $room_id = $_POST['room_id'] ?? '';
+
+        if (empty($room_id)) {
+            throw new Exception('Room ID required');
+        }
+
+        $db->query(
+            "UPDATE rooms SET 
+                needs_cleaning = 0
+             WHERE id = :id",
+            ['id' => $room_id]
+        );
+
+        // Create notification
+        $db->query(
+            "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
+             VALUES (:user_id, 'Room Marked Clean', :message, 'success', 'fa-sparkles', NOW())",
+            [
+                'user_id' => $_SESSION['user_id'],
+                'message' => "Room {$room_id} has been marked as clean and ready for guests."
+            ]
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Room marked as clean'
         ]);
         exit();
     }
@@ -591,13 +675,24 @@ try {
     }
 
 } catch (Exception $e) {
+    // Rollback transaction if active
     if (isset($db)) {
-        $db->rollBack();
+        try {
+            $db->rollBack();
+        } catch (Exception $rollbackError) {
+            // Ignore rollback errors
+        }
     }
+
+    // Log the error
+    error_log('Room Actions Error: ' . $e->getMessage());
+    error_log('POST Data: ' . print_r($_POST, true));
+
+    // Return JSON error response
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
     ]);
+    exit();
 }
-exit();
 ?>

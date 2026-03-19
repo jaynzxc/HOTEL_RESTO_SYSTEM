@@ -29,7 +29,7 @@ $nav_items = [
         'url' => './index.php'
     ],
     'profile' => [
-        'icon' => 'fa-regular fa-user',
+        'icon' => 'fas fa-user',
         'label' => 'My Profile',
         'url' => './my_profile.php'
     ],
@@ -39,12 +39,12 @@ $nav_items = [
         'url' => './hotel_booking.php'
     ],
     'my_reservation' => [
-        'icon' => 'fa-regular fa-calendar-check',
+        'icon' => 'fas fa-calendar-check',
         'label' => 'My Reservations',
         'url' => './my_reservation.php'
     ],
     'restaurant_reservation' => [
-        'icon' => 'fa-regular fa-clock',
+        'icon' => 'fas fa-clock',
         'label' => 'Restaurant Reservation',
         'url' => './restaurant_reservation.php'
     ],
@@ -54,17 +54,17 @@ $nav_items = [
         'url' => './order_food.php'
     ],
     'payments' => [
-        'icon' => 'fa-regular fa-credit-card',
+        'icon' => 'fas fa-credit-card',
         'label' => 'Payments',
         'url' => './payments.php'
     ],
     'loyalty_rewards' => [
-        'icon' => 'fa-regular fa-star',
+        'icon' => 'fas fa-star',
         'label' => 'Loyalty Rewards',
         'url' => './loyalty_rewards.php'
     ],
     'notifications' => [
-        'icon' => 'fa-regular fa-bell',
+        'icon' => 'fas fa-bell',
         'label' => 'Notifications',
         'url' => './notifications.php',
         'badge' => $unread_count > 0 ? $unread_count : null
@@ -104,18 +104,18 @@ $nav_items = [
                 <?php echo htmlspecialchars($user['full_name'] ?? 'Guest'); ?>
             </p>
             <div class="flex items-center gap-1 text-xs text-slate-500">
-                <i class="fa-regular fa-gem text-[11px]"></i>
+                <i class="fas fa-gem text-[11px]"></i>
                 <span id="loyaltyTier"><?php echo htmlspecialchars($member_tier); ?></span>
                 <span class="mx-1">·</span>
                 <span class="flex items-center gap-1">
-                    <i class="fa-regular fa-star text-amber-500"></i>
+                    <i class="fas fa-star text-amber-500"></i>
                     <span id="points"><?php echo number_format($points); ?></span> pts
                 </span>
             </div>
             <!-- Added note about points being admin-managed (only visible on hover for clean UI) -->
             <p class="text-[10px] text-amber-600 mt-0.5 opacity-70 hover:opacity-100 transition-opacity cursor-help"
                 title="Loyalty points are added by admin after payment verification">
-                <i class="fa-regular fa-circle-info mr-1"></i>admin-managed
+                <i class="fas fa-circle-info mr-1"></i>admin-managed
             </p>
         </div>
     </div>
@@ -153,7 +153,7 @@ $nav_items = [
     <?php if (isset($show_upgrade_card) && $show_upgrade_card): ?>
         <div class="mx-4 mt-3 p-4 bg-linear-to-br from-amber-50 to-amber-100/60 rounded-2xl border border-amber-200/60">
             <div class="flex items-center gap-2 text-amber-700">
-                <i class="fa-regular fa-gem"></i>
+                <i class="fas fa-gem"></i>
                 <span class="font-semibold text-sm" id="upgradeTitle">
                     <?php
                     $nextTier = $nextTier ?? '';
@@ -175,7 +175,7 @@ $nav_items = [
             </p>
             <!-- Added note in upgrade card about admin-managed points -->
             <p class="text-[10px] text-amber-500 mt-2 border-t border-amber-200/40 pt-2">
-                <i class="fa-regular fa-clock mr-1"></i>
+                <i class="fas fa-clock mr-1"></i>
                 Points updated by admin after payment verification
             </p>
         </div>

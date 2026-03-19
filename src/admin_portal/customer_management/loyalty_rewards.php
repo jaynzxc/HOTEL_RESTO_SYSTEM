@@ -68,10 +68,10 @@ $current_page = 'loyalty_rewards';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i>
+                class="fas fa-calendar text-slate-400"></i>
               <?php echo $today; ?>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fa-regular fa-bell"></i></span>
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
           </div>
         </div>
 
@@ -171,7 +171,7 @@ $current_page = 'loyalty_rewards';
         <!-- ===== TOP MEMBERS TABLE ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h2 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-star text-amber-600"></i> top
+            <h2 class="font-semibold flex items-center gap-2"><i class="fas fa-star text-amber-600"></i> top
               members by points</h2>
             <div class="flex gap-2">
               <button onclick="viewAllMembers()"
@@ -281,7 +281,7 @@ $current_page = 'loyalty_rewards';
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <div class="flex items-center justify-between mb-3">
               <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                  class="fa-regular fa-gift text-amber-600"></i> available rewards</h2>
+                  class="fas fa-gift text-amber-600"></i> available rewards</h2>
               <button onclick="manageRewards()" class="text-sm text-amber-700 hover:underline">manage all</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -304,7 +304,7 @@ $current_page = 'loyalty_rewards';
           <!-- recent redemptions -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-clock-rotate-left text-amber-600"></i> recent redemptions</h3>
+                class="fas fa-clock-rotate-left text-amber-600"></i> recent redemptions</h3>
             <ul class="space-y-2 max-h-48 overflow-y-auto">
               <?php if (empty($recentRedemptions)): ?>
                 <li class="text-sm text-slate-500 italic">No recent redemptions</li>

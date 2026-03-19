@@ -104,7 +104,7 @@ $current_page = 'events_conference';
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -131,10 +131,10 @@ $current_page = 'events_conference';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate"></span></span>
+                class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span></span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm relative cursor-pointer"
               id="notificationBell">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -191,7 +191,7 @@ $current_page = 'events_conference';
         <!-- ===== TODAY'S EVENTS HIGHLIGHT ===== -->
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8">
           <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-              class="fa-regular fa-calendar-check text-amber-600"></i> today's events (<span
+              class="fas fa-calendar-check text-amber-600"></i> today's events (<span
               id="todayDateDisplay"></span>)</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="todaysEventsContainer">
             <!-- Dynamically populated by JS -->
@@ -201,7 +201,7 @@ $current_page = 'events_conference';
         <!-- ===== UPCOMING EVENTS TABLE ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h2 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-calendar text-amber-600"></i>
+            <h2 class="font-semibold flex items-center gap-2"><i class="fas fa-calendar text-amber-600"></i>
               upcoming events (next 7 days)</h2>
             <button class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50"
               id="exportBtn">export</button>
@@ -243,7 +243,7 @@ $current_page = 'events_conference';
           <!-- venue availability -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-building text-amber-600"></i> venue availability (today)</h2>
+                class="fas fa-building text-amber-600"></i> venue availability (today)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="venueAvailabilityContainer">
               <!-- Dynamically populated by JS -->
             </div>
@@ -251,7 +251,7 @@ $current_page = 'events_conference';
 
           <!-- quick event booking -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fa-regular fa-plus text-amber-600"></i>
+            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-plus text-amber-600"></i>
               quick event booking</h3>
             <div class="space-y-3" id="quickBookingForm">
               <div>
@@ -424,13 +424,13 @@ $current_page = 'events_conference';
                   <button
                     class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                     id="saveEventBtn">
-                    <i class="fa-regular fa-floppy-disk"></i>
+                    <i class="fas fa-floppy-disk"></i>
                     Save Event
                   </button>
                   <button
                     class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                     id="cancelModalBtn">
-                    <i class="fa-regular fa-times"></i>
+                    <i class="fas fa-times"></i>
                     Cancel
                   </button>
                 </div>
@@ -582,13 +582,13 @@ $current_page = 'events_conference';
                   <button
                     class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                     id="updateEventBtn">
-                    <i class="fa-regular fa-pen-to-square"></i>
+                    <i class="fas fa-pen-to-square"></i>
                     Update Event
                   </button>
                   <button
                     class="flex-1 border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
                     id="cancelEditModalBtn">
-                    <i class="fa-regular fa-times"></i>
+                    <i class="fas fa-times"></i>
                     Cancel
                   </button>
                 </div>
@@ -838,10 +838,10 @@ $current_page = 'events_conference';
                 <td class="p-3"><span class="${statusColors[event.status] || 'bg-green-100 text-green-700'} px-2 py-0.5 rounded-full text-xs">${event.status || 'confirmed'}</span></td>
                 <td class="p-3">
                   <button class="text-amber-600 hover:text-amber-700 text-xs mr-2 edit-event-btn" data-id="${event.id}" title="Edit">
-                    <i class="fa-regular fa-pen-to-square"></i>
+                    <i class="fas fa-pen-to-square"></i>
                   </button>
                   <button class="text-red-600 hover:text-red-700 text-xs delete-event-btn" data-id="${event.id}" title="Delete">
-                    <i class="fa-regular fa-trash-can"></i>
+                    <i class="fas fa-trash-can"></i>
                   </button>
                 </td>
               </tr>
@@ -1305,7 +1305,7 @@ $current_page = 'events_conference';
                         <option value="maintenance" ${venue.status === 'maintenance' ? 'selected' : ''}>Maintenance</option>
                       </select>
                       <button class="text-xs text-red-600 hover:underline px-2" onclick="deleteVenue(${venue.id})">
-                        <i class="fa-regular fa-trash-can"></i>
+                        <i class="fas fa-trash-can"></i>
                       </button>
                     </div>
                   </div>

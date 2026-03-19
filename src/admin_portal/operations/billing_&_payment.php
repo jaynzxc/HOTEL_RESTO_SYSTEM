@@ -102,19 +102,19 @@ require_once '../../../controller/admin/get/billing_payments.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../hotel_management/front_desk_reception.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-reception w-4 text-slate-400"></i> Front Desk / Reception</a>
+                  class="fas fa-reception w-4 text-slate-400"></i> Front Desk / Reception</a>
               <a href="../hotel_management/room_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-bed w-4 text-slate-400"></i> Room Management</a>
               <a href="../hotel_management/arrival/reservation_&_booking.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
+                  class="fas fa-calendar-check w-4 text-slate-400"></i> Reservations & Booking</a>
               <a href="../hotel_management/housekeeping_&_maintenance.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-broom w-4 text-slate-400"></i> Housekeeping & Maintenance</a>
               <a href="../hotel_management/event_&_conference.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
+                  class="fas fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
             </div>
           </details>
 
@@ -129,7 +129,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../restaurant_management/table_reservation.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-clock w-4"></i> Table Reservation</a>
+                  class="fas fa-clock w-4"></i> Table Reservation</a>
               <a href="../restaurant_management/menu_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-bars w-4"></i> Menu Management</a>
@@ -141,7 +141,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
                   class="fa-solid fa-fire w-4"></i> Kitchen Orders (KOT)</a>
               <a href="../restaurant_management/wait_staff_management.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-user w-4"></i> Wait Staff Management</a>
+                  class="fas fa-user w-4"></i> Wait Staff Management</a>
             </div>
           </details>
 
@@ -149,20 +149,20 @@ require_once '../../../controller/admin/get/billing_payments.php';
           <details class="group" open>
             <summary
               class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
-              <i class="fa-regular fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
+              <i class="fas fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
               <span class="font-medium">CUSTOMER MANAGEMENT</span>
               <i class="fa-solid fa-chevron-right dropdown-arrow ml-auto text-xs text-slate-400"></i>
             </summary>
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../customer_management/customer_relationship.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-handshake w-4"></i> Guest Relationship (CRM)</a>
+                  class="fas fa-handshake w-4"></i> Guest Relationship (CRM)</a>
               <a href="../customer_management/loyalty_rewards.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-star w-4"></i> Loyalty & Rewards</a>
+                  class="fas fa-star w-4"></i> Loyalty & Rewards</a>
               <a href="../customer_management/customer_feedback_&_reviews.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
+                  class="fas fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
             </div>
           </details>
 
@@ -180,7 +180,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
                   class="fa-solid fa-boxes w-4 text-slate-400"></i> Inventory & Stock</a>
               <a href="../operations/billing_&_payment.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100/50 text-amber-700 font-medium"><i
-                  class="fa-regular fa-credit-card w-4 text-amber-600"></i> Billing & Payments</a>
+                  class="fas fa-credit-card w-4 text-amber-600"></i> Billing & Payments</a>
               <a href="../operations/payment_gateway.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-wifi w-4 text-slate-400"></i> Payment Gateway</a>
@@ -198,7 +198,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             <div class="ml-6 mt-1 space-y-1 pl-3 border-l-2 border-amber-100">
               <a href="../marketing/hotelmarketing_&_promotions.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-gem w-4"></i> Hotel Marketing & Promotions</a>
+                  class="fas fa-gem w-4"></i> Hotel Marketing & Promotions</a>
               <a href="../marketing/online_ordering_integration.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-cart-shopping w-4"></i> Online Ordering Integration</a>
@@ -219,7 +219,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
                   class="fa-solid fa-chart-line w-4"></i> Sales Reports</a>
               <a href="../reports_&_analytics/booking_reports.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
-                  class="fa-regular fa-calendar w-4"></i> Booking Reports</a>
+                  class="fas fa-calendar w-4"></i> Booking Reports</a>
               <a href="../reports_&_analytics/analytics_dashboard.php"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i
                   class="fa-solid fa-chart-pie w-4"></i> Analytics Dashboard</a>
@@ -270,8 +270,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fa-regular fa-bell"></i></span>
+                class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
           </div>
         </div>
 
@@ -307,7 +307,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             $color = $methodColors[$method['payment_method']] ?? [
               'bg' => 'bg-slate-50',
               'border' => 'border-slate-200',
-              'icon' => 'fa-regular fa-credit-card',
+              'icon' => 'fas fa-credit-card',
               'color' => 'text-slate-600'
             ];
             ?>
@@ -337,7 +337,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             <?php if (!empty($pendingApprovals)): ?>
               <button onclick="viewPendingApprovals()"
                 class="relative border border-amber-600 text-amber-700 px-4 py-2 rounded-xl text-sm hover:bg-amber-50 transition">
-                <i class="fa-regular fa-clock mr-1"></i> pending approvals
+                <i class="fas fa-clock mr-1"></i> pending approvals
                 <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                   <?php echo count($pendingApprovals); ?>
                 </span>
@@ -370,7 +370,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
             <h2 class="font-semibold flex items-center gap-2"><i
-                class="fa-regular fa-rectangle-list text-amber-600"></i> recent invoices</h2>
+                class="fas fa-rectangle-list text-amber-600"></i> recent invoices</h2>
             <div class="flex gap-2">
               <button onclick="viewAllInvoices()"
                 class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50 transition">view
@@ -470,7 +470,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
           <!-- recent transactions -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-clock text-amber-600"></i> recent transactions</h2>
+                class="fas fa-clock text-amber-600"></i> recent transactions</h2>
             <div class="space-y-3 max-h-60 overflow-y-auto">
               <?php if (empty($recentTransactions)): ?>
                 <p class="text-sm text-slate-400 text-center py-4">No recent transactions</p>
@@ -494,7 +494,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
           <!-- quick payment recording -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fa-regular fa-credit-card text-amber-600"></i> quick payment</h3>
+                class="fas fa-credit-card text-amber-600"></i> quick payment</h3>
             <form id="quickPaymentForm" onsubmit="quickPayment(event)">
               <div class="space-y-3">
                 <input type="text" id="quickInvoice" placeholder="invoice #"

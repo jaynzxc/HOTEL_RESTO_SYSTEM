@@ -73,7 +73,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -96,17 +96,17 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
           <div>
             <div class="flex items-center gap-2 text-sm text-slate-500 mb-1">
               <a href="../front_desk_reception.php" class="hover:text-amber-600 transition">
-                <i class="fa-regular fa-arrow-left"></i> Back to Front Desk
+                <i class="fas fa-arrow-left"></i> Back to Front Desk
               </a>
             </div>
             <h1 class="text-2xl lg:text-3xl font-light text-slate-800 flex items-center gap-2">
-              <i class="fa-regular fa-message text-amber-600"></i> All Guest Requests
+              <i class="fas fa-message text-amber-600"></i> All Guest Requests
             </h1>
             <p class="text-sm text-slate-500 mt-0.5">complete list of all guest requests</p>
           </div>
           <div class="flex gap-2">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm text-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate"></span>
+              <i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span>
             </span>
           </div>
         </div>
@@ -118,7 +118,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             onclick="filterByStatus('all')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                <i class="fa-regular fa-message"></i>
+                <i class="fas fa-message"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Total Requests</p>
@@ -131,7 +131,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             onclick="filterByStatus('pending')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700">
-                <i class="fa-regular fa-clock"></i>
+                <i class="fas fa-clock"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Pending</p>
@@ -144,7 +144,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             onclick="filterByStatus('in-progress')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                <i class="fa-regular fa-spinner"></i>
+                <i class="fas fa-spinner"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">In Progress</p>
@@ -157,7 +157,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
             onclick="filterByStatus('done')">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-700">
-                <i class="fa-regular fa-circle-check"></i>
+                <i class="fas fa-circle-check"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">Done</p>
@@ -170,7 +170,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         <!-- Search Bar -->
         <div class="mb-6">
           <div class="relative">
-            <i class="fa-regular fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
             <input type="text" id="searchInput" placeholder="Search by guest name, request, or subject..."
               class="w-full border border-slate-200 rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               value="<?php echo htmlspecialchars($searchFilter); ?>">
@@ -422,17 +422,17 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
                     <td>
                         <div class="flex gap-2">
                             <button onclick="viewRequest(${request.id})" class="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition" title="View details">
-                                <i class="fa-regular fa-eye"></i>
+                                <i class="fas fa-eye"></i>
                             </button>
                             ${request.status !== 'done' ? `
                                 <button onclick="openResponseModal(${request.id})" class="text-xs text-amber-600 border border-amber-600 px-2 py-1 rounded hover:bg-amber-50 transition" title="Add response">
-                                    <i class="fa-regular fa-reply"></i>
+                                    <i class="fas fa-reply"></i>
                                 </button>
                                 <button onclick="openAssignModal(${request.id})" class="text-xs text-purple-600 border border-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition" title="Assign staff">
-                                    <i class="fa-regular fa-user"></i>
+                                    <i class="fas fa-user"></i>
                                 </button>
                                 <button onclick="markAsDone(${request.id})" class="text-xs text-green-600 border border-green-600 px-2 py-1 rounded hover:bg-green-50 transition" title="Mark as done">
-                                    <i class="fa-regular fa-circle-check"></i>
+                                    <i class="fas fa-circle-check"></i>
                                 </button>
                             ` : ''}
                         </div>

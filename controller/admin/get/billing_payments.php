@@ -110,9 +110,9 @@ $methodColors = [
     'GCash' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'icon' => 'fa-brands fa-gcash', 'color' => 'text-blue-600'],
     'Visa' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'icon' => 'fa-brands fa-cc-visa', 'color' => 'text-green-600'],
     'Mastercard' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'icon' => 'fa-brands fa-cc-mastercard', 'color' => 'text-green-600'],
-    'Credit card' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'icon' => 'fa-regular fa-credit-card', 'color' => 'text-green-600'],
+    'Credit card' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'icon' => 'fas fa-credit-card', 'color' => 'text-green-600'],
     'Cash' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'icon' => 'fa-solid fa-money-bill-wave', 'color' => 'text-amber-600'],
-    'Bank transfer' => ['bg' => 'bg-purple-50', 'border' => 'border-purple-200', 'icon' => 'fa-regular fa-building', 'color' => 'text-purple-600']
+    'Bank transfer' => ['bg' => 'bg-purple-50', 'border' => 'border-purple-200', 'icon' => 'fas fa-building', 'color' => 'text-purple-600']
 ];
 
 // Build WHERE clause for invoices - FIXED: Added table alias for payment_status

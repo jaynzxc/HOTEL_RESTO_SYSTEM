@@ -2,7 +2,7 @@
 <?php if (!empty($_SESSION['success'])): ?>
     <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
         <?php foreach ($_SESSION['success'] as $message): ?>
-            <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i>
+            <p class="text-sm"><i class="fas fa-circle-check mr-2"></i>
                 <?php echo htmlspecialchars($message); ?>
             </p>
         <?php endforeach; ?>

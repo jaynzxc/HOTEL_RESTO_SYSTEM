@@ -45,7 +45,7 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <i class="fas fa-calendar text-slate-400"></i>
             <?php echo date('l, d F Y'); ?>
           </div>
         </div>
@@ -55,7 +55,7 @@
         <!-- ===== LEAVE A REVIEW SECTION ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <h2 class="font-semibold text-xl flex items-center gap-2 mb-4">
-            <i class="fa-regular fa-pen-to-square text-amber-600"></i>
+            <i class="fas fa-pen-to-square text-amber-600"></i>
             <span id="formTitle">write a new review</span>
           </h2>
 
@@ -80,11 +80,11 @@
               <div>
                 <label class="block text-xs text-slate-500 mb-1">your rating *</label>
                 <div class="flex items-center gap-1 text-3xl text-slate-300" id="ratingStars">
-                  <i class="fa-regular fa-star rating-star" data-value="1"></i>
-                  <i class="fa-regular fa-star rating-star" data-value="2"></i>
-                  <i class="fa-regular fa-star rating-star" data-value="3"></i>
-                  <i class="fa-regular fa-star rating-star" data-value="4"></i>
-                  <i class="fa-regular fa-star rating-star" data-value="5"></i>
+                  <i class="fas fa-star rating-star" data-value="1"></i>
+                  <i class="fas fa-star rating-star" data-value="2"></i>
+                  <i class="fas fa-star rating-star" data-value="3"></i>
+                  <i class="fas fa-star rating-star" data-value="4"></i>
+                  <i class="fas fa-star rating-star" data-value="5"></i>
                   <input type="hidden" name="rating" id="ratingValue" value="0">
                   <span class="text-sm text-slate-500 ml-3" id="ratingDisplay">0/5</span>
                 </div>
@@ -118,13 +118,13 @@
           </form>
 
           <p class="text-xs text-green-600 mt-3 flex items-center gap-1" id="pointsHint">
-            <i class="fa-regular fa-circle-check"></i> earn 20 loyalty points per review!
+            <i class="fas fa-circle-check"></i> earn 20 loyalty points per review!
           </p>
         </div>
 
         <!-- ===== MY PAST REVIEWS ===== -->
         <h2 class="font-semibold text-xl mb-4 flex items-center gap-2">
-          <i class="fa-regular fa-clock-rotate-left text-amber-600"></i> my past reviews
+          <i class="fas fa-clock-rotate-left text-amber-600"></i> my past reviews
         </h2>
 
         <div id="myReviewsContainer" class="space-y-4 mb-8">
@@ -166,7 +166,7 @@
                       <?php if (!empty($review['response_id'])): ?>
                         <div class="mt-3 p-3 bg-amber-50 rounded-xl border-l-4 border-amber-300">
                           <div class="flex items-center gap-2 mb-1">
-                            <i class="fa-regular fa-reply text-amber-600 text-xs"></i>
+                            <i class="fas fa-reply text-amber-600 text-xs"></i>
                             <p class="text-xs font-medium text-amber-700">Management response:</p>
                             <span class="text-[10px] text-slate-500">by
                               <?php echo htmlspecialchars($review['responder_name'] ?? 'Admin'); ?></span>
@@ -208,7 +208,7 @@
         <!-- ===== RECENT REVIEWS FROM OTHER GUESTS ===== -->
         <!-- ===== RECENT REVIEWS FROM OTHER GUESTS ===== -->
         <h2 class="font-semibold text-xl mb-4 flex items-center gap-2">
-          <i class="fa-regular fa-comments text-amber-600"></i> recent guest reviews
+          <i class="fas fa-comments text-amber-600"></i> recent guest reviews
         </h2>
 
         <div id="guestReviewsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -250,7 +250,7 @@
                 <?php if (!empty($review['admin_response'])): ?>
                   <div class="mt-2 p-2 bg-amber-50 rounded-lg border-l-2 border-amber-300 text-xs">
                     <p class="font-medium text-amber-700 flex items-center gap-1">
-                      <i class="fa-regular fa-reply"></i> Management response:
+                      <i class="fas fa-reply"></i> Management response:
                     </p>
                     <p class="text-slate-600 mt-1"><?php echo nl2br(htmlspecialchars($review['admin_response'])); ?></p>
                     <p class="text-[10px] text-slate-400 mt-1">
@@ -260,7 +260,7 @@
                 <?php endif; ?>
 
                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                  <i class="fa-regular fa-clock"></i>
+                  <i class="fas fa-clock"></i>
                   <?php echo time_elapsed_string($review['created_at']); ?> ·
                   <span class="text-slate-500"><?php echo htmlspecialchars($review['experience']); ?></span>
                 </p>
@@ -297,7 +297,7 @@
         if (currentRating > 0) {
           ratingStars.forEach((star, idx) => {
             if (idx < currentRating) {
-              star.classList.remove('fa-regular', 'text-slate-300');
+              star.classList.remove('fas', 'text-slate-300');
               star.classList.add('fa-solid', 'text-yellow-400');
             }
           });
@@ -313,11 +313,11 @@
 
             ratingStars.forEach((s, idx) => {
               if (idx < val) {
-                s.classList.remove('fa-regular', 'text-slate-300');
+                s.classList.remove('fas', 'text-slate-300');
                 s.classList.add('fa-solid', 'text-yellow-400');
               } else {
                 s.classList.remove('fa-solid', 'text-yellow-400');
-                s.classList.add('fa-regular', 'text-slate-300');
+                s.classList.add('fas', 'text-slate-300');
               }
             });
 
@@ -356,11 +356,11 @@
             currentRating = rating;
             ratingStars.forEach((s, idx) => {
               if (idx < rating) {
-                s.classList.remove('fa-regular', 'text-slate-300');
+                s.classList.remove('fas', 'text-slate-300');
                 s.classList.add('fa-solid', 'text-yellow-400');
               } else {
                 s.classList.remove('fa-solid', 'text-yellow-400');
-                s.classList.add('fa-regular', 'text-slate-300');
+                s.classList.add('fas', 'text-slate-300');
               }
             });
             ratingDisplay.innerText = rating + '/5';
@@ -393,7 +393,7 @@
           currentRating = 0;
           ratingStars.forEach(s => {
             s.classList.remove('fa-solid', 'text-yellow-400');
-            s.classList.add('fa-regular', 'text-slate-300');
+            s.classList.add('fas', 'text-slate-300');
           });
           ratingDisplay.innerText = '0/5';
           ratingValue.value = '0';

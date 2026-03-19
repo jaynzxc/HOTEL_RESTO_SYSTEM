@@ -73,7 +73,7 @@ $current_page = 'reservation_&_booking';
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -100,12 +100,12 @@ $current_page = 'reservation_&_booking';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i>
+              <i class="fas fa-calendar text-slate-400"></i>
               <span id="currentDate"><?php echo date('F j, Y'); ?></span>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
               id="notificationBell">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -144,7 +144,7 @@ $current_page = 'reservation_&_booking';
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
           <div class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-4">
             <div class="h-12 w-12 rounded-full bg-green-200 flex items-center justify-center text-green-700">
-              <i class="fa-regular fa-calendar-check text-xl"></i>
+              <i class="fas fa-calendar-check text-xl"></i>
             </div>
             <div>
               <p class="text-sm text-green-700 font-medium">Today's arrivals</p>
@@ -157,7 +157,7 @@ $current_page = 'reservation_&_booking';
           </div>
           <div class=" bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-4">
             <div class="h-12 w-12 rounded-full bg-orange-200 flex items-center justify-center text-orange-700">
-              <i class="fa-regular fa-calendar-xmark text-xl"></i>
+              <i class="fas fa-calendar-xmark text-xl"></i>
             </div>
             <div>
               <p class="text-sm text-orange-700 font-medium">Today's departures</p>
@@ -259,7 +259,7 @@ $current_page = 'reservation_&_booking';
                           title="<?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'Points already awarded: ' . $res['points_earned'] : 'Points to earn: ' . $res['points_earned'] . ' (add manually)'; ?>">
                           +<?php echo $res['points_earned']; ?>
                           <i
-                            class="fa-regular <?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'fa-circle-check text-green-500' : 'fa-star text-amber-500'; ?>"></i>
+                            class="fas <?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'fa-circle-check text-green-500' : 'fa-star text-amber-500'; ?>"></i>
                         </span>
                                         <?php else: ?>
                         <span class="text-xs text-slate-400">—</span>
@@ -269,20 +269,20 @@ $current_page = 'reservation_&_booking';
                       <div class="flex gap-2">
                         <button onclick="editReservation(<?php echo $res['id']; ?>)"
                           class="text-amber-700 hover:underline text-xs" title="Edit">
-                          <i class="fa-regular fa-pen-to-square"></i>
+                          <i class="fas fa-pen-to-square"></i>
                         </button>
 
                         <?php if ($res['status'] !== 'cancelled' && $res['status'] !== 'completed'): ?>
                           <button onclick="updateStatus(<?php echo $res['id']; ?>, '<?php echo $res['status']; ?>')"
                             class="text-blue-600 hover:underline text-xs" title="Update Status">
-                            <i class="fa-regular fa-arrow-rotate-right"></i>
+                            <i class="fas fa-arrow-rotate-right"></i>
                           </button>
                                           <?php endif; ?>
 
                         <?php if ($res['status'] === 'cancelled'): ?>
                           <button onclick="archiveReservation(<?php echo $res['id']; ?>)"
                             class="text-slate-400 hover:text-slate-600 text-xs" title="Archive">
-                            <i class="fa-regular fa-box-archive"></i>
+                            <i class="fas fa-box-archive"></i>
                           </button>
                                           <?php endif; ?>
 
@@ -292,14 +292,14 @@ $current_page = 'reservation_&_booking';
                             <!-- Already awarded - disabled button -->
                             <button disabled class="text-slate-300 cursor-not-allowed text-xs"
                               title="Points already awarded (<?php echo $res['points_earned']; ?> points)">
-                              <i class="fa-regular fa-star"></i>
+                              <i class="fas fa-star"></i>
                             </button>
                                             <?php else: ?>
                             <!-- Not yet awarded - active button -->
                             <button onclick="addPoints(<?php echo $res['id']; ?>, <?php echo $res['points_earned']; ?>)"
                               class="text-amber-600 hover:text-amber-700 text-xs"
                               title="Add <?php echo $res['points_earned']; ?> points to user">
-                              <i class="fa-regular fa-star"></i>
+                              <i class="fas fa-star"></i>
                             </button>
                                             <?php endif; ?>
                                           <?php endif; ?>
@@ -354,7 +354,7 @@ $current_page = 'reservation_&_booking';
           <!-- new booking quick form -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3">
-              <i class="fa-regular fa-plus text-amber-600"></i> quick new booking
+              <i class="fas fa-plus text-amber-600"></i> quick new booking
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -421,7 +421,7 @@ $current_page = 'reservation_&_booking';
           <!-- recent activity -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3">
-              <i class="fa-regular fa-clock-rotate-left text-amber-600"></i> recent activity
+              <i class="fas fa-clock-rotate-left text-amber-600"></i> recent activity
             </h3>
             <ul class="space-y-3 text-sm" id="recentActivityList">
               <?php foreach ($recentActivity as $activity): ?>
@@ -1100,14 +1100,14 @@ $current_page = 'reservation_&_booking';
               if (data.count > 0) {
                 resultDiv.innerHTML = `
               <div class="bg-green-50 text-green-700 p-3 rounded-lg">
-                <i class="fa-regular fa-circle-check mr-2"></i>
+                <i class="fas fa-circle-check mr-2"></i>
                 ${data.count} rooms available for these dates
               </div>
             `;
               } else {
                 resultDiv.innerHTML = `
               <div class="bg-red-50 text-red-700 p-3 rounded-lg">
-                <i class="fa-regular fa-circle-exclamation mr-2"></i>
+                <i class="fas fa-circle-exclamation mr-2"></i>
                 No rooms available for these dates
               </div>
             `;

@@ -130,7 +130,7 @@ $current_page = 'menu_management';
     <div id="toast" class="toast hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -425,11 +425,11 @@ $current_page = 'menu_management';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?>
+              <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
               id="notificationBell">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -443,7 +443,7 @@ $current_page = 'menu_management';
           <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-red-200 flex items-center justify-center text-red-700">
-                <i class="fa-regular fa-triangle-exclamation"></i>
+                <i class="fas fa-triangle-exclamation"></i>
               </div>
               <div>
                 <p class="font-medium text-red-800">Low Stock Alert</p>
@@ -587,7 +587,7 @@ $current_page = 'menu_management';
                       <td class="p-4">
                         <div class="flex items-center gap-3">
                           <div class="h-10 w-10 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500">
-                            <i class="fa-regular fa-image text-xs"></i>
+                            <i class="fas fa-image text-xs"></i>
                           </div>
                           <div>
                             <span class="font-medium"><?php echo htmlspecialchars($item['name']); ?></span>
@@ -601,7 +601,7 @@ $current_page = 'menu_management';
                       <td class="p-4 <?php echo $item['stock'] <= 10 ? 'text-rose-600 font-medium' : ''; ?>">
                         <?php echo $item['stock']; ?>
                         <?php if ($item['stock'] <= 10 && $item['stock'] > 0): ?>
-                          <i class="fa-regular fa-triangle-exclamation text-rose-500 ml-1" title="Low stock"></i>
+                          <i class="fas fa-triangle-exclamation text-rose-500 ml-1" title="Low stock"></i>
                         <?php endif; ?>
                       </td>
                       <td class="p-4">
@@ -612,17 +612,17 @@ $current_page = 'menu_management';
                       <td class="p-4">
                         <button class="text-amber-700 text-xs hover:underline mr-2"
                           onclick="editItem(<?php echo $item['id']; ?>)">
-                          <i class="fa-regular fa-pen-to-square"></i> edit
+                          <i class="fas fa-pen-to-square"></i> edit
                         </button>
                         <?php if ($item['status'] == 'out_of_stock' || $item['stock'] <= 0): ?>
                           <button class="text-emerald-600 text-xs hover:underline"
                             onclick="openRestockModal(<?php echo $item['id']; ?>)">
-                            <i class="fa-regular fa-box"></i> restock
+                            <i class="fas fa-box"></i> restock
                           </button>
                         <?php else: ?>
                           <button class="text-rose-600 text-xs hover:underline"
                             onclick="toggleItemStatus(<?php echo $item['id']; ?>, this)">
-                            <i class="fa-regular fa-ban"></i> disable
+                            <i class="fas fa-ban"></i> disable
                           </button>
                         <?php endif; ?>
                       </td>

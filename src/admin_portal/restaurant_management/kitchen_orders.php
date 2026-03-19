@@ -132,7 +132,7 @@ $current_page = 'kitchen_orders';
   <div id="toast" class="toast hidden">
     <div class="flex items-center gap-3">
       <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-        <i class="fa-regular fa-bell"></i>
+        <i class="fas fa-bell"></i>
       </div>
       <div>
         <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -214,10 +214,10 @@ $current_page = 'kitchen_orders';
         </div>
         <div class="flex gap-3 text-sm">
           <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?>
+            <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
           </span>
           <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative" id="notificationBell">
-            <i class="fa-regular fa-bell"></i>
+            <i class="fas fa-bell"></i>
             <?php if ($unread_count > 0): ?>
                 <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
             <?php endif; ?>
@@ -327,11 +327,11 @@ $current_page = 'kitchen_orders';
                     <td class="px-5 py-3"><?php echo $order['wait_time_minutes']; ?> min</td>
                     <td class="px-5 py-3">
                       <button class="edit-btn text-amber-600 hover:text-amber-800 mr-2" onclick="openEditModal('<?php echo $order['order_reference']; ?>')" title="Edit">
-                        <i class="fa-regular fa-pen-to-square"></i>
+                        <i class="fas fa-pen-to-square"></i>
                       </button>
                       <?php if ($order['status'] !== 'urgent'): ?>
                           <button class="urgent-btn text-red-600 hover:text-red-800" onclick="markAsUrgent('<?php echo $order['order_reference']; ?>')" title="Mark Urgent">
-                            <i class="fa-regular fa-clock"></i>
+                            <i class="fas fa-clock"></i>
                           </button>
                       <?php endif; ?>
                     </td>
@@ -345,7 +345,7 @@ $current_page = 'kitchen_orders';
       <!-- BOTTOM: EXPANDED PREPARATION QUEUE -->
       <div class="bg-white rounded-2xl border border-slate-200 p-6">
         <h2 class="font-semibold text-lg flex items-center gap-2 mb-4">
-          <i class="fa-regular fa-rectangle-list text-amber-600"></i> preparation queue
+          <i class="fas fa-rectangle-list text-amber-600"></i> preparation queue
         </h2>
 
         <!-- Expanded queue table -->
@@ -399,7 +399,7 @@ $current_page = 'kitchen_orders';
                       </td>
                       <td class="px-4 py-3">
                         <button class="text-amber-600 hover:text-amber-800" onclick="openEditModal('<?php echo $item['order_reference']; ?>')">
-                          <i class="fa-regular fa-pen-to-square"></i>
+                          <i class="fas fa-pen-to-square"></i>
                         </button>
                       </td>
                     </tr>
@@ -417,10 +417,10 @@ $current_page = 'kitchen_orders';
           </div>
           <div class="flex gap-2">
             <button id="refreshQueueBtn" class="text-amber-600 hover:text-amber-800 text-xs flex items-center gap-1" onclick="refreshQueue()">
-              <i class="fa-regular fa-clock"></i> refresh queue
+              <i class="fas fa-clock"></i> refresh queue
             </button>
             <button id="viewAllBtn" class="text-amber-600 hover:text-amber-800 text-xs flex items-center gap-1" onclick="viewAllOrders()">
-              <i class="fa-regular fa-file-lines"></i> view all
+              <i class="fas fa-file-lines"></i> view all
             </button>
           </div>
         </div>

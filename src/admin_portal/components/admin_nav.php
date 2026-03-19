@@ -32,7 +32,7 @@ $nav_groups = [
             'front_desk' => [
                 'label' => 'Front Desk / Reception',
                 'url' => '/src/admin_portal/hotel_management/front_desk_reception.php',
-                'icon' => 'fa-regular fa-reception'
+                'icon' => 'fas fa-reception'
             ],
             'room_management' => [
                 'label' => 'Room Management',
@@ -42,7 +42,7 @@ $nav_groups = [
             'reservations_booking' => [
                 'label' => 'Reservations & Booking',
                 'url' => '/src/admin_portal/hotel_management/reservation_&_booking.php',
-                'icon' => 'fa-regular fa-calendar-check'
+                'icon' => 'fas fa-calendar-check'
             ],
             'housekeeping' => [
                 'label' => 'Housekeeping & Maintenance',
@@ -52,7 +52,7 @@ $nav_groups = [
             'events_conference' => [
                 'label' => 'Events & Conference',
                 'url' => '/src/admin_portal/hotel_management/event_&_conference.php',
-                'icon' => 'fa-regular fa-calendar'
+                'icon' => 'fas fa-calendar'
             ]
         ]
     ],
@@ -64,7 +64,7 @@ $nav_groups = [
             'table_reservation' => [
                 'label' => 'Table Reservation',
                 'url' => '/src/admin_portal/restaurant_management/table_reservation.php',
-                'icon' => 'fa-regular fa-clock'
+                'icon' => 'fas fa-clock'
             ],
             'menu_management' => [
                 'label' => 'Menu Management',
@@ -84,29 +84,29 @@ $nav_groups = [
             'wait_staff' => [
                 'label' => 'Wait Staff Management',
                 'url' => '/src/admin_portal/restaurant_management/wait_staff_management.php',
-                'icon' => 'fa-regular fa-user'
+                'icon' => 'fas fa-user'
             ]
         ]
     ],
     'customer_management' => [
         'type' => 'group',
-        'icon' => 'fa-regular fa-address-book',
+        'icon' => 'fas fa-address-book',
         'label' => 'CUSTOMER MANAGEMENT',
         'items' => [
             'crm' => [
                 'label' => 'Guest Relationship (CRM)',
                 'url' => '/src/admin_portal/customer_management/customer_relationship.php',
-                'icon' => 'fa-regular fa-handshake'
+                'icon' => 'fas fa-handshake'
             ],
             'loyalty_rewards' => [
                 'label' => 'Loyalty & Rewards',
                 'url' => '/src/admin_portal/customer_management/loyalty_rewards.php',
-                'icon' => 'fa-regular fa-star'
+                'icon' => 'fas fa-star'
             ],
             'feedback_reviews' => [
                 'label' => 'Customer Feedback & Reviews',
                 'url' => '/src/admin_portal/customer_management/customer_feedback_&_reviews.php',
-                'icon' => 'fa-regular fa-pen-to-square'
+                'icon' => 'fas fa-pen-to-square'
             ]
         ]
     ],
@@ -123,7 +123,7 @@ $nav_groups = [
             'billing_payments' => [
                 'label' => 'Billing & Payments',
                 'url' => '/src/admin_portal/operations/billing_&_payment.php',
-                'icon' => 'fa-regular fa-credit-card'
+                'icon' => 'fas fa-credit-card'
             ],
             'payment_gateway' => [
                 'label' => 'Payment Gateway',
@@ -140,7 +140,7 @@ $nav_groups = [
             'promotions' => [
                 'label' => 'Hotel Marketing & Promotions',
                 'url' => '/src/admin_portal/marketing/hotelmarketing_&_promotions.php',
-                'icon' => 'fa-regular fa-gem'
+                'icon' => 'fas fa-gem'
             ],
             'online_ordering' => [
                 'label' => 'Online Ordering Integration',
@@ -162,7 +162,7 @@ $nav_groups = [
             'booking_reports' => [
                 'label' => 'Booking Reports',
                 'url' => '/src/admin_portal/reports_&_analytics/booking_reports.php',
-                'icon' => 'fa-regular fa-calendar'
+                'icon' => 'fas fa-calendar'
             ],
             'analytics_dashboard' => [
                 'label' => 'Analytics Dashboard',

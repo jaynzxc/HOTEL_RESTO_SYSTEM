@@ -106,7 +106,7 @@ $current_page = 'front_desk_reception';
     <div id="toast" class="toast bg-white rounded-xl p-4 min-w-75 shadow-lg border border-amber-200 hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -120,7 +120,7 @@ $current_page = 'front_desk_reception';
       <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-calendar-check text-amber-600"></i> Check-in Guest
+            <i class="fas fa-calendar-check text-amber-600"></i> Check-in Guest
           </h3>
           <button onclick="closeModal('checkinModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
@@ -186,7 +186,7 @@ $current_page = 'front_desk_reception';
       <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-calendar-xmark text-amber-600"></i> Check-out Guest
+            <i class="fas fa-calendar-xmark text-amber-600"></i> Check-out Guest
           </h3>
           <button onclick="closeModal('checkoutModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
@@ -247,7 +247,7 @@ $current_page = 'front_desk_reception';
       <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-user text-amber-600"></i> Walk-in Guest
+            <i class="fas fa-user text-amber-600"></i> Walk-in Guest
           </h3>
           <button onclick="closeModal('walkinModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
@@ -322,7 +322,7 @@ $current_page = 'front_desk_reception';
       <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-xl font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-bell text-amber-600"></i> Notify Guest
+            <i class="fas fa-bell text-amber-600"></i> Notify Guest
           </h3>
           <button onclick="closeModal('notifyModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
@@ -374,12 +374,12 @@ $current_page = 'front_desk_reception';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <span
+              <i class="fas fa-calendar text-slate-400"></i> <span
                 id="currentDate"><?php echo date('F j, Y'); ?></span>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
               onclick="viewNotifications()">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -393,7 +393,7 @@ $current_page = 'front_desk_reception';
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-700"><i
-                  class="fa-regular fa-calendar-check"></i></div>
+                  class="fas fa-calendar-check"></i></div>
               <div>
                 <p class="text-xs text-slate-500">Arrivals today</p>
                 <p class="text-2xl font-semibold" id="arrivalsCount"><?php echo count($arrivals); ?></p>
@@ -403,7 +403,7 @@ $current_page = 'front_desk_reception';
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700"><i
-                  class="fa-regular fa-calendar-xmark"></i></div>
+                  class="fas fa-calendar-xmark"></i></div>
               <div>
                 <p class="text-xs text-slate-500">Departures today</p>
                 <p class="text-2xl font-semibold" id="departuresCount"><?php echo count($departures); ?></p>
@@ -413,7 +413,7 @@ $current_page = 'front_desk_reception';
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700"><i
-                  class="fa-regular fa-building"></i></div>
+                  class="fas fa-building"></i></div>
               <div>
                 <p class="text-xs text-slate-500">Occupied rooms</p>
                 <p class="text-2xl font-semibold" id="occupiedRooms"><?php echo $roomStats['occupied'] ?? 0; ?></p>
@@ -423,7 +423,7 @@ $current_page = 'front_desk_reception';
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700"><i
-                  class="fa-regular fa-message"></i></div>
+                  class="fas fa-message"></i></div>
               <div>
                 <p class="text-xs text-slate-500">Guest requests</p>
                 <p class="text-2xl font-semibold" id="guestRequests"><?php echo count($guestRequests); ?></p>
@@ -442,7 +442,7 @@ $current_page = 'front_desk_reception';
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                    class="fa-regular fa-calendar-check text-amber-600"></i> Today's arrivals (check-in)</h2>
+                    class="fas fa-calendar-check text-amber-600"></i> Today's arrivals (check-in)</h2>
                 <button onclick="openWalkinModal()"
                   class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50">+ quick
                   check-in</button>
@@ -486,7 +486,7 @@ $current_page = 'front_desk_reception';
                                 class="text-amber-700 text-xs border border-amber-600 px-2 py-1 rounded hover:bg-amber-50">check
                                 in</button>
                             <?php else: ?>
-                              <span class="text-xs text-green-600"><i class="fa-regular fa-circle-check"></i> checked
+                              <span class="text-xs text-green-600"><i class="fas fa-circle-check"></i> checked
                                 in</span>
                             <?php endif; ?>
                           </td>
@@ -502,7 +502,7 @@ $current_page = 'front_desk_reception';
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                    class="fa-regular fa-calendar-xmark text-amber-600"></i> Today's departures (check-out)</h2>
+                    class="fas fa-calendar-xmark text-amber-600"></i> Today's departures (check-out)</h2>
                 <button onclick="batchCheckout()"
                   class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50">batch
                   check-out</button>
@@ -549,7 +549,7 @@ $current_page = 'front_desk_reception';
                                 class="text-amber-700 text-xs border border-amber-600 px-2 py-1 rounded hover:bg-amber-50">check
                                 out</button>
                             <?php else: ?>
-                              <span class="text-xs text-green-600"><i class="fa-regular fa-circle-check"></i> completed</span>
+                              <span class="text-xs text-green-600"><i class="fas fa-circle-check"></i> completed</span>
                             <?php endif; ?>
                           </td>
                         </tr>
@@ -566,7 +566,7 @@ $current_page = 'front_desk_reception';
             <!-- active guest requests -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                  class="fa-regular fa-message text-amber-600"></i> Active guest requests</h3>
+                  class="fas fa-message text-amber-600"></i> Active guest requests</h3>
               <ul class="space-y-3" id="requestsList">
                 <?php if (empty($guestRequests)): ?>
                   <li class="text-center text-slate-500 py-2">No active requests</li>
@@ -588,7 +588,7 @@ $current_page = 'front_desk_reception';
                         </span>
                         <button onclick="completeRequest(<?php echo $request['id']; ?>)"
                           class="text-xs text-green-600 hover:text-green-700">
-                          <i class="fa-regular fa-circle-check"></i>
+                          <i class="fas fa-circle-check"></i>
                         </button>
                       </div>
                     </li>
@@ -603,7 +603,7 @@ $current_page = 'front_desk_reception';
             <!-- today's summary -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
               <h3 class="font-semibold flex items-center gap-2 mb-2"><i
-                  class="fa-regular fa-clipboard text-amber-600"></i> today's summary</h3>
+                  class="fas fa-clipboard text-amber-600"></i> today's summary</h3>
               <div class="space-y-1 text-sm" id="todaySummary">
                 <div class="flex justify-between">
                   <span>Checked in</span>
@@ -634,7 +634,7 @@ $current_page = 'front_desk_reception';
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                class="fa-regular fa-rectangle-list text-amber-600"></i> Upcoming reservations (next 3 days)</h2>
+                class="fas fa-rectangle-list text-amber-600"></i> Upcoming reservations (next 3 days)</h2>
             <a href="../upcoming_reservation/all_upcoming_reservations.php"
               class="text-sm text-amber-700 hover:underline">view all</a>
           </div>
@@ -806,7 +806,7 @@ $current_page = 'front_desk_reception';
                 statusCell.className = 'status-badge px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700';
 
                 const actionCell = row.querySelector('td:last-child');
-                actionCell.innerHTML = '<span class="text-xs text-green-600"><i class="fa-regular fa-circle-check"></i> checked in</span>';
+                actionCell.innerHTML = '<span class="text-xs text-green-600"><i class="fas fa-circle-check"></i> checked in</span>';
               }
 
               // Update stats
@@ -894,7 +894,7 @@ $current_page = 'front_desk_reception';
                 statusCell.className = 'status-badge px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700';
 
                 const actionCell = row.querySelector('td:last-child');
-                actionCell.innerHTML = '<span class="text-xs text-green-600"><i class="fa-regular fa-circle-check"></i> completed</span>';
+                actionCell.innerHTML = '<span class="text-xs text-green-600"><i class="fas fa-circle-check"></i> completed</span>';
               }
 
               // Update stats
@@ -971,7 +971,7 @@ $current_page = 'front_desk_reception';
             <td>${data.booking.room}</td>
             <td>${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
             <td><span class="status-badge bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">checked-in</span></td>
-            <td><span class="text-xs text-green-600"><i class="fa-regular fa-circle-check"></i> checked in</span></td>
+            <td><span class="text-xs text-green-600"><i class="fas fa-circle-check"></i> checked in</span></td>
           `;
 
               // Remove "no arrivals" row if exists

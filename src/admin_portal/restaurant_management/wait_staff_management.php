@@ -136,7 +136,7 @@ $current_page = 'wait_staff_management';
     <div id="toast" class="toast hidden">
       <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-          <i class="fa-regular fa-bell"></i>
+          <i class="fas fa-bell"></i>
         </div>
         <div>
           <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -246,20 +246,20 @@ $current_page = 'wait_staff_management';
             <?php if (!$hrApiConnected): ?>
               <span
                 class="bg-red-100 text-red-700 border border-red-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-                <i class="fa-regular fa-circle-exclamation"></i> HR API Offline
+                <i class="fas fa-circle-exclamation"></i> HR API Offline
               </span>
             <?php else: ?>
               <span
                 class="bg-green-100 text-green-700 border border-green-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-                <i class="fa-regular fa-circle-check"></i> HR API Connected
+                <i class="fas fa-circle-check"></i> HR API Connected
               </span>
             <?php endif; ?>
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo $today; ?>
+              <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
               id="notificationBell">
-              <i class="fa-regular fa-bell"></i>
+              <i class="fas fa-bell"></i>
               <?php if ($unread_count > 0): ?>
                 <span
                   class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -330,7 +330,7 @@ $current_page = 'wait_staff_management';
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
             <h2 class="font-semibold flex items-center gap-2">
-              <i class="fa-regular fa-user text-amber-600"></i> restaurant staff roster
+              <i class="fas fa-user text-amber-600"></i> restaurant staff roster
               <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">live from HR</span>
             </h2>
           </div>
@@ -419,11 +419,11 @@ $current_page = 'wait_staff_management';
                       <td class="p-3">
                         <?php if ($attendance): ?>
                           <div class="text-xs">
-                            <p><i class="fa-regular fa-clock text-green-500 mr-1"></i> In:
+                            <p><i class="fas fa-clock text-green-500 mr-1"></i> In:
                               <?php echo date('h:i A', strtotime($attendance['clock_in'])); ?>
                             </p>
                             <?php if ($attendance['clock_out']): ?>
-                              <p><i class="fa-regular fa-clock text-red-500 mr-1"></i> Out:
+                              <p><i class="fas fa-clock text-red-500 mr-1"></i> Out:
                                 <?php echo date('h:i A', strtotime($attendance['clock_out'])); ?>
                               </p>
                             <?php endif; ?>
@@ -443,17 +443,17 @@ $current_page = 'wait_staff_management';
                         <button
                           onclick="openAssignTablesModal('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
                           class="text-amber-600 hover:text-amber-800 text-xs mr-2" title="Assign Tables">
-                          <i class="fa-regular fa-table"></i>
+                          <i class="fas fa-table"></i>
                         </button>
                         <button
                           onclick="openNoteModal('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
                           class="text-blue-600 hover:text-blue-800 text-xs mr-2" title="Add Note">
-                          <i class="fa-regular fa-note-sticky"></i>
+                          <i class="fas fa-note-sticky"></i>
                         </button>
                         <button
                           onclick="viewNotes('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
                           class="text-slate-600 hover:text-slate-800 text-xs" title="View Notes">
-                          <i class="fa-regular fa-eye"></i>
+                          <i class="fas fa-eye"></i>
                         </button>
                       </td>
                     </tr>
@@ -479,7 +479,7 @@ $current_page = 'wait_staff_management';
           <!-- today's shift schedule -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5">
             <h2 class="font-semibold text-lg flex items-center gap-2 mb-3">
-              <i class="fa-regular fa-calendar text-amber-600"></i> today's shift schedule
+              <i class="fas fa-calendar text-amber-600"></i> today's shift schedule
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="shiftSummary">
               <div class="border rounded-xl p-3">
@@ -520,7 +520,7 @@ $current_page = 'wait_staff_management';
           <!-- attendance summary -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3">
-              <i class="fa-regular fa-chart-line text-amber-600"></i> attendance summary
+              <i class="fas fa-chart-line text-amber-600"></i> attendance summary
             </h3>
             <div class="space-y-3">
               <div class="flex justify-between items-center">

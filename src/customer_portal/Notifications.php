@@ -36,11 +36,11 @@ require_once '../../controller/customer/get/notifications.php';
             <button
               class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 hover:bg-slate-50"
               id="markAllReadBtn">
-              <i class="fa-regular fa-circle-check"></i> mark all as read
+              <i class="fas fa-circle-check"></i> mark all as read
             </button>
             <div
               class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate"></span>
+              <i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@ require_once '../../controller/customer/get/notifications.php';
         <!-- ===== NOTIFICATIONS LIST (empty) ===== -->
         <div id="notificationsContainer" class="space-y-3">
           <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-            <i class="fa-regular fa-bell-slash text-4xl text-slate-300 mb-3"></i>
+            <i class="fas fa-bell-slash text-4xl text-slate-300 mb-3"></i>
             <p class="text-slate-500">No notifications yet.</p>
             <p class="text-xs text-slate-400 mt-1">We'll notify you when something arrives.</p>
           </div>
@@ -80,7 +80,7 @@ require_once '../../controller/customer/get/notifications.php';
         <div
           class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mt-8 flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-3">
-            <i class="fa-regular fa-bell-slash text-2xl text-amber-600"></i>
+            <i class="fas fa-bell-slash text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">manage notification preferences</p>
               <p class="text-xs text-slate-600">choose which alerts you receive via email, SMS, or in-app</p>
@@ -131,15 +131,15 @@ require_once '../../controller/customer/get/notifications.php';
         // Helper: get icon for category
         function getIcon(category) {
           const iconMap = {
-            'booking': 'fa-regular fa-calendar-check',
-            'reminder': 'fa-regular fa-clock',
-            'promo': 'fa-regular fa-gem',
-            'payment': 'fa-regular fa-credit-card',
-            'points': 'fa-regular fa-star',
-            'review': 'fa-regular fa-pen-to-square',
-            'system': 'fa-regular fa-circle-info'
+            'booking': 'fas fa-calendar-check',
+            'reminder': 'fas fa-clock',
+            'promo': 'fas fa-gem',
+            'payment': 'fas fa-credit-card',
+            'points': 'fas fa-star',
+            'review': 'fas fa-pen-to-square',
+            'system': 'fas fa-circle-info'
           };
-          return iconMap[category] || 'fa-regular fa-bell';
+          return iconMap[category] || 'fas fa-bell';
         }
 
         // Render notifications based on filter
@@ -147,7 +147,7 @@ require_once '../../controller/customer/get/notifications.php';
           if (notifications.length === 0) {
             container.innerHTML = `
             <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-              <i class="fa-regular fa-bell-slash text-4xl text-slate-300 mb-3"></i>
+              <i class="fas fa-bell-slash text-4xl text-slate-300 mb-3"></i>
               <p class="text-slate-500">No notifications yet.</p>
               <p class="text-xs text-slate-400 mt-1">We'll notify you when something arrives.</p>
             </div>
@@ -193,7 +193,7 @@ require_once '../../controller/customer/get/notifications.php';
                 </div>
                 <p class="text-sm text-slate-600 mt-1">${escapeHtml(n.message)}</p>
                 <div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                  <span><i class="fa-regular fa-clock mr-1"></i> ${n.time_ago}</span>
+                  <span><i class="fas fa-clock mr-1"></i> ${n.time_ago}</span>
                   ${n.link ? `<a href="${n.link}" class="text-amber-700 hover:underline view-action" data-id="${n.id}">${n.view_text}</a>` : ''}
                   <button class="text-slate-500 hover:underline dismiss-action" data-id="${n.id}">dismiss</button>
                 </div>
@@ -328,7 +328,7 @@ require_once '../../controller/customer/get/notifications.php';
         function showToast(message, type = 'success') {
           const toast = document.createElement('div');
           toast.className = `fixed bottom-4 right-4 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-bounce`;
-          toast.innerHTML = `<i class="fa-regular ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i>${message}`;
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i>${message}`;
           document.body.appendChild(toast);
 
           setTimeout(() => {

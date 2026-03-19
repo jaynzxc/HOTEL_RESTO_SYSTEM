@@ -67,7 +67,7 @@
         <?php if (!empty($_SESSION['success'])): ?>
           <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
             <?php foreach ($_SESSION['success'] as $message): ?>
-              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              <p class="text-sm"><i class="fas fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
               </p>
             <?php endforeach; ?>
           </div>
@@ -110,7 +110,7 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <span id="currentDate"></span>
+            <i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span>
           </div>
         </div>
 
@@ -118,7 +118,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <!-- points balance card -->
           <div class="bg-linear-to-br from-amber-600 to-amber-700 text-white rounded-2xl p-6 shadow-md lg:col-span-1">
-            <p class="text-sm opacity-90 flex items-center gap-1"><i class="fa-regular fa-star"></i> your points balance
+            <p class="text-sm opacity-90 flex items-center gap-1"><i class="fas fa-star"></i> your points balance
             </p>
             <p class="text-4xl font-bold mt-2" id="pointsBalance"><?php echo $points; ?></p>
             <p class="text-xs opacity-80 mt-1">≈ ₱<?php echo number_format($points * 0.5); ?> value</p>
@@ -135,7 +135,7 @@
           <!-- tier status & progress -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:col-span-2">
             <div class="flex items-center justify-between">
-              <h3 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-gem text-amber-600"></i> current
+              <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-gem text-amber-600"></i> current
                 tier: <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm"
                   id="currentTier"><?php echo $tier; ?></span></h3>
               <p class="text-sm text-slate-500" id="nextTierLabel">next: <?php echo $nextTier; ?></p>
@@ -168,13 +168,13 @@
         </div>
 
         <!-- ===== AVAILABLE REWARDS TO REDEEM ===== -->
-        <h2 class="font-semibold text-xl mb-4 flex items-center gap-2"><i class="fa-regular fa-gift text-amber-600"></i>
+        <h2 class="font-semibold text-xl mb-4 flex items-center gap-2"><i class="fas fa-gift text-amber-600"></i>
           rewards you can redeem</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
 
           <?php if (empty($availableRewards)): ?>
             <div class="col-span-3 text-center py-8 text-slate-500">
-              <i class="fa-regular fa-face-frown text-4xl mb-3 opacity-50"></i>
+              <i class="fas fa-face-frown text-4xl mb-3 opacity-50"></i>
               <p>No rewards available at the moment.</p>
             </div>
           <?php else: ?>
@@ -203,7 +203,7 @@
                 data-points="<?php echo $reward['points_cost']; ?>">
                 <div
                   class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xl mb-3">
-                  <i class="fa-regular <?php echo $icon; ?>"></i>
+                  <i class="fas <?php echo $icon; ?>"></i>
                 </div>
                 <h3 class="font-semibold"><?php echo htmlspecialchars($reward['reward_name']); ?></h3>
                 <p class="text-xs text-slate-500 mt-1"><?php echo htmlspecialchars($reward['description']); ?></p>
@@ -219,7 +219,7 @@
                 </div>
                 <?php if ($reward['stock_limit'] !== null): ?>
                   <p class="text-xs text-slate-400 mt-2">
-                    <i class="fa-regular fa-box mr-1"></i>
+                    <i class="fas fa-box mr-1"></i>
                     <?php echo max(0, $reward['stock_limit'] - $reward['times_redeemed']); ?> left
                   </p>
                 <?php endif; ?>
@@ -231,7 +231,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                class="fa-regular fa-clock-rotate-left text-amber-600"></i> points history</h2>
+                class="fas fa-clock-rotate-left text-amber-600"></i> points history</h2>
             <a href="#" class="text-sm text-amber-700 hover:underline">view all</a>
           </div>
           <div class="overflow-x-auto">
@@ -275,21 +275,21 @@
         <!-- ===== HOW TO EARN MORE (static info) ===== -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
-            <i class="fa-regular fa-bed text-2xl text-amber-600"></i>
+            <i class="fas fa-bed text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">hotel stays</p>
               <p class="text-xs text-slate-600">5 pts per ₱100 spent</p>
             </div>
           </div>
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
-            <i class="fa-regular fa-utensils text-2xl text-amber-600"></i>
+            <i class="fas fa-utensils text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">dining</p>
               <p class="text-xs text-slate-600">3 pts per ₱100 (tier bonuses apply)</p>
             </div>
           </div>
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3">
-            <i class="fa-regular fa-calendar-check text-2xl text-amber-600"></i>
+            <i class="fas fa-calendar-check text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">events & spa</p>
               <p class="text-xs text-slate-600">2 pts per ₱100</p>
@@ -334,7 +334,7 @@
         // Show toast message
         function showToast(message, type = 'success') {
           toast.className = `toast ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white px-6 py-3 rounded-xl shadow-lg`;
-          toast.innerHTML = `<i class="fa-regular ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i>${message}`;
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mr-2"></i>${message}`;
           toast.classList.remove('hidden');
 
           setTimeout(() => {

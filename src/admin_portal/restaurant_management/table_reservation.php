@@ -116,7 +116,7 @@ $current_page = 'table_reservation';
   <div id="toast" class="toast bg-white rounded-xl p-4 min-w-[300px] shadow-lg border border-amber-200 hidden">
     <div class="flex items-center gap-3">
       <div class="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-        <i class="fa-regular fa-bell"></i>
+        <i class="fas fa-bell"></i>
       </div>
       <div>
         <p id="toastMessage" class="text-sm font-medium text-slate-800">Notification</p>
@@ -143,11 +143,11 @@ $current_page = 'table_reservation';
         </div>
         <div class="flex gap-3 text-sm">
           <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i> <?php echo date('F j, Y', strtotime($today)); ?>
+            <i class="fas fa-calendar text-slate-400"></i> <?php echo date('F j, Y', strtotime($today)); ?>
           </span>
           <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
             id="notificationBell">
-            <i class="fa-regular fa-bell"></i>
+            <i class="fas fa-bell"></i>
             <?php if ($unread_count > 0): ?>
               <span
                 class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
@@ -251,7 +251,7 @@ $current_page = 'table_reservation';
           </div>
           <button class="border border-amber-600 text-amber-700 px-3 py-2 rounded-xl text-sm hover:bg-amber-50"
             id="addWalkinBtn">
-            <i class="fa-regular fa-plus mr-1"></i>walk-in
+            <i class="fas fa-plus mr-1"></i>walk-in
           </button>
         </div>
       </div>
@@ -260,7 +260,7 @@ $current_page = 'table_reservation';
       <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
         <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
           <h2 class="font-semibold flex items-center gap-2">
-            <i class="fa-regular fa-clock text-amber-600"></i> reservations
+            <i class="fas fa-clock text-amber-600"></i> reservations
           </h2>
           <div class="flex gap-2">
             <button id="exportBtn"
@@ -332,11 +332,11 @@ $current_page = 'table_reservation';
                       <div class="flex items-center gap-1">
                         <?php echo htmlspecialchars($res['guest_name']); ?>
                         <?php if ($res['has_outstanding_balance']): ?>
-                          <i class="fa-regular fa-circle-exclamation text-amber-500 cursor-help" 
+                          <i class="fas fa-circle-exclamation text-amber-500 cursor-help" 
                              title="Guest has outstanding balance of ₱<?php echo number_format($res['current_balance'], 2); ?>"></i>
                         <?php endif; ?>
                         <?php if ($res['member_tier'] && $res['member_tier'] !== 'bronze'): ?>
-                          <i class="fa-regular fa-gem text-amber-500" title="<?php echo ucfirst($res['member_tier']); ?> member"></i>
+                          <i class="fas fa-gem text-amber-500" title="<?php echo ucfirst($res['member_tier']); ?> member"></i>
                         <?php endif; ?>
                       </div>
                     </td>
@@ -360,9 +360,9 @@ $current_page = 'table_reservation';
                         <span class="text-xs font-medium <?php echo $res['points_awarded'] ? 'text-green-600' : 'text-amber-600'; ?>">
                           +<?php echo $res['points_earned']; ?>
                           <?php if ($res['points_awarded']): ?>
-                            <i class="fa-regular fa-circle-check text-green-500" title="Points awarded"></i>
+                            <i class="fas fa-circle-check text-green-500" title="Points awarded"></i>
                           <?php else: ?>
-                            <i class="fa-regular fa-star text-amber-500" title="Points to earn"></i>
+                            <i class="fas fa-star text-amber-500" title="Points to earn"></i>
                           <?php endif; ?>
                         </span>
                       <?php else: ?>
@@ -376,29 +376,29 @@ $current_page = 'table_reservation';
                       <div class="flex gap-2 action-container">
                         <?php if ($res['status'] === 'pending' || $res['status'] === 'confirmed'): ?>
                           <button class="action-btn seat-btn text-xs text-blue-600 hover:underline" title="Seat guest">
-                            <i class="fa-regular fa-chair"></i>
+                            <i class="fas fa-chair"></i>
                           </button>
                         <?php endif; ?>
                         
                         <?php if (!in_array($res['status'], ['cancelled', 'completed', 'no-show'])): ?>
                           <button class="action-btn cancel-btn text-xs text-red-600 hover:underline" title="Cancel">
-                            <i class="fa-regular fa-ban"></i>
+                            <i class="fas fa-ban"></i>
                           </button>
                         <?php endif; ?>
                         
                         <?php if ($res['status'] === 'pending'): ?>
                           <button class="action-btn confirm-btn text-xs text-green-600 hover:underline" title="Confirm">
-                            <i class="fa-regular fa-check-circle"></i>
+                            <i class="fas fa-check-circle"></i>
                           </button>
                         <?php endif; ?>
                         
                         <?php if ($res['status'] === 'seated'): ?>
                           <button class="action-btn order-btn text-xs text-purple-600 hover:underline" title="Take order">
-                            <i class="fa-regular fa-receipt"></i>
+                            <i class="fas fa-receipt"></i>
                           </button>
                           <button class="action-btn check-btn text-xs text-emerald-600 hover:underline"
                             title="Process check">
-                            <i class="fa-regular fa-credit-card"></i>
+                            <i class="fas fa-credit-card"></i>
                           </button>
                         <?php endif; ?>
                         
@@ -406,13 +406,13 @@ $current_page = 'table_reservation';
                           <button class="action-btn points-btn text-xs text-amber-600 hover:underline" 
                                   title="Award <?php echo $res['points_earned']; ?> points"
                                   onclick="awardPoints(<?php echo $res['id']; ?>, <?php echo $res['points_earned']; ?>)">
-                            <i class="fa-regular fa-star"></i>
+                            <i class="fas fa-star"></i>
                           </button>
                         <?php endif; ?>
                         
                         <button class="action-btn details-btn text-xs text-slate-600 hover:underline"
                           title="View details">
-                          <i class="fa-regular fa-eye"></i>
+                          <i class="fas fa-eye"></i>
                         </button>
                       </div>
                     </td>
@@ -467,7 +467,7 @@ $current_page = 'table_reservation';
         <!-- table availability grid -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
           <h2 class="font-semibold text-lg flex items-center gap-2 mb-3">
-            <i class="fa-regular fa-table text-amber-600"></i> table availability
+            <i class="fas fa-table text-amber-600"></i> table availability
           </h2>
           <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" id="tableGrid">
             <?php foreach ($tables as $table):
@@ -502,7 +502,7 @@ $current_page = 'table_reservation';
         <!-- waitlist -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
           <h3 class="font-semibold flex items-center gap-2 mb-3">
-            <i class="fa-regular fa-list-timeline text-amber-600"></i> waitlist (<span
+            <i class="fas fa-list-timeline text-amber-600"></i> waitlist (<span
               id="waitlistCount"><?php echo count($waitingList); ?></span>)
           </h3>
           <div class="space-y-2 max-h-60 overflow-y-auto" id="waitlistContainer">
@@ -525,11 +525,11 @@ $current_page = 'table_reservation';
                   <div class="flex gap-1">
                     <button class="text-xs text-green-600 hover:underline seat-waitlist-btn" title="Seat"
                       onclick="seatFromWaitlist(<?php echo $wait['id']; ?>)">
-                      <i class="fa-regular fa-chair"></i>
+                      <i class="fas fa-chair"></i>
                     </button>
                     <button class="text-xs text-red-600 hover:underline remove-waitlist-btn" title="Remove"
                       onclick="removeFromWaitlist(<?php echo $wait['id']; ?>)">
-                      <i class="fa-regular fa-trash-can"></i>
+                      <i class="fas fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
@@ -597,7 +597,7 @@ $current_page = 'table_reservation';
         
         <div class="bg-amber-50 p-3 rounded-lg">
           <p class="text-xs text-amber-700 flex items-center gap-1">
-            <i class="fa-regular fa-circle-info"></i>
+            <i class="fas fa-circle-info"></i>
             Down payment: ₱500 per guest · 5 points per ₱100
           </p>
         </div>
@@ -862,7 +862,7 @@ $current_page = 'table_reservation';
                     <p>${guestName} seated at table ${selectedTable}</p>
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
                       <p class="text-yellow-700 font-medium flex items-center gap-2">
-                        <i class="fa-regular fa-triangle-exclamation"></i>
+                        <i class="fas fa-triangle-exclamation"></i>
                         Outstanding Balance Warning
                       </p>
                       <p class="text-sm text-yellow-600 mt-1">${data.warning}</p>
@@ -997,7 +997,7 @@ $current_page = 'table_reservation';
                 <div class="col-span-2">
                   <div class="bg-amber-50 p-2 rounded-lg">
                     <p class="text-xs text-amber-700 font-medium flex items-center gap-1">
-                      <i class="fa-regular fa-circle-exclamation"></i>
+                      <i class="fas fa-circle-exclamation"></i>
                       Outstanding Balance: ₱${parseFloat(data.outstanding_balance).toLocaleString()}
                     </p>
                   </div>

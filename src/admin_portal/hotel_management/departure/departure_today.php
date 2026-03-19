@@ -61,7 +61,7 @@ $current_page = 'departure_today';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fa-regular fa-clock text-slate-400"></i>
+              <i class="fas fa-clock text-slate-400"></i>
               <span id="currentTime"></span>
             </span>
             <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50"
@@ -101,7 +101,7 @@ $current_page = 'departure_today';
               </div>
               <button onclick="openBulkCheckout()"
                 class="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700">
-                <i class="fa-regular fa-bolt mr-2"></i>Start
+                <i class="fas fa-bolt mr-2"></i>Start
               </button>
             </div>
           </div>
@@ -113,7 +113,7 @@ $current_page = 'departure_today';
               </div>
               <button onclick="notifyHousekeeping()"
                 class="bg-amber-600 text-white px-5 py-2.5 rounded-xl hover:bg-amber-700">
-                <i class="fa-regular fa-broom mr-2"></i>Notify
+                <i class="fas fa-broom mr-2"></i>Notify
               </button>
             </div>
           </div>
@@ -349,7 +349,7 @@ $current_page = 'departure_today';
                             ${dep.status === 'checked_in' ?
               `<button onclick="openCheckoutModal(${dep.id})" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-green-700">check out</button>` :
               dep.status === 'completed' ?
-                `<span class="text-green-600 text-xs"><i class="fa-regular fa-check-circle"></i> completed</span>` :
+                `<span class="text-green-600 text-xs"><i class="fas fa-check-circle"></i> completed</span>` :
                 `<span class="text-slate-400 text-xs">${dep.status}</span>`
             }
                             <button onclick="viewGuestDetails(${dep.id})" class="border border-slate-200 text-xs px-3 py-1.5 rounded-lg hover:bg-slate-50">details</button>

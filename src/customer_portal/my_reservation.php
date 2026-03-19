@@ -431,7 +431,7 @@ function isCancellable($status, $date)
                         </div>
                         <div
                             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-                            <i class="fa-regular fa-calendar text-slate-400"></i>
+                            <i class="fas fa-calendar text-slate-400"></i>
                             <span id="currentDate">
                                 <?php echo strtolower(date('l, F j, Y')); ?>
                             </span>
@@ -551,7 +551,7 @@ function isCancellable($status, $date)
                                             <?php if (!$isPaid && !$isCancelled): ?>
                                                 <a href="payments.php?type=hotel&id=<?php echo $booking['booking_id']; ?>"
                                                     class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                    <i class="fa-regular fa-credit-card"></i>
+                                                    <i class="fas fa-credit-card"></i>
                                                     Pay Now
                                                 </a>
                                             <?php endif; ?>
@@ -559,14 +559,14 @@ function isCancellable($status, $date)
                                             <button
                                                 onclick="viewBookingDetails(<?php echo htmlspecialchars(json_encode($booking)); ?>)"
                                                 class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                <i class="fa-regular fa-eye"></i>
+                                                <i class="fas fa-eye"></i>
                                                 Details
                                             </button>
 
                                             <?php if ($canCancel): ?>
                                                 <button onclick="cancelBooking(<?php echo $booking['booking_id']; ?>)"
                                                     class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                    <i class="fa-regular fa-times-circle"></i>
+                                                    <i class="fas fa-times-circle"></i>
                                                     Cancel
                                                 </button>
                                             <?php endif; ?>
@@ -662,7 +662,7 @@ function isCancellable($status, $date)
                                             <?php if (!$isPaid && !$isCancelled && $reservation['deposit_amount'] > 0): ?>
                                                 <a href="payments.php?type=restaurant&id=<?php echo $reservation['reservation_id']; ?>"
                                                     class="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                    <i class="fa-regular fa-credit-card"></i>
+                                                    <i class="fas fa-credit-card"></i>
                                                     Pay Deposit
                                                 </a>
                                             <?php endif; ?>
@@ -670,14 +670,14 @@ function isCancellable($status, $date)
                                             <button
                                                 onclick="viewReservationDetails(<?php echo htmlspecialchars(json_encode($reservation)); ?>)"
                                                 class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                <i class="fa-regular fa-eye"></i>
+                                                <i class="fas fa-eye"></i>
                                                 Details
                                             </button>
 
                                             <?php if ($canCancel): ?>
                                                 <button onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)"
                                                     class="inline-flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                    <i class="fa-regular fa-times-circle"></i>
+                                                    <i class="fas fa-times-circle"></i>
                                                     Cancel
                                                 </button>
                                             <?php endif; ?>
@@ -686,7 +686,7 @@ function isCancellable($status, $date)
                                                 <button
                                                     onclick="modifyReservation(<?php echo $reservation['reservation_id']; ?>, '<?php echo $reservation['reservation_date']; ?>', '<?php echo $reservation['reservation_time']; ?>', <?php echo $reservation['number_of_guests']; ?>)"
                                                     class="inline-flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                                                    <i class="fa-regular fa-edit"></i>
+                                                    <i class="fas fa-edit"></i>
                                                     Modify
                                                 </button>
                                             <?php endif; ?>
@@ -701,7 +701,7 @@ function isCancellable($status, $date)
                     <div
                         class="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <i class="fa-regular fa-circle-question text-3xl text-amber-600"></i>
+                            <i class="fas fa-circle-question text-3xl text-amber-600"></i>
                             <div>
                                 <p class="font-medium text-slate-800">need help with a reservation?</p>
                                 <p class="text-xs text-slate-600">contact our support team or modify online</p>

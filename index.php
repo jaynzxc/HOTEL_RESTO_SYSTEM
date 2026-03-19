@@ -59,7 +59,7 @@ session_start();
                         <?php if (isset($_SESSION['user_id']) && $_SESSION['logged_in'] === true): ?>
                             <!-- User is logged in - Show user name and logout -->
                             <span class="hidden md:block text-slate-600">
-                                <i class="fa-regular fa-circle-user mr-1"></i>
+                                <i class="fas fa-circle-user mr-1"></i>
                                 <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>
                             </span>
                             <a href="../../controller/auth/logout.php"
@@ -70,7 +70,7 @@ session_start();
                             <!-- User is not logged in - Show Login and Sign Up -->
                             <a href="./src/login-register/login_form.php"
                                 class="hidden md:block text-slate-600 hover:text-amber-700 transition font-medium">
-                                <i class="fa-regular fa-circle-user mr-1"></i> Login
+                                <i class="fas fa-circle-user mr-1"></i> Login
                             </a>
                             <a href="./src/login-register/register_form.php"
                                 class="bg-amber-600 text-white px-6 py-2 rounded-xl hover:bg-amber-700 transition shadow-sm hover:shadow font-medium">
@@ -97,7 +97,7 @@ session_start();
                     <!-- same amber accent -->
                     <span
                         class="bg-amber-500/20 backdrop-blur-sm text-amber-200 px-4 py-2 rounded-full text-sm font-medium inline-block mb-6 border border-amber-400/30">
-                        <i class="fa-regular fa-star mr-2"></i>Welcome to Hotel and Restaurant
+                        <i class="fas fa-star mr-2"></i>Welcome to Hotel and Restaurant
                     </span>
                     <h1 class="text-5xl md:text-7xl font-light mb-4 tracking-tight">
                         stay.<span class="font-semibold text-amber-400">dine</span>.relax.
@@ -108,11 +108,11 @@ session_start();
                     <div class="flex flex-wrap gap-4">
                         <a href="./src/customer_portal/hotel_booking.php"
                             class="bg-amber-600 text-white px-8 py-4 rounded-xl text-lg font-medium hover:bg-amber-700 transition shadow-lg hover:shadow-xl flex items-center gap-2">
-                            <i class="fa-regular fa-calendar-check"></i> Book a Room
+                            <i class="fas fa-calendar-check"></i> Book a Room
                         </a>
                         <a href="#"
                             class="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl text-lg font-medium hover:bg-white/20 transition border border-white/30 flex items-center gap-2">
-                            <i class="fa-regular fa-clock"></i> Reserve a Table
+                            <i class="fas fa-clock"></i> Reserve a Table
                         </a>
                     </div>
 
@@ -248,19 +248,19 @@ session_start();
 
                         <div class="grid grid-cols-2 gap-4 mb-8">
                             <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl">
-                                <i class="fa-regular fa-circle-check text-amber-600"></i>
+                                <i class="fas fa-circle-check text-amber-600"></i>
                                 <span class="text-sm">Breakfast Buffet</span>
                             </div>
                             <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl">
-                                <i class="fa-regular fa-circle-check text-amber-600"></i>
+                                <i class="fas fa-circle-check text-amber-600"></i>
                                 <span class="text-sm">Lunch Specials</span>
                             </div>
                             <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl">
-                                <i class="fa-regular fa-circle-check text-amber-600"></i>
+                                <i class="fas fa-circle-check text-amber-600"></i>
                                 <span class="text-sm">Fine Dining Dinner</span>
                             </div>
                             <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-xl">
-                                <i class="fa-regular fa-circle-check text-amber-600"></i>
+                                <i class="fas fa-circle-check text-amber-600"></i>
                                 <span class="text-sm">24/7 Room Service</span>
                             </div>
                         </div>
@@ -268,11 +268,11 @@ session_start();
                         <div class="flex flex-wrap gap-4">
                             <a href="#"
                                 class="bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition font-medium shadow-md flex items-center gap-2">
-                                <i class="fa-regular fa-calendar-check"></i> Reserve a Table
+                                <i class="fas fa-calendar-check"></i> Reserve a Table
                             </a>
                             <a href="#"
                                 class="border-2 border-amber-600 text-amber-700 px-6 py-3 rounded-xl hover:bg-amber-50 transition font-medium flex items-center gap-2">
-                                <i class="fa-regular fa-rectangle-list"></i> View Menu
+                                <i class="fas fa-rectangle-list"></i> View Menu
                             </a>
                         </div>
                     </div>
@@ -446,7 +446,7 @@ session_start();
                                 <div class="flex text-amber-400">
                                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
                                         class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
-                                        class="fa-regular fa-star"></i>
+                                        class="fas fa-star"></i>
                                 </div>
                             </div>
                         </div>
@@ -467,11 +467,11 @@ session_start();
                 <div class="flex flex-wrap justify-center gap-4">
                     <a href="#"
                         class="bg-white text-amber-700 px-8 py-4 rounded-xl text-lg font-medium hover:bg-slate-100 transition shadow-lg hover:shadow-xl flex items-center gap-2">
-                        <i class="fa-regular fa-user"></i> Create Account
+                        <i class="fas fa-user"></i> Create Account
                     </a>
                     <a href="#"
                         class="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-medium hover:bg-white/10 transition flex items-center gap-2">
-                        <i class="fa-regular fa-circle-question"></i> Contact Us
+                        <i class="fas fa-circle-question"></i> Contact Us
                     </a>
                 </div>
             </div>
@@ -524,9 +524,9 @@ session_start();
                     <div>
                         <h4 class="font-semibold text-slate-700 mb-4">Contact Info</h4>
                         <ul class="space-y-2 text-sm text-slate-500">
-                            <li><i class="fa-regular fa-map-pin mr-2 text-amber-600"></i> 123 Main St, Manila</li>
-                            <li><i class="fa-regular fa-phone mr-2 text-amber-600"></i> +63 (2) 1234 5678</li>
-                            <li><i class="fa-regular fa-envelope mr-2 text-amber-600"></i> info@gmail.com</li>
+                            <li><i class="fas fa-map-pin mr-2 text-amber-600"></i> 123 Main St, Manila</li>
+                            <li><i class="fas fa-phone mr-2 text-amber-600"></i> +63 (2) 1234 5678</li>
+                            <li><i class="fas fa-envelope mr-2 text-amber-600"></i> info@gmail.com</li>
                         </ul>
                     </div>
                 </div>

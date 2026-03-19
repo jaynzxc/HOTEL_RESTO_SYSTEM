@@ -78,7 +78,7 @@
         <?php if (!empty($_SESSION['success'])): ?>
           <div class="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4">
             <?php foreach ($_SESSION['success'] as $message): ?>
-              <p class="text-sm"><i class="fa-regular fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
+              <p class="text-sm"><i class="fas fa-circle-check mr-2"></i><?php echo htmlspecialchars($message); ?>
               </p>
             <?php endforeach; ?>
           </div>
@@ -102,7 +102,7 @@
           </div>
           <div
             class="bg-white border border-slate-200 rounded-full px-4 py-2 text-sm flex items-center gap-2 shadow-sm">
-            <i class="fa-regular fa-calendar text-slate-400"></i>
+            <i class="fas fa-calendar text-slate-400"></i>
             <span id="currentDate"></span>
           </div>
         </div>
@@ -119,7 +119,7 @@
               <div class="flex gap-3 mt-3">
                 <button onclick="processRestaurantDownPayment()"
                   class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-                  <i class="fa-regular fa-credit-card mr-2"></i>Pay Now
+                  <i class="fas fa-credit-card mr-2"></i>Pay Now
                 </button>
                 <button onclick="dismissRestaurantPayment()"
                   class="border border-amber-300 text-amber-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-amber-100 transition">
@@ -145,7 +145,7 @@
               <div class="flex gap-3 mt-3">
                 <button onclick="processHotelPayment()"
                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-                  <i class="fa-regular fa-credit-card mr-2"></i>Pay Now
+                  <i class="fas fa-credit-card mr-2"></i>Pay Now
                 </button>
                 <button onclick="dismissHotelPayment()"
                   class="border border-blue-300 text-blue-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-100 transition">
@@ -163,7 +163,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
           <!-- current balance card -->
           <div class="bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-2xl p-6 shadow-md">
-            <p class="text-sm opacity-90 flex items-center gap-1"><i class="fa-regular fa-credit-card"></i> current
+            <p class="text-sm opacity-90 flex items-center gap-1"><i class="fas fa-credit-card"></i> current
               balance</p>
             <p class="text-3xl font-bold mt-2" id="currentBalance">₱<?php echo number_format($currentBalance, 2); ?>
             </p>
@@ -178,7 +178,7 @@
           </div>
           <!-- payment methods summary -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5">
-            <h3 class="font-semibold flex items-center gap-2"><i class="fa-regular fa-credit-card text-amber-600"></i>
+            <h3 class="font-semibold flex items-center gap-2"><i class="fas fa-credit-card text-amber-600"></i>
               payment methods</h3>
             <div class="mt-3 space-y-2" id="paymentMethodsSummary">
               <?php if (empty($paymentMethods)): ?>
@@ -217,12 +217,12 @@
             </div>
             <button onclick="openAddPaymentModal()"
               class="text-amber-700 text-sm mt-3 flex items-center gap-1 hover:underline"><i
-                class="fa-regular fa-plus"></i> add new</button>
+                class="fas fa-plus"></i> add new</button>
           </div>
           <!-- recent transaction summary -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5">
             <h3 class="font-semibold flex items-center gap-2"><i
-                class="fa-regular fa-clock-rotate-left text-amber-600"></i> this month</h3>
+                class="fas fa-clock-rotate-left text-amber-600"></i> this month</h3>
             <p class="text-2xl font-bold mt-2" id="monthlyTotal">
               ₱<?php echo number_format($monthlyStats['total'], 2); ?>
             </p>
@@ -251,14 +251,14 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                class="fa-regular fa-credit-card text-amber-600"></i> your payment methods</h2>
+                class="fas fa-credit-card text-amber-600"></i> your payment methods</h2>
             <button onclick="openAddPaymentModal()"
               class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm">+ add method</button>
           </div>
           <div id="paymentMethodsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <?php if (empty($paymentMethods)): ?>
               <div class="col-span-full text-center py-8 text-slate-500">
-                <i class="fa-regular fa-credit-card text-4xl mb-3 text-slate-300"></i>
+                <i class="fas fa-credit-card text-4xl mb-3 text-slate-300"></i>
                 <p class="text-sm">No payment methods added yet</p>
                 <p class="text-xs text-slate-400 mt-1">Add a payment method to get started</p>
               </div>
@@ -311,11 +311,11 @@
                     <?php endif; ?>
                     <button onclick="setDefaultPayment(<?php echo $method['id']; ?>)"
                       class="text-slate-400 hover:text-amber-600" title="Set as default">
-                      <i class="fa-regular fa-star"></i>
+                      <i class="fas fa-star"></i>
                     </button>
                     <button onclick="deletePaymentMethod(<?php echo $method['id']; ?>)"
                       class="text-slate-400 hover:text-red-600">
-                      <i class="fa-regular fa-trash-can"></i>
+                      <i class="fas fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
@@ -328,7 +328,7 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                class="fa-regular fa-rectangle-list text-amber-600"></i> recent transactions</h2>
+                class="fas fa-rectangle-list text-amber-600"></i> recent transactions</h2>
             <button onclick="viewAllTransactions()" class="text-sm text-amber-700 hover:underline">view all</button>
           </div>
           <div class="overflow-x-auto">
@@ -346,7 +346,7 @@
                 <?php if (empty($transactions)): ?>
                   <tr>
                     <td colspan="5" class="py-12 text-center text-slate-500">
-                      <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
+                      <i class="fas fa-clock text-3xl mb-2 text-slate-300"></i>
                       <p class="text-sm">No recent transactions</p>
                       <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
                     </td>
@@ -395,14 +395,14 @@
         <!-- ===== PROMO / PAYMENT INFO ===== -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-center gap-4">
-            <i class="fa-regular fa-circle-question text-3xl text-amber-600"></i>
+            <i class="fas fa-circle-question text-3xl text-amber-600"></i>
             <div>
               <p class="font-medium">payment support</p>
               <p class="text-xs text-slate-600">contact billing@lucas.stay or +63 2 1234 5678</p>
             </div>
           </div>
           <div class="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4">
-            <i class="fa-regular fa-star text-2xl text-amber-600"></i>
+            <i class="fas fa-star text-2xl text-amber-600"></i>
             <div>
               <p class="font-medium">earn points with every payment</p>
               <p class="text-xs text-slate-500">5 points per ₱100 spent</p>
@@ -589,7 +589,7 @@
 
         toast.className = `toast ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3`;
         toast.innerHTML = `
-            <i class="fa-regular ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
+            <i class="fas ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-bell'}"></i>
             <span class="text-sm font-medium">${message}</span>
         `;
 
@@ -665,7 +665,7 @@
           tableBody.innerHTML = `
                 <tr>
                     <td colspan="5" class="py-12 text-center text-slate-500">
-                        <i class="fa-regular fa-clock text-3xl mb-2 text-slate-300"></i>
+                        <i class="fas fa-clock text-3xl mb-2 text-slate-300"></i>
                         <p class="text-sm">No recent transactions</p>
                         <p class="text-xs text-slate-400 mt-1">Your transactions will appear here</p>
                     </td>
@@ -1178,7 +1178,7 @@
             </div>
             <div class="mt-3 pt-2 border-t border-amber-200 bg-amber-50 p-2 rounded-lg">
                 <p class="text-xs text-amber-700 flex items-center gap-1">
-                    <i class="fa-regular fa-star mr-1"></i>
+                    <i class="fas fa-star mr-1"></i>
                     <strong>Points to Earn:</strong> +${pointsEarned} loyalty points
                 </p>
                 <p class="text-xs text-amber-600 mt-1">
