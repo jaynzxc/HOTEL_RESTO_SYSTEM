@@ -271,7 +271,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
                 class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -327,9 +328,6 @@ require_once '../../../controller/admin/get/billing_payments.php';
             <button onclick="createInvoice()"
               class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-amber-700 transition">+ create
               invoice</button>
-            <button onclick="recordPayment()"
-              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">record
-              payment</button>
             <button onclick="exportInvoices()"
               class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">export</button>
             <button onclick="viewReports()"
@@ -369,8 +367,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
         <!-- ===== INVOICES TABLE ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-8">
           <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <h2 class="font-semibold flex items-center gap-2"><i
-                class="fas fa-rectangle-list text-amber-600"></i> recent invoices</h2>
+            <h2 class="font-semibold flex items-center gap-2"><i class="fas fa-rectangle-list text-amber-600"></i>
+              recent invoices</h2>
             <div class="flex gap-2">
               <button onclick="viewAllInvoices()"
                 class="text-sm text-amber-700 border border-amber-600 px-3 py-1 rounded-lg hover:bg-amber-50 transition">view
@@ -469,8 +467,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
 
           <!-- recent transactions -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
-            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fas fa-clock text-amber-600"></i> recent transactions</h2>
+            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-clock text-amber-600"></i>
+              recent transactions</h2>
             <div class="space-y-3 max-h-60 overflow-y-auto">
               <?php if (empty($recentTransactions)): ?>
                 <p class="text-sm text-slate-400 text-center py-4">No recent transactions</p>
@@ -493,8 +491,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
 
           <!-- quick payment recording -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fas fa-credit-card text-amber-600"></i> quick payment</h3>
+            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-credit-card text-amber-600"></i>
+              quick payment</h3>
             <form id="quickPaymentForm" onsubmit="quickPayment(event)">
               <div class="space-y-3">
                 <input type="text" id="quickInvoice" placeholder="invoice #"
@@ -521,11 +519,11 @@ require_once '../../../controller/admin/get/billing_payments.php';
     </div>
 
     <script>
-      // Global variables
-      let currentPage = <?php echo $currentPage; ?>;
-      let totalPages = <?php echo $totalPages; ?>;
-      let currentStatus = '<?php echo $statusFilter; ?>';
-      let currentSearch = '<?php echo $searchFilter; ?>';
+      // Pass PHP data to JavaScript
+      const currentPage = <?php echo $currentPage; ?>;
+      const totalPages = <?php echo $totalPages; ?>;
+      const currentStatus = '<?php echo $statusFilter; ?>';
+      const currentSearch = '<?php echo $searchFilter; ?>';
 
       // ========== SEARCH FUNCTIONALITY ==========
       document.addEventListener('DOMContentLoaded', function () {
@@ -671,7 +669,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('due_date', result.value.due_date);
             formData.append('description', result.value.description);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -681,9 +679,9 @@ require_once '../../../controller/admin/get/billing_payments.php';
                   Swal.fire({
                     title: 'Success!',
                     html: `
-                                <p>${data.message}</p>
-                                <p class="mt-2 font-medium">Invoice #: ${data.invoice_number}</p>
-                            `,
+                                    <p>${data.message}</p>
+                                    <p class="mt-2 font-medium">Invoice #: ${data.invoice_number}</p>
+                                `,
                     icon: 'success',
                     confirmButtonColor: '#d97706'
                   }).then(() => {
@@ -697,6 +695,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -709,14 +715,22 @@ require_once '../../../controller/admin/get/billing_payments.php';
           html: `
                 <div class="text-left space-y-3">
                     <div>
+                        <label class="text-sm font-medium text-slate-700">Booking Type</label>
+                        <select id="bookingTypeSelect" class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1">
+                            <option value="hotel">Hotel Booking</option>
+                            <option value="restaurant">Restaurant Reservation</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="text-sm font-medium text-slate-700">Select Invoice</label>
                         <select id="invoiceSelect" class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1">
                             <option value="">Select invoice...</option>
                             <?php foreach ($invoices as $inv): ?>
-                            <option value="<?php echo $inv['id']; ?>" data-amount="<?php echo $inv['amount']; ?>" data-paid="<?php echo $inv['paid_amount'] ?? 0; ?>">
+                            <option value="<?php echo $inv['id']; ?>" data-amount="<?php echo $inv['amount']; ?>" data-paid="<?php echo $inv['paid_amount'] ?? 0; ?>" data-type="hotel">
                                 <?php echo $inv['invoice_number']; ?> - <?php echo $inv['guest_name']; ?> (₱<?php echo number_format($inv['amount']); ?>)
                             </option>
                             <?php endforeach; ?>
+                            <!-- Add restaurant reservations here if needed -->
                         </select>
                     </div>
                     <div>
@@ -755,6 +769,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
           preConfirm: () => {
             const invoiceId = document.getElementById('invoiceSelect').value;
             const amount = document.getElementById('paymentAmount').value;
+            const bookingType = document.getElementById('bookingTypeSelect').value;
             if (!invoiceId || !amount) {
               Swal.showValidationMessage('Please select invoice and enter amount');
               return false;
@@ -763,7 +778,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
               booking_id: invoiceId,
               amount: amount,
               method: document.getElementById('paymentMethod').value,
-              reference: document.getElementById('reference').value
+              reference: document.getElementById('reference').value,
+              booking_type: bookingType
             };
           }
         }).then((result) => {
@@ -783,8 +799,9 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('amount', result.value.amount);
             formData.append('payment_method', result.value.method);
             formData.append('reference', result.value.reference);
+            formData.append('booking_type', result.value.booking_type);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -807,6 +824,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -857,7 +882,8 @@ require_once '../../../controller/admin/get/billing_payments.php';
               booking_id: bookingId,
               amount: amount,
               method: document.getElementById('paymentMethod').value,
-              reference: document.getElementById('reference').value
+              reference: document.getElementById('reference').value,
+              booking_type: 'hotel'
             };
           }
         }).then((result) => {
@@ -877,8 +903,9 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('amount', result.value.amount);
             formData.append('payment_method', result.value.method);
             formData.append('reference', result.value.reference);
+            formData.append('booking_type', result.value.booking_type);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -901,6 +928,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -925,7 +960,6 @@ require_once '../../../controller/admin/get/billing_payments.php';
           return;
         }
 
-        // Find invoice ID from invoice number (would need AJAX lookup)
         Swal.fire({
           title: 'Processing...',
           text: 'Please wait',
@@ -950,25 +984,35 @@ require_once '../../../controller/admin/get/billing_payments.php';
 
       // View Invoice
       function viewInvoice(bookingId) {
+        Swal.fire({
+          title: 'Loading...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         const formData = new FormData();
         formData.append('action', 'get_invoice');
         formData.append('booking_id', bookingId);
 
-        fetch('../../controller/admin/post/billing_actions.php', {
+        fetch('../../../controller/admin/post/billing_actions.php', {
           method: 'POST',
           body: formData
         })
           .then(response => response.json())
           .then(data => {
+            Swal.close();
             if (data.success) {
               let paymentsHtml = '';
               if (data.payments.length > 0) {
                 data.payments.forEach(p => {
                   const status = p.approval_status === 'approved' ? '✓' : '⏳';
                   paymentsHtml += `<li class="text-sm border-b border-slate-100 py-1 flex justify-between">
-                            <span>${p.payment_reference} · ${p.payment_method}</span>
-                            <span>₱${p.amount.toLocaleString()} ${status}</span>
-                        </li>`;
+                                <span>${p.payment_reference} · ${p.payment_method}</span>
+                                <span>₱${parseFloat(p.amount).toLocaleString()} ${status}</span>
+                            </li>`;
                 });
               } else {
                 paymentsHtml = '<li class="text-sm text-slate-500">No payments yet</li>';
@@ -980,33 +1024,33 @@ require_once '../../../controller/admin/get/billing_payments.php';
               Swal.fire({
                 title: 'Invoice Details',
                 html: `
-                        <div class="text-left">
-                            <div class="bg-amber-50 p-3 rounded-lg mb-3">
-                                <p class="font-semibold text-lg">${data.invoice.booking_reference}</p>
-                                <p class="text-sm">${data.invoice.guest_first_name} ${data.invoice.guest_last_name}</p>
-                                <p class="text-xs text-slate-600">${data.invoice.guest_email || 'No email'}</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-sm mb-3">
-                                <div><span class="text-slate-500">Date:</span> ${new Date(data.invoice.created_at).toLocaleDateString()}</div>
-                                <div><span class="text-slate-500">Due:</span> ${new Date(data.invoice.check_out).toLocaleDateString()}</div>
-                                <div><span class="text-slate-500">Amount:</span> ₱${data.invoice.total_amount.toLocaleString()}</div>
-                                <div><span class="text-slate-500">Paid:</span> ₱${data.paid_amount.toLocaleString()}</div>
-                                <div class="col-span-2"><span class="text-slate-500">Balance:</span> <span class="font-semibold ${balanceClass}">₱${balance.toLocaleString()}</span></div>
-                            </div>
-                            <div class="mb-3">
-                                <p class="font-medium text-sm mb-1">Payment History</p>
-                                <ul class="text-sm bg-slate-50 p-2 rounded">
-                                    ${paymentsHtml}
-                                </ul>
-                            </div>
-                            ${data.invoice.special_requests ? `
-                                <div class="text-sm">
-                                    <p class="font-medium">Notes:</p>
-                                    <p class="text-slate-600">${data.invoice.special_requests}</p>
+                            <div class="text-left">
+                                <div class="bg-amber-50 p-3 rounded-lg mb-3">
+                                    <p class="font-semibold text-lg">${data.invoice.booking_reference}</p>
+                                    <p class="text-sm">${data.invoice.guest_first_name} ${data.invoice.guest_last_name}</p>
+                                    <p class="text-xs text-slate-600">${data.invoice.guest_email || 'No email'}</p>
                                 </div>
-                            ` : ''}
-                        </div>
-                    `,
+                                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                                    <div><span class="text-slate-500">Date:</span> ${new Date(data.invoice.created_at).toLocaleDateString()}</div>
+                                    <div><span class="text-slate-500">Due:</span> ${new Date(data.invoice.check_out).toLocaleDateString()}</div>
+                                    <div><span class="text-slate-500">Amount:</span> ₱${parseFloat(data.invoice.total_amount).toLocaleString()}</div>
+                                    <div><span class="text-slate-500">Paid:</span> ₱${parseFloat(data.paid_amount).toLocaleString()}</div>
+                                    <div class="col-span-2"><span class="text-slate-500">Balance:</span> <span class="font-semibold ${balanceClass}">₱${balance.toLocaleString()}</span></div>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="font-medium text-sm mb-1">Payment History</p>
+                                    <ul class="text-sm bg-slate-50 p-2 rounded">
+                                        ${paymentsHtml}
+                                    </ul>
+                                </div>
+                                ${data.invoice.special_requests ? `
+                                    <div class="text-sm">
+                                        <p class="font-medium">Notes:</p>
+                                        <p class="text-slate-600">${data.invoice.special_requests}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `,
                 confirmButtonColor: '#d97706',
                 confirmButtonText: 'Close',
                 showCancelButton: balance > 0,
@@ -1025,6 +1069,15 @@ require_once '../../../controller/admin/get/billing_payments.php';
                 confirmButtonColor: '#d97706'
               });
             }
+          })
+          .catch(error => {
+            Swal.close();
+            Swal.fire({
+              title: 'Error',
+              text: 'Network error: ' + error.message,
+              icon: 'error',
+              confirmButtonColor: '#d97706'
+            });
           });
       }
 
@@ -1058,12 +1111,13 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('action', 'send_reminder');
             formData.append('booking_id', bookingId);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
               .then(response => response.json())
               .then(data => {
+                Swal.close();
                 if (data.success) {
                   Swal.fire({
                     title: 'Success!',
@@ -1079,6 +1133,15 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.close();
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -1109,7 +1172,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('action', 'void_invoice');
             formData.append('booking_id', bookingId);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -1132,6 +1195,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -1158,7 +1229,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     <div>
                         <p class="font-medium">${p.payment_reference}</p>
                         <p class="text-xs">${p.guest_name} · ${p.invoice_number}</p>
-                        <p class="text-xs text-slate-500">₱${p.amount.toLocaleString()} · ${p.payment_method}</p>
+                        <p class="text-xs text-slate-500">₱${parseFloat(p.amount).toLocaleString()} · ${p.payment_method}</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="approvePayment(${p.id})" class="text-green-600 hover:underline text-xs">Approve</button>
@@ -1190,11 +1261,20 @@ require_once '../../../controller/admin/get/billing_payments.php';
           confirmButtonText: 'Yes, approve'
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'approve_payment');
             formData.append('payment_id', paymentId);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -1217,6 +1297,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -1242,12 +1330,21 @@ require_once '../../../controller/admin/get/billing_payments.php';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'reject_payment');
             formData.append('payment_id', paymentId);
             formData.append('reason', result.value);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
@@ -1270,6 +1367,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -1281,6 +1386,14 @@ require_once '../../../controller/admin/get/billing_payments.php';
           title: 'Export Invoices',
           html: `
                 <div class="text-left space-y-3">
+                    <div>
+                        <label class="text-sm font-medium text-slate-700">Type</label>
+                        <select id="exportType" class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1">
+                            <option value="all">All (Hotel & Restaurant)</option>
+                            <option value="hotel">Hotel Only</option>
+                            <option value="restaurant">Restaurant Only</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="text-sm font-medium text-slate-700">Filter</label>
                         <select id="exportFilter" class="w-full border border-slate-300 rounded-lg px-3 py-2 mt-1">
@@ -1305,6 +1418,7 @@ require_once '../../../controller/admin/get/billing_payments.php';
           confirmButtonText: 'Export',
           preConfirm: () => {
             return {
+              type: document.getElementById('exportType').value,
               filter: document.getElementById('exportFilter').value,
               format: document.getElementById('exportFormat').value
             };
@@ -1313,9 +1427,10 @@ require_once '../../../controller/admin/get/billing_payments.php';
           if (result.isConfirmed) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '../../controller/admin/post/billing_actions.php';
+            form.action = '../../../controller/admin/post/billing_actions.php';
             form.innerHTML = `
                     <input type="hidden" name="action" value="export_invoices">
+                    <input type="hidden" name="type" value="${result.value.type}">
                     <input type="hidden" name="filter" value="${result.value.filter}">
                     <input type="hidden" name="format" value="${result.value.format}">
                 `;
@@ -1376,12 +1491,13 @@ require_once '../../../controller/admin/get/billing_payments.php';
             formData.append('period', result.value.period);
             formData.append('type', result.value.type);
 
-            fetch('../../controller/admin/post/billing_actions.php', {
+            fetch('../../../controller/admin/post/billing_actions.php', {
               method: 'POST',
               body: formData
             })
               .then(response => response.json())
               .then(data => {
+                Swal.close();
                 if (data.success) {
                   let reportHtml = '<div class="text-left">';
                   reportHtml += `<p>Period: ${new Date(data.start).toLocaleDateString()} - ${new Date(data.end).toLocaleDateString()}</p>`;
@@ -1414,6 +1530,15 @@ require_once '../../../controller/admin/get/billing_payments.php';
                     confirmButtonColor: '#d97706'
                   });
                 }
+              })
+              .catch(error => {
+                Swal.close();
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Network error: ' + error.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
               });
           }
         });
@@ -1426,4 +1551,4 @@ require_once '../../../controller/admin/get/billing_payments.php';
     </script>
   </body>
 
-</html>#
+</html>

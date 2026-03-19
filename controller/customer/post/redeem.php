@@ -33,17 +33,34 @@ if (empty($reward_name) || $points_cost <= 0) {
 try {
     $db->beginTransaction();
 
-    // Check for outstanding balance first
+    // Check for outstanding balance AND pending payments from current_balance
     $balanceData = $db->query(
-        "SELECT total_balance FROM current_balance WHERE user_id = :user_id",
+        "SELECT total_balance, pending_balance, available_balance 
+         FROM current_balance 
+         WHERE user_id = :user_id",
         ['user_id' => $_SESSION['user_id']]
     )->fetch_one();
 
     error_log("Balance data: " . print_r($balanceData, true));
 
-    // Only block if there's actually an outstanding balance
-    if ($balanceData && isset($balanceData['total_balance']) && $balanceData['total_balance'] > 0) {
-        throw new Exception('Please clear your outstanding balance before redeeming rewards.');
+    // Block redemption if there's ANY outstanding balance OR pending payments
+    if ($balanceData) {
+        $totalOutstanding = $balanceData['total_balance'] ?? 0;
+        $pendingBalance = $balanceData['pending_balance'] ?? 0;
+
+        // Check if total_balance > 0 OR pending_balance > 0
+        if ($totalOutstanding > 0 || $pendingBalance > 0) {
+            $message = 'Please clear your ';
+            if ($totalOutstanding > 0 && $pendingBalance > 0) {
+                $message .= 'outstanding balance (₱' . number_format($totalOutstanding, 2) . ') and pending payments (₱' . number_format($pendingBalance, 2) . ')';
+            } elseif ($totalOutstanding > 0) {
+                $message .= 'outstanding balance of ₱' . number_format($totalOutstanding, 2);
+            } elseif ($pendingBalance > 0) {
+                $message .= 'pending payments of ₱' . number_format($pendingBalance, 2) . ' (waiting for admin approval)';
+            }
+            $message .= ' before redeeming rewards.';
+            throw new Exception($message);
+        }
     }
 
     // Get user with lock
@@ -63,7 +80,7 @@ try {
         throw new Exception('Insufficient points');
     }
 
-    // Check if reward exists in rewards table (optional)
+    // Check if reward exists in rewards table
     $reward = $db->query(
         "SELECT * FROM rewards WHERE reward_name = :reward_name AND is_active = 1",
         ['reward_name' => $reward_name]
@@ -90,7 +107,7 @@ try {
 
     error_log("Update user points result: " . ($updateResult ? "success" : "failed"));
 
-    // Insert redemption record - FIXED: Make sure all fields match your table structure
+    // Insert redemption record
     $insertResult = $db->query(
         "INSERT INTO redemptions (user_id, reward_name, points_cost, experience, status, created_at) 
          VALUES (:user_id, :reward_name, :points_cost, :experience, 'pending', NOW())",
@@ -114,6 +131,23 @@ try {
         $db->query(
             "UPDATE rewards SET times_redeemed = times_redeemed + 1 WHERE id = :id",
             ['id' => $reward['id']]
+        );
+    }
+
+    // Create notification for admin about redemption
+    $admins = $db->query(
+        "SELECT id FROM users WHERE role = 'admin'"
+    )->find();
+
+    foreach ($admins as $admin) {
+        $db->query(
+            "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
+             VALUES (:user_id, 'Reward Redemption', :message, 'info', 'fa-gift', :link, NOW())",
+            [
+                'user_id' => $admin['id'],
+                'message' => "User redeemed: $reward_name for $points_cost points",
+                'link' => '/src/admin/customer_management/loyalty_rewards.php'
+            ]
         );
     }
 

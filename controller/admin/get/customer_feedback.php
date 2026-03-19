@@ -1,7 +1,7 @@
 <?php
 /**
  * GET Controller - Admin Customer Feedback & Reviews
- * Handles fetching all reviews and feedback data
+ * Handles fetching all reviews and feedback data with pagination
  */
 
 session_start();
@@ -13,12 +13,6 @@ if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
     exit();
 }
 
-// // Check if user has admin role
-// if (($_SESSION['user_role'] ?? 'customer') !== 'admin') {
-//     header('Location: ../../view/customer_portal/dashboard.php');
-//     exit();
-// }
-
 $config = require __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
 
@@ -29,7 +23,49 @@ $admin = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
-// Get all reviews with user details and response info
+// Get filter parameters
+$statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all';
+$ratingFilter = isset($_GET['rating']) ? (int) $_GET['rating'] : 0;
+$searchFilter = isset($_GET['search']) ? $_GET['search'] : '';
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$limit = 10;
+$offset = ($page - 1) * $limit;
+
+// Build WHERE clause for reviews
+$whereConditions = ["1=1"];
+$queryParams = [];
+
+if ($statusFilter === 'pending') {
+    $whereConditions[] = "rr.id IS NULL"; // No response yet
+} elseif ($statusFilter === 'responded') {
+    $whereConditions[] = "rr.id IS NOT NULL"; // Has response
+}
+
+if ($ratingFilter > 0) {
+    $whereConditions[] = "r.rating = :rating";
+    $queryParams['rating'] = $ratingFilter;
+}
+
+if (!empty($searchFilter)) {
+    $whereConditions[] = "(r.review_text LIKE :search OR u.full_name LIKE :search)";
+    $queryParams['search'] = '%' . $searchFilter . '%';
+}
+
+$whereClause = implode(' AND ', $whereConditions);
+
+// Get total count for pagination
+$countResult = $db->query(
+    "SELECT COUNT(*) as total 
+     FROM reviews r
+     JOIN users u ON r.user_id = u.id
+     LEFT JOIN review_responses rr ON r.id = rr.review_id
+     WHERE $whereClause",
+    $queryParams
+)->fetch_one();
+$totalReviews = $countResult['total'];
+$totalPages = ceil($totalReviews / $limit);
+
+// Get all reviews with user details and response info - WITH PAGINATION
 $reviews = $db->query(
     "SELECT 
         r.id,
@@ -54,9 +90,10 @@ $reviews = $db->query(
      JOIN users u ON r.user_id = u.id
      LEFT JOIN review_responses rr ON r.id = rr.review_id
      LEFT JOIN users ru ON rr.responded_by = ru.id
+     WHERE $whereClause
      ORDER BY r.created_at DESC
-     LIMIT 50",
-    []
+     LIMIT $limit OFFSET $offset",
+    $queryParams
 )->find() ?: [];
 
 // Get review statistics
@@ -77,12 +114,27 @@ $stats = $db->query(
     []
 )->fetch_one();
 
+// Ensure stats have default values
+if (!$stats) {
+    $stats = [
+        'total_reviews' => 0,
+        'avg_rating' => 0,
+        'pending_responses' => 0,
+        'this_month' => 0,
+        'five_star' => 0,
+        'four_star' => 0,
+        'three_star' => 0,
+        'two_star' => 0,
+        'one_star' => 0
+    ];
+}
+
 // Get rating distribution
 $ratingDistribution = $db->query(
     "SELECT 
         rating,
         COUNT(*) as count,
-        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM reviews), 1) as percentage
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM reviews WHERE 1=1), 1) as percentage
      FROM reviews
      GROUP BY rating
      ORDER BY rating DESC",
@@ -172,7 +224,14 @@ $viewData = [
     'foodPositive' => $foodPositive,
     'roomPositive' => $roomPositive,
     'templates' => $templates,
-    'today' => date('F j, Y')
+    'today' => date('F j, Y'),
+    'currentPage' => $page,
+    'totalPages' => $totalPages,
+    'totalReviews' => $totalReviews,
+    'statusFilter' => $statusFilter,
+    'ratingFilter' => $ratingFilter,
+    'searchFilter' => $searchFilter,
+    'limit' => $limit
 ];
 
 // Extract variables for view

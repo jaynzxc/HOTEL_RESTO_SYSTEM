@@ -19,7 +19,7 @@ $user = $db->query(
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
 
-// Get outstanding balance from current_balance table
+// Get outstanding balance from current_balance table - USING ALL THREE BALANCE TYPES
 $balanceData = $db->query(
     "SELECT total_balance, pending_balance, available_balance 
      FROM current_balance 
@@ -28,8 +28,29 @@ $balanceData = $db->query(
 )->fetch_one();
 
 $totalOutstanding = 0;
+$hasOutstandingBalance = false;
+$hasPendingPayments = false;
+$balanceMessage = '';
+
 if ($balanceData) {
     $totalOutstanding = $balanceData['total_balance'] ?? 0;
+    $pendingBalance = $balanceData['pending_balance'] ?? 0;
+    $availableBalance = $balanceData['available_balance'] ?? 0;
+
+    // Check for ANY outstanding balance (total_balance > 0) OR pending payments
+    $hasOutstandingBalance = $totalOutstanding > 0;
+    $hasPendingPayments = $pendingBalance > 0;
+
+    // Create appropriate message based on balance status
+    if ($totalOutstanding > 0 && $pendingBalance > 0) {
+        $balanceMessage = "You have ₱" . number_format($totalOutstanding, 2) . " outstanding (₱" . number_format($pendingBalance, 2) . " pending approval)";
+    } elseif ($totalOutstanding > 0) {
+        $balanceMessage = "You have ₱" . number_format($totalOutstanding, 2) . " outstanding balance";
+    } elseif ($pendingBalance > 0) {
+        $balanceMessage = "You have ₱" . number_format($pendingBalance, 2) . " in payments pending approval";
+        // Still block redemptions if there are pending payments
+        $hasOutstandingBalance = true;
+    }
 } else {
     // Fallback: calculate from bookings and reservations if no current_balance record
     $outstandingBookings = $db->query(
@@ -47,9 +68,9 @@ if ($balanceData) {
     )->fetch_one();
 
     $totalOutstanding = ($outstandingBookings['total'] ?? 0) + ($outstandingReservations['total'] ?? 0);
+    $hasOutstandingBalance = $totalOutstanding > 0;
+    $balanceMessage = $hasOutstandingBalance ? "You have ₱" . number_format($totalOutstanding, 2) . " outstanding balance" : '';
 }
-
-$hasOutstandingBalance = $totalOutstanding > 0;
 
 // Get points history
 $pointsHistory = $db->query(
@@ -82,7 +103,7 @@ if (!$pointsHistory) {
     $pointsHistory = [];
 }
 
-// Get available rewards from database - THIS IS THE KEY PART
+// Get available rewards from database
 $availableRewards = $db->query(
     "SELECT * FROM rewards WHERE is_active = 1 ORDER BY points_cost ASC"
 )->find();
@@ -140,7 +161,7 @@ $initials = strtoupper(substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? s
 $viewData = [
     'user' => $user,
     'pointsHistory' => $pointsHistory,
-    'availableRewards' => $availableRewards, // Add this to view data
+    'availableRewards' => $availableRewards,
     'points' => $points,
     'tier' => $tier,
     'nextTier' => $nextTier,
@@ -151,7 +172,11 @@ $viewData = [
     'progress' => $progress,
     'initials' => $initials,
     'totalOutstanding' => $totalOutstanding,
-    'hasOutstandingBalance' => $hasOutstandingBalance
+    'pendingBalance' => $pendingBalance ?? 0,
+    'availableBalance' => $availableBalance ?? 0,
+    'hasOutstandingBalance' => $hasOutstandingBalance,
+    'hasPendingPayments' => $hasPendingPayments ?? false,
+    'balanceMessage' => $balanceMessage
 ];
 
 // Extract variables for view

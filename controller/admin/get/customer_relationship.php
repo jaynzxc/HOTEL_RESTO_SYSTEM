@@ -66,20 +66,23 @@ if (!$stats) {
     ];
 }
 
-// Build WHERE clause for filtering
+// Build WHERE clause for filtering with parameters
 $whereConditions = ["role = 'customer'"];
+$queryParams = [];
 
 if ($tierFilter !== 'all') {
-    $whereConditions[] = "member_tier = '" . $db->escape($tierFilter) . "'";
+    $whereConditions[] = "member_tier = :tier";
+    $queryParams['tier'] = $tierFilter;
 }
 
 if ($stayFilter > 0) {
-    $whereConditions[] = "last_login >= DATE_SUB(NOW(), INTERVAL $stayFilter DAY)";
+    $whereConditions[] = "last_login >= DATE_SUB(NOW(), INTERVAL :stay DAY)";
+    $queryParams['stay'] = $stayFilter;
 }
 
 if (!empty($searchFilter)) {
-    $searchFilter = $db->escape($searchFilter);
-    $whereConditions[] = "(full_name LIKE '%$searchFilter%' OR email LIKE '%$searchFilter%' OR phone LIKE '%$searchFilter%')";
+    $whereConditions[] = "(full_name LIKE :search OR email LIKE :search OR phone LIKE :search)";
+    $queryParams['search'] = '%' . $searchFilter . '%';
 }
 
 $whereClause = implode(' AND ', $whereConditions);
@@ -92,11 +95,13 @@ $offset = ($page - 1) * $limit;
 // Get total count with filters
 $countResult = $db->query(
     "SELECT COUNT(*) as total FROM users WHERE $whereClause",
-    []
+    $queryParams
 )->fetch_one();
-$totalGuests = $countResult['total'];
+$totalGuests = $countResult['total'] ?? 0;
 $totalPages = ceil($totalGuests / $limit);
 
+// IMPORTANT: For LIMIT and OFFSET, we need to use them as integers directly in the query
+// We cannot use named placeholders for LIMIT/OFFSET as they are treated as strings
 $guests = $db->query(
     "SELECT 
         u.id,
@@ -121,8 +126,8 @@ $guests = $db->query(
      FROM users u
      WHERE $whereClause
      ORDER BY u.loyalty_points DESC
-     LIMIT $limit OFFSET $offset",
-    []
+     LIMIT $limit OFFSET $offset",  // Direct integer values, no placeholders
+    $queryParams  // Only the WHERE clause parameters
 )->find() ?: [];
 
 // RECENT INTERACTIONS
@@ -262,18 +267,6 @@ if ($admin) {
     }
 }
 
-// Get unread notifications count
-try {
-    $unread_result = $db->query(
-        "SELECT COUNT(*) as count FROM notifications 
-         WHERE user_id = :user_id AND is_read = 0",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-    $unread_count = $unread_result['count'] ?? 0;
-} catch (Exception $e) {
-    $unread_count = 0;
-}
-
 // Helper function for days until celebration
 function daysUntil($monthDay)
 {
@@ -300,7 +293,6 @@ $viewData = [
     'currentPage' => $page,
     'totalPages' => $totalPages,
     'totalGuests' => $totalGuests,
-    'unread_count' => $unread_count,
     'today' => date('F j, Y'),
     'tierFilter' => $tierFilter,
     'stayFilter' => $stayFilter,

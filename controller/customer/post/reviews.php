@@ -49,11 +49,11 @@ try {
                 );
 
                 $db->query(
-                    "UPDATE users SET loyalty_points = loyalty_points + 20 WHERE id = :user_id",
+                    "UPDATE users SET loyalty_points = loyalty_points + 1 WHERE id = :user_id",
                     ['user_id' => $_SESSION['user_id']]
                 );
 
-                $_SESSION['success'][] = 'Review added successfully! +20 points';
+                $_SESSION['success'][] = 'Review added successfully! +1 points';
             } else {
                 $review_id = $_POST['review_id'] ?? 0;
 
@@ -92,7 +92,7 @@ try {
             $_SESSION['success'][] = 'Review deleted successfully';
 
             $db->query(
-                "UPDATE users SET loyalty_points = loyalty_points - 20 WHERE id = :user_id",
+                "UPDATE users SET loyalty_points = loyalty_points - 1 WHERE id = :user_id",
                 ['user_id' => $_SESSION['user_id']]
             );
         }

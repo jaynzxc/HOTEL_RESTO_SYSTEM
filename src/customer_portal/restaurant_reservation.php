@@ -465,15 +465,20 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               console.log('Server response:', data);
 
               if (data.success) {
+                // Check if reservation data exists
+                if (!data.reservation) {
+                  throw new Error('Reservation data missing from response');
+                }
+
                 // Save to sessionStorage for payment page
                 sessionStorage.setItem('pendingRestaurantReservation', JSON.stringify(data.reservation));
 
-                const pointsFormatted = data.reservation.points_earned.toLocaleString();
+                const pointsFormatted = (data.reservation.points_earned || 0).toLocaleString();
                 const downPaymentFormatted = new Intl.NumberFormat('en-PH', {
                   style: 'currency',
                   currency: 'PHP',
                   minimumFractionDigits: 2
-                }).format(data.reservation.down_payment);
+                }).format(data.reservation.down_payment || 0);
 
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
@@ -484,10 +489,10 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
             <div class="text-left">
                 <div class="bg-green-50 p-4 rounded-lg mb-4">
                     <p class="text-green-700 mb-2"><i class="fas fa-circle-check mr-2"></i>Reservation confirmed!</p>
-                    <p class="text-sm"><strong>Reference:</strong> ${data.reservation.reference}</p>
-                    <p class="text-sm"><strong>Guests:</strong> ${data.reservation.guests}</p>
-                    <p class="text-sm"><strong>Date:</strong> ${data.reservation.date}</p>
-                    <p class="text-sm"><strong>Time:</strong> ${data.reservation.time}</p>
+                    <p class="text-sm"><strong>Reference:</strong> ${data.reservation.reference || 'N/A'}</p>
+                    <p class="text-sm"><strong>Guests:</strong> ${data.reservation.guests || 0}</p>
+                    <p class="text-sm"><strong>Date:</strong> ${data.reservation.date || 'N/A'}</p>
+                    <p class="text-sm"><strong>Time:</strong> ${data.reservation.time || 'N/A'}</p>
                 </div>
                 
                 <div class="bg-amber-50 p-4 rounded-lg mb-4">
@@ -519,51 +524,96 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                   if (result.isConfirmed) {
                     window.location.href = './payments.php?type=restaurant&id=' + data.reservation.id;
                   } else {
-                    window.location.href = './my_reservations.php';
+                    window.location.href = './my_reservation.php';
                   }
                 });
               }
               else if (data.has_pending) {
-                // User has pending reservation
+                // User has pending item (booking, reservation, balance, etc.)
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
 
-                const pending = data.pending_reservation;
-                const formattedAmount = new Intl.NumberFormat('en-PH', {
-                  style: 'currency',
-                  currency: 'PHP'
-                }).format(pending.down_payment);
+                // Handle different types of pending items
+                let pendingHtml = '';
+                let title = 'Cannot Create Reservation';
+
+                if (data.type === 'hotel_booking') {
+                  // Handle pending hotel booking
+                  const pending = data.pending_item;
+                  title = 'Unpaid Hotel Booking Found';
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Pending Hotel Booking Details:</p>
+                            <p class="text-sm"><strong>Reference:</strong> ${pending.reference || 'N/A'}</p>
+                            <p class="text-sm"><strong>Details:</strong> ${pending.details || 'N/A'}</p>
+                            <p class="text-sm"><strong>Date:</strong> ${pending.date || 'N/A'}</p>
+                            <p class="text-sm font-semibold mt-2"><strong>Amount Due:</strong> ${pending.amount_formatted || '₱0.00'}</p>
+                        </div>
+                    `;
+                } else if (data.type === 'restaurant_reservation') {
+                  // Handle pending restaurant reservation
+                  const pending = data.pending_item;
+                  title = 'Pending Restaurant Reservation Found';
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Pending Reservation Details:</p>
+                            <p class="text-sm"><strong>Reference:</strong> ${pending.reference || 'N/A'}</p>
+                            <p class="text-sm"><strong>Guests:</strong> ${pending.details || 'N/A'}</p>
+                            <p class="text-sm"><strong>Date:</strong> ${pending.date || 'N/A'} at ${pending.time || 'N/A'}</p>
+                            <p class="text-sm font-semibold mt-2"><strong>Down Payment:</strong> ${pending.amount_formatted || '₱0.00'}</p>
+                            ${pending.points_earned ? `
+                            <p class="text-sm text-amber-600 mt-2">
+                                <i class="fas fa-star mr-1"></i>Points to earn: +${pending.points_earned}
+                            </p>
+                            ` : ''}
+                        </div>
+                    `;
+                } else if (data.type === 'balance_pending' || data.type === 'balance_rejected') {
+                  // Handle balance issues
+                  const pending = data.pending_item;
+                  title = data.type === 'balance_pending' ? 'Pending Balance Approval' : 'Payment Rejected';
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Balance Status:</p>
+                            <p class="text-sm">${data.message}</p>
+                            <p class="text-sm"><strong>Pending Amount:</strong> ${pending?.amount_formatted || '₱0.00'}</p>
+                            ${pending?.reason ? `<p class="text-sm text-red-600"><strong>Reason:</strong> ${pending.reason}</p>` : ''}
+                        </div>
+                    `;
+                } else if (data.type === 'payment_pending') {
+                  // Handle pending payment
+                  const pending = data.pending_item;
+                  title = 'Payment Pending Approval';
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Pending Payment Details:</p>
+                            <p class="text-sm"><strong>Reference:</strong> ${pending.reference || 'N/A'}</p>
+                            <p class="text-sm"><strong>Amount:</strong> ${pending.amount_formatted || '₱0.00'}</p>
+                            <p class="text-sm"><strong>Method:</strong> ${pending.method || 'N/A'}</p>
+                        </div>
+                    `;
+                } else {
+                  // Generic pending item
+                  pendingHtml = `<p class="mb-3">${data.message || 'You have a pending item that needs attention.'}</p>`;
+                }
 
                 Swal.fire({
-                  title: 'Pending Reservation Found',
+                  title: title,
                   html: `
                         <div class="text-left">
-                            <p class="mb-3">${data.message}</p>
-                            <div class="bg-amber-50 p-3 rounded-lg">
-                                <p><strong>Reference:</strong> ${pending.reservation_reference}</p>
-                                <p><strong>Guests:</strong> ${pending.guests}</p>
-                                <p><strong>Date:</strong> ${pending.reservation_date}</p>
-                                <p><strong>Time:</strong> ${pending.reservation_time}</p>
-                                <p><strong>Down Payment:</strong> ${formattedAmount}</p>
-                                ${pending.points_earned > 0 ? `
-                                <p class="text-amber-600 mt-2">
-                                    <i class="fas fa-star mr-1"></i>
-                                    Points to earn: +${pending.points_earned}
-                                </p>
-                                ` : ''}
-                            </div>
+                            <p class="mb-3">${data.message || 'Please resolve this before creating a new reservation.'}</p>
+                            ${pendingHtml}
                         </div>
                     `,
                   icon: 'warning',
                   confirmButtonColor: '#d97706',
-                  confirmButtonText: 'Pay Now',
+                  confirmButtonText: 'OK',
                   showCancelButton: true,
-                  cancelButtonText: 'Cancel',
+                  cancelButtonText: 'View My Reservations',
                   cancelButtonColor: '#6b7280'
                 }).then((result) => {
-                  if (result.isConfirmed) {
-                    // Go to payments page
-                    window.location.href = './payments.php?type=restaurant&id=' + pending.id;
+                  if (result.dismiss === Swal.DismissReason.cancel) {
+                    window.location.href = './my_reservation.php';
                   }
                 });
               }
@@ -573,8 +623,14 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 modal.classList.remove('flex');
 
                 let errorMessage = data.message || 'An error occurred';
-                if (data.errors) {
-                  errorMessage = data.errors.join('<br>');
+                if (data.errors && Array.isArray(data.errors)) {
+                  errorMessage = '<ul class="list-disc list-inside">';
+                  data.errors.forEach(err => {
+                    errorMessage += `<li>${err}</li>`;
+                  });
+                  errorMessage += '</ul>';
+                } else if (data.errors) {
+                  errorMessage = data.errors;
                 }
 
                 Swal.fire({
@@ -598,6 +654,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
               });
             });
         }
+
         // ---------- EVENT LISTENERS ----------
         document.addEventListener('DOMContentLoaded', function () {
           // Update date and time

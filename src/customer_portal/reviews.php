@@ -118,7 +118,7 @@
           </form>
 
           <p class="text-xs text-green-600 mt-3 flex items-center gap-1" id="pointsHint">
-            <i class="fas fa-circle-check"></i> earn 20 loyalty points per review!
+            <i class="fas fa-circle-check"></i> earn 1 loyalty points per review!
           </p>
         </div>
 

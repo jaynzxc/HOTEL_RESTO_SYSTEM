@@ -2,6 +2,7 @@
 /**
  * POST Controller - Create Hotel Booking
  * Handles hotel booking creation with points calculation (for tracking only)
+ * Checks for pending/unpaid bookings and balance approval status
  */
 
 session_start();
@@ -32,6 +33,125 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
+    // Get user ID from session
+    $user_id = $_SESSION['user_id'];
+
+    // ========== CHECK FOR ACTIVE PENDING/UNPAID BOOKINGS ==========
+    // Only block if there's an ACTIVE pending booking (not completed/cancelled)
+    $pendingBooking = $db->query(
+        "SELECT id, booking_reference, room_name, check_in, check_out, total_amount, status, payment_status
+         FROM bookings 
+         WHERE user_id = :user_id 
+         AND status IN ('pending', 'confirmed')
+         AND payment_status = 'unpaid'
+         AND check_out >= CURDATE()  -- Only future bookings
+         ORDER BY created_at DESC 
+         LIMIT 1",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($pendingBooking) {
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'type' => 'booking',
+            'message' => 'You have an active unpaid booking that needs payment before creating a new one.',
+            'pending_item' => $pendingBooking
+        ]);
+        exit();
+    }
+
+    // ========== CHECK FOR ACTIVE PENDING/UNPAID RESTAURANT RESERVATIONS ==========
+    $pendingReservation = $db->query(
+        "SELECT id, reservation_reference, reservation_date, reservation_time, guests, down_payment, status, payment_status
+         FROM restaurant_reservations 
+         WHERE user_id = :user_id 
+         AND status IN ('pending', 'confirmed')
+         AND payment_status = 'unpaid'
+         AND reservation_date >= CURDATE()  -- Only future reservations
+         ORDER BY created_at DESC 
+         LIMIT 1",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($pendingReservation) {
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'type' => 'reservation',
+            'message' => 'You have an active unpaid restaurant reservation that needs payment before creating a new booking.',
+            'pending_item' => $pendingReservation
+        ]);
+        exit();
+    }
+
+    // ========== CHECK BALANCE APPROVAL STATUS ==========
+    $balance = $db->query(
+        "SELECT * FROM current_balance 
+         WHERE user_id = :user_id",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($balance) {
+        // Only block if there's a PENDING approval (actively waiting)
+        if ($balance['admin_approval'] === 'pending') {
+            echo json_encode([
+                'success' => false,
+                'has_pending' => true,
+                'type' => 'balance_pending',
+                'message' => 'You have a payment pending admin approval. Please wait for approval before making new bookings.',
+                'pending_item' => [
+                    'amount' => $balance['pending_balance'],
+                    'total' => $balance['total_balance']
+                ]
+            ]);
+            exit();
+        }
+
+        // Block if there's a REJECTED balance with active pending amount
+        if ($balance['admin_approval'] === 'rejected' && $balance['pending_balance'] > 0) {
+            echo json_encode([
+                'success' => false,
+                'has_pending' => true,
+                'type' => 'balance_rejected',
+                'message' => 'Your previous payment was rejected. Please contact support to resolve this before making new bookings.',
+                'pending_item' => [
+                    'amount' => $balance['pending_balance'],
+                    'total' => $balance['total_balance'],
+                    'reason' => $balance['rejection_reason']
+                ]
+            ]);
+            exit();
+        }
+
+        // NOTE: We DON'T block if total_balance > 0 but no pending approval
+        // This allows users with completed approved balances to book
+    }
+
+    // ========== CHECK FOR PENDING PAYMENTS ==========
+    $pendingPayment = $db->query(
+        "SELECT id, payment_reference, amount, payment_method, approval_status
+         FROM payments 
+         WHERE user_id = :user_id 
+         AND approval_status = 'pending'
+         ORDER BY created_at DESC 
+         LIMIT 1",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($pendingPayment) {
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'type' => 'payment_pending',
+            'message' => 'You have a payment of ₱' . number_format($pendingPayment['amount'], 2) . ' pending admin approval. Please wait for approval before creating a new booking.',
+            'pending_item' => $pendingPayment
+        ]);
+        exit();
+    }
+
+    // ========== ALL CHECKS PASSED - PROCEED WITH BOOKING CREATION ==========
+
     // Get and validate input data
     $firstName = trim($_POST['first_name'] ?? '');
     $lastName = trim($_POST['last_name'] ?? '');
@@ -97,28 +217,6 @@ try {
         exit();
     }
 
-    // Check if user has any pending bookings that need payment
-    $pendingBooking = $db->query(
-        "SELECT id, booking_reference, room_name, check_in, check_out, total_amount 
-         FROM bookings 
-         WHERE user_id = :user_id 
-         AND status = 'pending' 
-         AND payment_status = 'unpaid'
-         ORDER BY created_at DESC 
-         LIMIT 1",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-
-    if ($pendingBooking) {
-        echo json_encode([
-            'success' => false,
-            'has_pending' => true,
-            'message' => 'You have a pending booking that needs payment before creating a new one.',
-            'pending_booking' => $pendingBooking
-        ]);
-        exit();
-    }
-
     // Calculate totals
     $subtotal = $roomPrice * $nights;
     $tax = $subtotal * 0.12; // 12% tax
@@ -150,7 +248,7 @@ try {
         )",
         [
             'reference' => $reference,
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $user_id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $email,
@@ -174,10 +272,10 @@ try {
     // Get the inserted booking ID
     $bookingId = $db->lastInsertId();
 
-    // Create notification for user - clarify points will be added by admin
+    // Create notification for user
     $notification_message = "Your booking for $roomName from $checkIn to $checkOut has been created. Total: ₱" . number_format($totalAmount, 2);
     if ($pointsEarned > 0) {
-        $notification_message .= " You'll earn $pointsEarned loyalty points (admin will add after payment).";
+        $notification_message .= " You'll earn $pointsEarned loyalty points after payment.";
     }
 
     $db->query(
@@ -187,13 +285,10 @@ try {
             :user_id, 'Booking Created', :message, 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', NOW()
         )",
         [
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $user_id,
             'message' => $notification_message
         ]
     );
-
-    // IMPORTANT: DO NOT update users.loyalty_points here
-    // Points will be added manually by admin after payment confirmation
 
     // Commit transaction
     $db->commit();
@@ -212,7 +307,7 @@ try {
             'total' => $totalAmount,
             'points_earned' => $pointsEarned
         ],
-        'note' => 'Points will be added by admin after payment confirmation'
+        'note' => 'Points will be added after payment confirmation'
     ]);
 
 } catch (Exception $e) {
@@ -223,10 +318,13 @@ try {
 
     // Log error
     error_log("Booking creation error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    error_log("POST data: " . print_r($_POST, true));
 
+    // Return the actual error message for debugging
     echo json_encode([
         'success' => false,
-        'message' => 'An error occurred while creating your booking. Please try again.'
+        'message' => $e->getMessage()
     ]);
 }
 exit();

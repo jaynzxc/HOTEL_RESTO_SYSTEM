@@ -132,14 +132,8 @@ $current_page = 'events_conference';
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
                 class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm relative cursor-pointer"
-              id="notificationBell">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
-              <?php endif; ?>
-            </span>
+            <!-- Notification Component -->
+            <?php require_once '../components/notification_component.php'; ?>
           </div>
         </div>
 
@@ -191,8 +185,8 @@ $current_page = 'events_conference';
         <!-- ===== TODAY'S EVENTS HIGHLIGHT ===== -->
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8">
           <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-              class="fas fa-calendar-check text-amber-600"></i> today's events (<span
-              id="todayDateDisplay"></span>)</h2>
+              class="fas fa-calendar-check text-amber-600"></i> today's events (<span id="todayDateDisplay"></span>)
+          </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="todaysEventsContainer">
             <!-- Dynamically populated by JS -->
           </div>
@@ -1599,13 +1593,6 @@ $current_page = 'events_conference';
           const eventId = btn.dataset.id;
           deleteEvent(eventId);
         }
-      });
-
-      // Notification bell
-      document.getElementById('notificationBell').addEventListener('click', () => {
-        notifications.forEach(n => n.read = true);
-        updateNotificationBadge();
-        showNotification(`${notifications.length} notification(s) marked as read`, 'info');
       });
 
       // Quick availability check

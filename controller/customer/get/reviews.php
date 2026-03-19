@@ -57,17 +57,7 @@ $guestReviews = $db->query(
     ['user_id' => $_SESSION['user_id']]
 )->find();
 
-// Get unread notifications count
-try {
-    $unread_result = $db->query(
-        "SELECT COUNT(*) as count FROM notifications 
-         WHERE user_id = :user_id AND is_read = 0",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-    $unread_count = $unread_result['count'] ?? 0;
-} catch (Exception $e) {
-    $unread_count = 0;
-}
+
 
 $points = $user['loyalty_points'] ?? 0;
 
@@ -84,7 +74,6 @@ $viewData = [
     'guestReviews' => $guestReviews,
     'points' => $points,
     'initials' => $initials,
-    'unread_count' => $unread_count
 ];
 
 // Extract variables for view

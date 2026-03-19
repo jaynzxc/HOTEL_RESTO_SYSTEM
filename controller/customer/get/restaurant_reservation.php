@@ -173,7 +173,7 @@ $viewData = [
     'reservations' => $reservations,
     'waitingList' => $waitingList,
     'notifications' => $notifications,
-    'unread_count' => $unread_count,
+    
     'downPaymentSummary' => $downPaymentSummary,
     'initials' => $initials,
     'roleDisplay' => $roleDisplay,

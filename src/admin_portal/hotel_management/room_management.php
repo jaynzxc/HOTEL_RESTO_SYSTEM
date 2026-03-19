@@ -94,16 +94,8 @@ $current_page = 'room_management';
                 <?php echo $today; ?>
               </span>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
-              id="notificationBell">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  <?php echo $unread_count; ?>
-                </span>
-              <?php endif; ?>
-            </span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -1685,12 +1677,6 @@ $current_page = 'room_management';
         // This would be used for quick status toggles
         showToast(`Status update for room ${roomNumber}`, 'info');
       }
-
-      // Notification bell
-      document.getElementById('notificationBell').addEventListener('click', function () {
-        window.location.href = '../notifications.php';
-      });
-
       // Close modals on outside click
       window.onclick = function (event) {
         const roomModal = document.getElementById('roomModal');

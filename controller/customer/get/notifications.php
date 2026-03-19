@@ -141,7 +141,7 @@ $viewData = [
     'user' => $user,
     'notifications' => $notifications,
     'counts' => $counts,
-    'unread_count' => $unread_count,
+    
     'initials' => $initials
 ];
 

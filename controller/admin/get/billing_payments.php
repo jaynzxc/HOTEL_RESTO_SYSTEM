@@ -115,8 +115,9 @@ $methodColors = [
     'Bank transfer' => ['bg' => 'bg-purple-50', 'border' => 'border-purple-200', 'icon' => 'fas fa-building', 'color' => 'text-purple-600']
 ];
 
-// Build WHERE clause for invoices - FIXED: Added table alias for payment_status
+// Build WHERE clause for invoices - USING PROPER PARAMETER BINDING
 $whereConditions = ["1=1"];
+$queryParams = [];
 
 if ($statusFilter !== 'all') {
     if ($statusFilter === 'paid') {
@@ -131,9 +132,10 @@ if ($statusFilter !== 'all') {
     }
 }
 
+// Handle search with proper parameter binding (FIXED: removed $db->escape())
 if (!empty($searchFilter)) {
-    $searchFilter = $db->escape($searchFilter);
-    $whereConditions[] = "(b.booking_reference LIKE '%$searchFilter%' OR b.guest_first_name LIKE '%$searchFilter%' OR b.guest_last_name LIKE '%$searchFilter%')";
+    $whereConditions[] = "(b.booking_reference LIKE :search OR b.guest_first_name LIKE :search OR b.guest_last_name LIKE :search)";
+    $queryParams['search'] = '%' . $searchFilter . '%';
 }
 
 $whereClause = implode(' AND ', $whereConditions);
@@ -143,14 +145,15 @@ $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $limit = 10;
 $offset = ($page - 1) * $limit;
 
-// Get total count
+// Get total count with parameters
 $countResult = $db->query(
     "SELECT COUNT(*) as total FROM bookings b WHERE $whereClause",
-    []
+    $queryParams
 )->fetch_one();
-$totalInvoices = $countResult['total'];
+$totalInvoices = $countResult['total'] ?? 0;
 $totalPages = ceil($totalInvoices / $limit);
 
+// Get invoices with parameters
 $invoices = $db->query(
     "SELECT 
         b.id,
@@ -174,7 +177,7 @@ $invoices = $db->query(
      WHERE $whereClause
      ORDER BY b.created_at DESC
      LIMIT $limit OFFSET $offset",
-    []
+    $queryParams
 )->find() ?: [];
 
 // RECENT TRANSACTIONS (only approved payments)
@@ -233,18 +236,6 @@ if ($admin) {
     }
 }
 
-// Get unread notifications count
-try {
-    $unread_result = $db->query(
-        "SELECT COUNT(*) as count FROM notifications 
-         WHERE user_id = :user_id AND is_read = 0",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-    $unread_count = $unread_result['count'] ?? 0;
-} catch (Exception $e) {
-    $unread_count = 0;
-}
-
 // Store data for view
 $viewData = [
     'admin' => $admin,
@@ -264,7 +255,6 @@ $viewData = [
     'totalInvoices' => $totalInvoices,
     'statusFilter' => $statusFilter,
     'searchFilter' => $searchFilter,
-    'unread_count' => $unread_count,
     'today' => date('F j, Y')
 ];
 

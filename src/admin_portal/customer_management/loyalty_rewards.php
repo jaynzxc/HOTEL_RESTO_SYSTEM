@@ -45,6 +45,20 @@ $current_page = 'loyalty_rewards';
         transform: translateY(-2px);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
       }
+
+      .pagination-btn {
+        transition: all 0.2s;
+      }
+
+      .pagination-btn:hover:not(:disabled) {
+        background-color: #fef3c7;
+      }
+
+      .pagination-btn.active {
+        background-color: #d97706;
+        color: white;
+        border-color: #d97706;
+      }
     </style>
   </head>
 
@@ -71,7 +85,8 @@ $current_page = 'loyalty_rewards';
                 class="fas fa-calendar text-slate-400"></i>
               <?php echo $today; ?>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -255,21 +270,42 @@ $current_page = 'loyalty_rewards';
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination Controls -->
           <div class="p-4 border-t border-slate-200 flex items-center justify-between">
-            <span class="text-xs text-slate-500">Showing top
-              <?php echo count($topMembers); ?> of
-              <?php echo number_format($stats['total_members'] ?? 0); ?> members
+            <span class="text-xs text-slate-500">
+              Showing
+              <?php echo (($currentPage - 1) * $limit) + 1; ?>-<?php echo min($currentPage * $limit, $totalMembers); ?>
+              of <?php echo number_format($totalMembers); ?> members
             </span>
             <div class="flex gap-2">
-              <button
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition">Previous</button>
-              <button class="bg-amber-600 text-white px-3 py-1 rounded-lg text-sm">1</button>
-              <button
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition">2</button>
-              <button
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition">3</button>
-              <button
-                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition">Next</button>
+              <button onclick="changePage(<?php echo $currentPage - 1; ?>)"
+                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                <?php echo $currentPage <= 1 ? 'disabled' : ''; ?>>
+                Previous
+              </button>
+
+              <?php
+              // Show up to 5 page buttons
+              $startPage = max(1, $currentPage - 2);
+              $endPage = min($totalPages, $startPage + 4);
+              if ($endPage - $startPage < 4) {
+                $startPage = max(1, $endPage - 4);
+              }
+
+              for ($i = $startPage; $i <= $endPage; $i++):
+                ?>
+                <button onclick="changePage(<?php echo $i; ?>)"
+                  class="px-3 py-1 rounded-lg text-sm transition <?php echo $i == $currentPage ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?>">
+                  <?php echo $i; ?>
+                </button>
+              <?php endfor; ?>
+
+              <button onclick="changePage(<?php echo $currentPage + 1; ?>)"
+                class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                <?php echo $currentPage >= $totalPages ? 'disabled' : ''; ?>>
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -280,8 +316,8 @@ $current_page = 'loyalty_rewards';
           <!-- available rewards -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
             <div class="flex items-center justify-between mb-3">
-              <h2 class="font-semibold text-lg flex items-center gap-2"><i
-                  class="fas fa-gift text-amber-600"></i> available rewards</h2>
+              <h2 class="font-semibold text-lg flex items-center gap-2"><i class="fas fa-gift text-amber-600"></i>
+                available rewards</h2>
               <button onclick="manageRewards()" class="text-sm text-amber-700 hover:underline">manage all</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -331,22 +367,31 @@ $current_page = 'loyalty_rewards';
       // Global variables
       let currentPage = <?php echo $currentPage; ?>;
       let totalPages = <?php echo $totalPages; ?>;
+      let totalMembers = <?php echo $totalMembers; ?>;
 
       // Search functionality
-      document.getElementById('searchInput').addEventListener('keyup', function () {
-        const searchTerm = this.value.toLowerCase();
-        const rows = document.querySelectorAll('.member-row');
+      document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.addEventListener('keyup', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.member-row');
 
-        rows.forEach(row => {
-          const name = row.dataset.name;
-          row.style.display = name.includes(searchTerm) ? '' : 'none';
-        });
+            rows.forEach(row => {
+              const name = row.dataset.name;
+              row.style.display = name.includes(searchTerm) ? '' : 'none';
+            });
+          });
+        }
       });
 
       // Pagination
       function changePage(page) {
         if (page < 1 || page > totalPages) return;
-        window.location.href = `?page=${page}`;
+
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
       }
 
       // Create Reward
@@ -404,6 +449,15 @@ $current_page = 'loyalty_rewards';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Creating...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'create_reward');
             formData.append('reward_name', result.value.name);
@@ -460,7 +514,7 @@ $current_page = 'loyalty_rewards';
           </div>
           <div>
             <label class="text-sm font-medium">Description</label>
-            <textarea id="rewardDesc" class="w-full border rounded-lg p-2" rows="2">${desc.replace(/"/g, '&quot;')}</textarea>
+            <textarea id="rewardDesc" class="w-full border rounded-lg p-2" rows="2">${desc ? desc.replace(/"/g, '&quot;') : ''}</textarea>
           </div>
           <div>
             <label class="text-sm font-medium">Points Cost *</label>
@@ -508,6 +562,15 @@ $current_page = 'loyalty_rewards';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Updating...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'update_reward');
             formData.append('reward_id', rewardId);
@@ -558,6 +621,15 @@ $current_page = 'loyalty_rewards';
           confirmButtonText: 'Yes, delete it'
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Deleting...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'delete_reward');
             formData.append('reward_id', rewardId);
@@ -601,9 +673,9 @@ $current_page = 'loyalty_rewards';
             <select id="memberSelect" class="w-full border rounded-lg p-2">
               <option value="">Select member...</option>
               <?php foreach ($topMembers as $member): ?>
-                                        <option value="<?php echo $member['id']; ?>" data-points="<?php echo $member['loyalty_points']; ?>">
-                                          <?php echo addslashes($member['full_name']); ?> (<?php echo $member['loyalty_points']; ?> pts)
-                                        </option>
+                  <option value="<?php echo $member['id']; ?>" data-points="<?php echo $member['loyalty_points']; ?>">
+                    <?php echo addslashes($member['full_name']); ?> (<?php echo $member['loyalty_points']; ?> pts)
+                  </option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -644,6 +716,15 @@ $current_page = 'loyalty_rewards';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Adjusting...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'adjust_points');
             formData.append('user_id', result.value.user_id);
@@ -721,6 +802,15 @@ $current_page = 'loyalty_rewards';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Adjusting...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'adjust_points');
             formData.append('user_id', userId);
@@ -794,6 +884,15 @@ $current_page = 'loyalty_rewards';
           }
         }).then((result) => {
           if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Saving...',
+              text: 'Please wait',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
             const formData = new FormData();
             formData.append('action', 'update_tiers');
             formData.append('bronze', result.value.bronze);
@@ -868,10 +967,10 @@ $current_page = 'loyalty_rewards';
             form.method = 'POST';
             form.action = '../../controller/admin/post/loyalty_actions.php';
             form.innerHTML = `
-          <input type="hidden" name="action" value="export_data">
-          <input type="hidden" name="export_type" value="${result.value.type}">
-          <input type="hidden" name="format" value="${result.value.format}">
-        `;
+              <input type="hidden" name="action" value="export_data">
+              <input type="hidden" name="export_type" value="${result.value.type}">
+              <input type="hidden" name="format" value="${result.value.format}">
+            `;
             document.body.appendChild(form);
             form.submit();
             document.body.removeChild(form);
@@ -881,6 +980,15 @@ $current_page = 'loyalty_rewards';
 
       // View Member Details
       function viewMember(userId) {
+        Swal.fire({
+          title: 'Loading...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         const formData = new FormData();
         formData.append('action', 'get_member');
         formData.append('user_id', userId);
@@ -891,6 +999,7 @@ $current_page = 'loyalty_rewards';
         })
           .then(response => response.json())
           .then(data => {
+            Swal.close();
             if (data.success) {
               let redemptionsHtml = '';
               if (data.redemptions.length > 0) {
@@ -904,25 +1013,38 @@ $current_page = 'loyalty_rewards';
               Swal.fire({
                 title: 'Member Details',
                 html: `
-            <div class="text-left">
-              <p><strong>Name:</strong> ${data.member.full_name}</p>
-              <p><strong>Email:</strong> ${data.member.email}</p>
-              <p><strong>Phone:</strong> ${data.member.phone || 'N/A'}</p>
-              <p><strong>Points:</strong> ${data.member.loyalty_points}</p>
-              <p><strong>Tier:</strong> ${data.member.member_tier}</p>
-              <p><strong>Member since:</strong> ${new Date(data.member.created_at).toLocaleDateString()}</p>
-              <p><strong>Last login:</strong> ${data.member.last_login ? new Date(data.member.last_login).toLocaleDateString() : 'Never'}</p>
-              
-              <div class="mt-4">
-                <p class="font-medium">Recent Redemptions:</p>
-                <ul class="list-disc pl-4 mt-1">
-                  ${redemptionsHtml}
-                </ul>
-              </div>
-            </div>
-          `,
+                  <div class="text-left max-h-96 overflow-y-auto">
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                      <div class="col-span-2 bg-amber-50 p-3 rounded-lg">
+                        <p class="font-semibold text-lg">${data.member.full_name}</p>
+                        <p class="text-sm">${data.member.email}</p>
+                        <p class="text-sm">${data.member.phone || 'No phone'}</p>
+                      </div>
+                      <div class="border rounded-lg p-2 text-center">
+                        <p class="text-xs text-slate-500">Points</p>
+                        <p class="font-bold text-lg">${data.member.loyalty_points}</p>
+                      </div>
+                      <div class="border rounded-lg p-2 text-center">
+                        <p class="text-xs text-slate-500">Tier</p>
+                        <p class="font-bold text-lg capitalize">${data.member.member_tier}</p>
+                      </div>
+                    </div>
+                    
+                    <p class="text-xs text-slate-500 mb-1">Member since:</p>
+                    <p class="text-sm mb-2">${new Date(data.member.created_at).toLocaleDateString()}</p>
+                    
+                    <p class="text-xs text-slate-500 mb-1">Last login:</p>
+                    <p class="text-sm mb-3">${data.member.last_login ? new Date(data.member.last_login).toLocaleDateString() : 'Never'}</p>
+                    
+                    <p class="font-medium mt-3 mb-2">Recent Redemptions:</p>
+                    <ul class="list-disc pl-4 text-sm space-y-1">
+                      ${redemptionsHtml}
+                    </ul>
+                  </div>
+                `,
                 confirmButtonColor: '#d97706',
-                confirmButtonText: 'Close'
+                confirmButtonText: 'Close',
+                width: '500px'
               });
             } else {
               Swal.fire({
@@ -937,6 +1059,15 @@ $current_page = 'loyalty_rewards';
 
       // Manage All Rewards
       function manageRewards() {
+        Swal.fire({
+          title: 'Loading...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         const formData = new FormData();
         formData.append('action', 'get_rewards');
 
@@ -946,33 +1077,42 @@ $current_page = 'loyalty_rewards';
         })
           .then(response => response.json())
           .then(data => {
+            Swal.close();
             if (data.success) {
-              let rewardsHtml = '';
+              let rewardsHtml = '<div class="max-h-96 overflow-y-auto">';
               data.rewards.forEach(r => {
+                const statusBadge = r.is_active == 1
+                  ? '<span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">active</span>'
+                  : '<span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">inactive</span>';
+
                 rewardsHtml += `
-            <div class="border rounded-lg p-3 mb-2 flex justify-between items-center">
-              <div>
-                <p class="font-medium">${r.reward_name}</p>
-                <p class="text-xs text-slate-500">${r.points_cost} pts · ${r.category}</p>
-              </div>
-              <div class="flex gap-2">
-                <button onclick="editReward(${r.id}, '${r.reward_name.replace(/'/g, "\\'")}', '${r.description ? r.description.replace(/'/g, "\\'") : ''}', ${r.points_cost}, '${r.category}', ${r.is_active}, ${r.stock_limit || 'null'})" class="text-blue-600 hover:underline text-xs">Edit</button>
-                <button onclick="deleteReward(${r.id})" class="text-red-600 hover:underline text-xs">Delete</button>
-              </div>
-            </div>
-          `;
+                  <div class="border rounded-lg p-3 mb-2 flex justify-between items-center">
+                    <div>
+                      <p class="font-medium">${r.reward_name} ${statusBadge}</p>
+                      <p class="text-xs text-slate-500">${r.points_cost} pts · ${r.category}</p>
+                      ${r.stock_limit ? `<p class="text-xs text-slate-400">Stock: ${r.times_redeemed}/${r.stock_limit}</p>` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                      <button onclick="editReward(${r.id}, '${r.reward_name.replace(/'/g, "\\'")}', '${r.description ? r.description.replace(/'/g, "\\'").replace(/\n/g, '\\n') : ''}', ${r.points_cost}, '${r.category}', ${r.is_active}, ${r.stock_limit || 'null'})" class="text-blue-600 hover:underline text-xs">Edit</button>
+                      <button onclick="deleteReward(${r.id})" class="text-red-600 hover:underline text-xs">Delete</button>
+                    </div>
+                  </div>
+                `;
               });
+              rewardsHtml += '</div>';
+
+              rewardsHtml += `
+                <button onclick="createReward()" class="mt-3 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm w-full hover:bg-amber-700 transition">
+                  + Create New Reward
+                </button>
+              `;
 
               Swal.fire({
                 title: 'Manage Rewards',
-                html: `
-            <div class="max-h-96 overflow-y-auto">
-              ${rewardsHtml}
-            </div>
-            <button onclick="createReward()" class="mt-3 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm w-full">+ Create New Reward</button>
-          `,
+                html: rewardsHtml,
                 showConfirmButton: false,
-                showCloseButton: true
+                showCloseButton: true,
+                width: '600px'
               });
             }
           });

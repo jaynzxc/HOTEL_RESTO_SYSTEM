@@ -32,14 +32,20 @@ $paymentMethods = $db->query(
     ['user_id' => $_SESSION['user_id']]
 )->find();
 
-// Get user's payments from payments table
+// Get user's payments from payments table with approval status
 $payments = $db->query(
     "SELECT p.*, 
         CASE 
             WHEN p.booking_type = 'hotel' THEN b.booking_reference
             WHEN p.booking_type = 'restaurant' THEN rr.reservation_reference
             ELSE NULL
-        END as reference_number
+        END as reference_number,
+        CASE
+            WHEN p.approval_status = 'approved' AND p.payment_status = 'completed' THEN 'completed'
+            WHEN p.approval_status = 'pending' THEN 'pending'
+            WHEN p.approval_status = 'rejected' THEN 'failed'
+            ELSE p.payment_status
+        END as display_status
      FROM payments p
      LEFT JOIN bookings b ON p.booking_id = b.id AND p.booking_type = 'hotel'
      LEFT JOIN restaurant_reservations rr ON p.booking_id = rr.id AND p.booking_type = 'restaurant'
@@ -49,7 +55,7 @@ $payments = $db->query(
     ['user_id' => $_SESSION['user_id']]
 )->find();
 
-// Get current balance from current_balance table (using the view or direct query)
+// Get current balance from current_balance table
 $balanceData = $db->query(
     "SELECT total_balance, pending_balance, available_balance 
      FROM current_balance 
@@ -72,8 +78,10 @@ if (!$balanceData) {
 }
 
 $currentBalance = $balanceData['available_balance'] ?? 0;
+$pendingBalance = $balanceData['pending_balance'] ?? 0;
+$totalBalance = $balanceData['total_balance'] ?? 0;
 
-// Get monthly summary from payments table
+// Get monthly summary from payments table (only approved payments)
 $currentMonth = date('Y-m');
 $monthlyStats = $db->query(
     "SELECT 
@@ -82,6 +90,7 @@ $monthlyStats = $db->query(
      FROM payments 
      WHERE user_id = :user_id 
         AND payment_status = 'completed'
+        AND approval_status = 'approved'
         AND DATE_FORMAT(created_at, '%Y-%m') = :month",
     [
         'user_id' => $_SESSION['user_id'],
@@ -89,13 +98,14 @@ $monthlyStats = $db->query(
     ]
 )->fetch_one();
 
-// Get last month's total for comparison
+// Get last month's total for comparison (only approved payments)
 $lastMonth = date('Y-m', strtotime('-1 month'));
 $lastMonthTotal = $db->query(
     "SELECT COALESCE(SUM(amount), 0) as total
      FROM payments 
      WHERE user_id = :user_id 
         AND payment_status = 'completed'
+        AND approval_status = 'approved'
         AND DATE_FORMAT(created_at, '%Y-%m') = :month",
     [
         'user_id' => $_SESSION['user_id'],
@@ -128,19 +138,9 @@ if ($user) {
     );
 }
 
-// Get unread notifications count
-try {
-    $unread_result = $db->query(
-        "SELECT COUNT(*) as count FROM notifications 
-         WHERE user_id = :user_id AND is_read = 0",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-    $unread_count = $unread_result['count'] ?? 0;
-} catch (Exception $e) {
-    $unread_count = 0;
-}
 
-// Get recent unpaid bookings for quick payment
+
+// Get recent unpaid bookings for quick payment (only available balance)
 $recentUnpaid = $db->query(
     "SELECT 
         id,
@@ -178,11 +178,13 @@ $viewData = [
     'paymentMethods' => $paymentMethods,
     'payments' => $payments,
     'currentBalance' => $currentBalance,
+    'pendingBalance' => $pendingBalance,
+    'totalBalance' => $totalBalance,
     'balanceData' => $balanceData,
     'monthlyStats' => $monthlyStats,
     'percentChange' => $percentChange,
     'initials' => $initials,
-    'unread_count' => $unread_count,
+    
     'recentUnpaid' => $recentUnpaid,
     'success' => $success,
     'error' => $error,

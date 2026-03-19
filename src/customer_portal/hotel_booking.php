@@ -256,8 +256,8 @@
         <!-- STEP 1: Guest Details -->
         <div id="step1-content" class="block">
           <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2"><i
-                class="fas fa-user text-amber-600"></i> Guest Details</h2>
+            <h2 class="text-xl font-semibold mb-6 flex items-center gap-2"><i class="fas fa-user text-amber-600"></i>
+              Guest Details</h2>
 
             <div id="step1Errors" class="hidden bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4">
             </div>
@@ -697,6 +697,7 @@
         };
 
         // ---------- create booking via AJAX ----------
+        // ---------- create booking via AJAX ----------
         window.createBooking = function () {
           if (!selectedRoomId) {
             showError('No room selected', 'Please select a room to continue');
@@ -739,7 +740,7 @@
           })
             .then(response => response.json())
             .then(data => {
-              // In the createBooking function, update the success message:
+              console.log('Server response:', data); // Debug log
 
               if (data.success) {
                 // Save to sessionStorage for payment page
@@ -794,52 +795,87 @@
                   if (result.isConfirmed) {
                     window.location.href = './payments.php?type=hotel&id=' + data.booking.id;
                   } else {
-                    window.location.href = './my_reservations.php';
+                    window.location.href = './my_reservation.php';
                   }
                 });
               }
               else if (data.has_pending) {
-                // User has pending booking
+                // User has pending booking/reservation
                 Swal.close();
 
-                const pending = data.pending_booking;
-                const formattedAmount = new Intl.NumberFormat('en-PH', {
-                  style: 'currency',
-                  currency: 'PHP',
-                  minimumFractionDigits: 2
-                }).format(pending.total_amount);
+                // Handle different types of pending items
+                let pendingHtml = '';
+
+                if (data.type === 'booking' || data.type === 'reservation') {
+                  // Handle booking or reservation
+                  const pending = data.pending_item;
+                  const amount = data.type === 'booking' ? pending.total_amount : pending.down_payment;
+                  const formattedAmount = new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP',
+                    minimumFractionDigits: 2
+                  }).format(amount || 0);
+
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Pending ${data.type === 'booking' ? 'Booking' : 'Reservation'} Details:</p>
+                            <p class="text-sm"><strong>Reference:</strong> ${pending.booking_reference || pending.reservation_reference || 'N/A'}</p>
+                            ${pending.room_name ? `<p class="text-sm"><strong>Room:</strong> ${pending.room_name}</p>` : ''}
+                            <p class="text-sm"><strong>Date:</strong> ${pending.check_in || pending.reservation_date || 'N/A'}</p>
+                            ${pending.check_out ? `<p class="text-sm"><strong>Check-out:</strong> ${pending.check_out}</p>` : ''}
+                            <p class="text-sm font-semibold mt-2">Amount Due: ${formattedAmount}</p>
+                        </div>
+                    `;
+                } else if (data.type === 'balance_pending' || data.type === 'balance_rejected') {
+                  // Handle balance issues
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Balance Status:</p>
+                            <p class="text-sm">${data.message}</p>
+                            ${data.pending_item?.amount ? `<p class="text-sm"><strong>Pending Amount:</strong> ₱${data.pending_item.amount.toLocaleString()}</p>` : ''}
+                            ${data.pending_item?.reason ? `<p class="text-sm text-red-600"><strong>Reason:</strong> ${data.pending_item.reason}</p>` : ''}
+                        </div>
+                    `;
+                } else if (data.type === 'payment_pending') {
+                  // Handle pending payment
+                  const pending = data.pending_item;
+                  pendingHtml = `
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">Pending Payment:</p>
+                            <p class="text-sm"><strong>Reference:</strong> ${pending.payment_reference}</p>
+                            <p class="text-sm"><strong>Amount:</strong> ₱${pending.amount.toLocaleString()}</p>
+                            <p class="text-sm"><strong>Method:</strong> ${pending.payment_method}</p>
+                        </div>
+                    `;
+                } else {
+                  // Generic pending item
+                  pendingHtml = `<p class="mb-3">${data.message || 'You have a pending item that needs attention.'}</p>`;
+                }
 
                 Swal.fire({
-                  title: 'Pending Booking Found',
+                  title: 'Cannot Create Booking',
                   html: `
                         <div class="text-left">
-                            <p class="mb-3">${data.message}</p>
-                            <div class="bg-amber-50 p-4 rounded-lg">
-                                <p class="font-medium mb-2">Pending Booking Details:</p>
-                                <p class="text-sm"><strong>Reference:</strong> ${pending.booking_reference}</p>
-                                <p class="text-sm"><strong>Room:</strong> ${pending.room_name}</p>
-                                <p class="text-sm"><strong>Check-in:</strong> ${pending.check_in}</p>
-                                <p class="text-sm"><strong>Check-out:</strong> ${pending.check_out}</p>
-                                <p class="text-sm font-semibold mt-2">Amount Due: ${formattedAmount}</p>
-                            </div>
+                            <p class="mb-3">${data.message || 'You have a pending item that needs attention before creating a new booking.'}</p>
+                            ${pendingHtml}
                         </div>
                     `,
                   icon: 'warning',
                   confirmButtonColor: '#d97706',
-                  confirmButtonText: 'Pay Now',
+                  confirmButtonText: 'OK',
                   showCancelButton: true,
-                  cancelButtonText: 'Cancel',
+                  cancelButtonText: 'View My Reservations',
                   cancelButtonColor: '#6b7280'
                 }).then((result) => {
-                  if (result.isConfirmed) {
-                    // Go to payments page
-                    window.location.href = './payments.php?type=hotel&id=' + pending.id;
+                  if (result.dismiss === Swal.DismissReason.cancel) {
+                    window.location.href = './my_reservation.php';
                   }
                 });
               }
               else {
+                // Handle validation errors or other errors
                 let errorMessage = data.message || 'An error occurred';
-                if (data.errors) {
+                if (data.errors && Array.isArray(data.errors)) {
                   errorMessage = '<ul class="list-disc list-inside">';
                   data.errors.forEach(err => {
                     errorMessage += `<li>${err}</li>`;
@@ -855,16 +891,15 @@
               }
             })
             .catch(error => {
-              console.error('Error:', error);
+              console.error('Fetch Error:', error);
               Swal.fire({
                 title: 'Error',
-                text: 'Failed to create booking. Please try again.',
+                text: 'Failed to connect to server. Please check your internet connection and try again.',
                 icon: 'error',
                 confirmButtonColor: '#d97706'
               });
             });
         };
-
         // ---------- initialize ----------
         document.addEventListener('DOMContentLoaded', function () {
           // Set default dates if empty

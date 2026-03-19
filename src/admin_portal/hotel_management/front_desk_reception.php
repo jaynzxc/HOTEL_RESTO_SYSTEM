@@ -374,17 +374,10 @@ $current_page = 'front_desk_reception';
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fas fa-calendar text-slate-400"></i> <span
-                id="currentDate"><?php echo date('F j, Y'); ?></span>
+              <i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"><?php echo date('F j, Y'); ?></span>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
-              onclick="viewNotifications()">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
-              <?php endif; ?>
-            </span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -565,8 +558,8 @@ $current_page = 'front_desk_reception';
           <div class="space-y-5">
             <!-- active guest requests -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
-              <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                  class="fas fa-message text-amber-600"></i> Active guest requests</h3>
+              <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-message text-amber-600"></i>
+                Active guest requests</h3>
               <ul class="space-y-3" id="requestsList">
                 <?php if (empty($guestRequests)): ?>
                   <li class="text-center text-slate-500 py-2">No active requests</li>
@@ -602,8 +595,8 @@ $current_page = 'front_desk_reception';
 
             <!-- today's summary -->
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
-              <h3 class="font-semibold flex items-center gap-2 mb-2"><i
-                  class="fas fa-clipboard text-amber-600"></i> today's summary</h3>
+              <h3 class="font-semibold flex items-center gap-2 mb-2"><i class="fas fa-clipboard text-amber-600"></i>
+                today's summary</h3>
               <div class="space-y-1 text-sm" id="todaySummary">
                 <div class="flex justify-between">
                   <span>Checked in</span>
@@ -1165,11 +1158,6 @@ $current_page = 'front_desk_reception';
 
         const pendingCheckin = document.getElementById('pendingCheckin');
         pendingCheckin.textContent = Math.max(0, parseInt(pendingCheckin.textContent) - 1);
-      }
-
-      // View Notifications
-      function viewNotifications() {
-        window.location.href = '../notifications.php';
       }
     </script>
   </body>

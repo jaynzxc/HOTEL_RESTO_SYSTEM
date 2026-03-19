@@ -257,14 +257,8 @@ $current_page = 'wait_staff_management';
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
               <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
-              id="notificationBell">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
-              <?php endif; ?>
-            </span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -932,12 +926,6 @@ $current_page = 'wait_staff_management';
 
         updatePagination();
       }
-
-      // ========== NOTIFICATION BELL ==========
-      document.getElementById('notificationBell')?.addEventListener('click', function () {
-        window.location.href = '../notifications.php';
-      });
-
       // ========== INITIALIZATION ==========
       document.addEventListener('DOMContentLoaded', function () {
         updatePagination();

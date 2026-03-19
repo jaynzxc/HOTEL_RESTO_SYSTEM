@@ -245,7 +245,7 @@ $viewData = [
     'activeOrder' => $activeOrder,
     'orderHistory' => $orderHistory,
     'balance' => $balance,
-    'unread_count' => $unread_count,
+    
     'initials' => $initials,
     'defaultTable' => $defaultTable,
     'defaultRoom' => $defaultRoom,

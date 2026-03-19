@@ -83,16 +83,29 @@
           </div>
         <?php endif; ?>
 
-        <!-- Outstanding Balance Warning -->
-        <?php if ($hasOutstandingBalance): ?>
+        <!-- Outstanding Balance Warning - UPDATED to show pending balance -->
+        <?php if ($hasOutstandingBalance || $hasPendingPayments): ?>
           <div class="balance-warning text-white rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <i class="fa-solid fa-exclamation-triangle text-2xl"></i>
               <div>
-                <p class="font-semibold">Outstanding Balance Detected</p>
-                <p class="text-sm opacity-90">You have ₱<?php echo number_format($totalOutstanding, 2); ?> in unpaid
-                  bookings.</p>
-                <p class="text-xs opacity-75 mt-1">Please clear your balance before redeeming rewards.</p>
+                <p class="font-semibold">
+                  <?php echo $hasPendingPayments ? 'Pending Payments Detected' : 'Outstanding Balance Detected'; ?>
+                </p>
+                <p class="text-sm opacity-90">
+                  <?php
+                  if ($totalOutstanding > 0 && $pendingBalance > 0) {
+                    echo "You have ₱" . number_format($totalOutstanding, 2) . " outstanding (₱" . number_format($pendingBalance, 2) . " pending approval)";
+                  } elseif ($totalOutstanding > 0) {
+                    echo "You have ₱" . number_format($totalOutstanding, 2) . " in unpaid bookings.";
+                  } elseif ($pendingBalance > 0) {
+                    echo "You have ₱" . number_format($pendingBalance, 2) . " in payments pending admin approval.";
+                  }
+                  ?>
+                </p>
+                <p class="text-xs opacity-75 mt-1">
+                  <?php echo $hasPendingPayments ? 'Please wait for approval before redeeming rewards.' : 'Please clear your balance before redeeming rewards.'; ?>
+                </p>
               </div>
             </div>
             <a href="./payments.php"
@@ -101,7 +114,6 @@
             </a>
           </div>
         <?php endif; ?>
-
         <!-- header -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -210,10 +222,10 @@
                 <div class="flex items-center justify-between mt-4">
                   <span class="font-bold text-amber-700"><?php echo number_format($reward['points_cost']); ?> pts</span>
                   <button
-                    class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo $hasOutstandingBalance ? 'opacity-50 cursor-not-allowed' : ''; ?>"
+                    class="redeem-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl text-sm <?php echo ($hasOutstandingBalance || $hasPendingPayments) ? 'opacity-50 cursor-not-allowed' : ''; ?>"
                     data-reward="<?php echo htmlspecialchars($reward['reward_name']); ?>"
                     data-cost="<?php echo $reward['points_cost']; ?>"
-                    data-experience="<?php echo htmlspecialchars($reward['category']); ?>" <?php echo $hasOutstandingBalance ? 'disabled' : ''; ?>>
+                    data-experience="<?php echo htmlspecialchars($reward['category']); ?>" <?php echo ($hasOutstandingBalance || $hasPendingPayments) ? 'disabled' : ''; ?>>
                     redeem
                   </button>
                 </div>
@@ -342,26 +354,34 @@
           }, 3000);
         }
 
-        // Show balance warning
+        // Show balance warning with pending status
         function showBalanceWarning() {
+          let message = '';
+          <?php if ($pendingBalance > 0 && $totalOutstanding > 0): ?>
+            message = `You have an outstanding balance of <strong>₱<?php echo number_format($totalOutstanding, 2); ?></strong> with <strong>₱<?php echo number_format($pendingBalance, 2); ?></strong> pending approval.`;
+          <?php elseif ($pendingBalance > 0): ?>
+            message = `You have <strong>₱<?php echo number_format($pendingBalance, 2); ?></strong> in payments pending admin approval.`;
+          <?php elseif ($totalOutstanding > 0): ?>
+            message = `You have an outstanding balance of <strong>₱<?php echo number_format($totalOutstanding, 2); ?></strong>.`;
+          <?php endif; ?>
+
           Swal.fire({
-            title: 'Outstanding Balance Detected',
+            title: 'Cannot Redeem Rewards',
             html: `
-              <div class="text-left">
-                <p class="mb-3 text-red-600">You have an outstanding balance of <strong>₱${outstandingAmount.toFixed(2)}</strong>.</p>
-                <p class="mb-3">Please clear your balance before redeeming rewards.</p>
-                <a href="./payments.php" class="inline-block bg-amber-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-700 transition">
-                  Go to Payments
-                </a>
-              </div>
-            `,
+      <div class="text-left">
+        <p class="mb-3 text-red-600">${message}</p>
+        <p class="mb-3">Please clear your balance before redeeming rewards.</p>
+        <a href="./payments.php" class="inline-block bg-amber-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-700 transition">
+          Go to Payments
+        </a>
+      </div>
+    `,
             icon: 'warning',
             confirmButtonColor: '#d97706',
             confirmButtonText: 'OK',
             showCancelButton: false
           });
         }
-
         // Update points in UI
         function updatePoints(newPoints) {
           currentPoints = newPoints;

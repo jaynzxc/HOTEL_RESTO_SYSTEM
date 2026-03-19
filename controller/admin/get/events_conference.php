@@ -127,17 +127,7 @@ if ($admin) {
     }
 }
 
-// Get unread notifications count
-try {
-    $unread_result = $db->query(
-        "SELECT COUNT(*) as count FROM notifications 
-         WHERE user_id = :user_id AND is_read = 0",
-        ['user_id' => $_SESSION['user_id']]
-    )->fetch_one();
-    $unread_count = $unread_result['count'] ?? 0;
-} catch (Exception $e) {
-    $unread_count = 0;
-}
+
 
 // Store data for view
 $viewData = [
@@ -148,7 +138,7 @@ $viewData = [
     'upcomingEvents' => $upcomingEvents,
     'venues' => $venues,
     'stats' => $stats,
-    'unread_count' => $unread_count,
+    
     'today' => $today
 ];
 

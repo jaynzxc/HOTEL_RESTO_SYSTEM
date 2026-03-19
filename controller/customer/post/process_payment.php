@@ -89,14 +89,14 @@ try {
         // Calculate points that COULD be earned (for display only - NOT added to user account)
         $points_earned = floor($amount / 100) * 5;
 
-        // Insert into payments table
+        // Insert into payments table - with pending status
         $db->query(
             "INSERT INTO payments (
                 payment_reference, user_id, booking_type, booking_id, amount, 
-                payment_method, payment_status, payment_date, created_at
+                payment_method, payment_status, approval_status, payment_date, created_at
             ) VALUES (
                 :ref, :user_id, :booking_type, :booking_id, :amount, 
-                :payment_method, 'completed', NOW(), NOW()
+                :payment_method, 'pending', 'pending', NOW(), NOW()
             )",
             [
                 'ref' => $payment_ref,
@@ -112,18 +112,13 @@ try {
 
         // IMPORTANT: DO NOT update user loyalty_points here
         // Points will be added manually by admin after verification
-        // The points_earned is just for display/reference
 
-        // If this payment is for a booking, update booking status
+        // If this payment is for a booking, update booking status to pending payment
         if ($booking_id) {
-            // Determine booking type
-            $booking_type = $payment_type; // 'hotel' or 'restaurant'
-
-            if ($booking_type === 'hotel') {
+            if ($payment_type === 'hotel') {
                 $db->query(
                     "UPDATE bookings SET 
-                        payment_status = 'paid',
-                        status = 'confirmed',
+                        payment_status = 'pending',
                         payment_date = NOW(),
                         payment_method = :payment_method,
                         payment_id = :payment_id
@@ -135,22 +130,10 @@ try {
                         'payment_id' => $payment_id
                     ]
                 );
-
-                // Get booking details for notification
-                $booking = $db->query(
-                    "SELECT room_name, check_in, check_out, points_earned 
-                     FROM bookings WHERE id = :id",
-                    ['id' => $booking_id]
-                )->fetch_one();
-
-                $points_earned = $booking ? $booking['points_earned'] : 0;
-
-            } elseif ($booking_type === 'restaurant') {
-                // Check if restaurant_reservations table exists and update it
+            } elseif ($payment_type === 'restaurant') {
                 $db->query(
                     "UPDATE restaurant_reservations SET 
-                        payment_status = 'paid',
-                        status = 'confirmed',
+                        payment_status = 'pending',
                         payment_date = NOW(),
                         payment_method = :payment_method,
                         payment_id = :payment_id
@@ -162,27 +145,18 @@ try {
                         'payment_id' => $payment_id
                     ]
                 );
-
-                // Get reservation details for notification
-                $reservation = $db->query(
-                    "SELECT guests, reservation_date, reservation_time, points_earned 
-                     FROM restaurant_reservations WHERE id = :id",
-                    ['id' => $booking_id]
-                )->fetch_one();
-
-                $points_earned = $reservation ? $reservation['points_earned'] : 0;
             }
         }
 
-        // Create notification for the user - clarify points will be added by admin
-        $notification_message = "Payment of ₱" . number_format($amount, 2) . " processed successfully.";
+        // Create notification for the user - clarify approval needed
+        $notification_message = "Payment of ₱" . number_format($amount, 2) . " received and pending admin approval.";
         if ($points_earned > 0) {
-            $notification_message .= " You'll earn $points_earned loyalty points (admin will add after verification).";
+            $notification_message .= " You'll earn $points_earned loyalty points after approval.";
         }
 
         $db->query(
             "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
-             VALUES (:user_id, 'Payment Successful', :message, 'success', 'fa-credit-card', :link, NOW())",
+             VALUES (:user_id, 'Payment Pending Approval', :message, 'info', 'fa-clock', :link, NOW())",
             [
                 'user_id' => $_SESSION['user_id'],
                 'message' => $notification_message,
@@ -190,12 +164,29 @@ try {
             ]
         );
 
+        // Create notification for admin about pending payment
+        $admins = $db->query(
+            "SELECT id FROM users WHERE role = 'admin'"
+        )->find();
+
+        foreach ($admins as $admin) {
+            $db->query(
+                "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
+                 VALUES (:user_id, 'Payment Pending Approval', :message, 'warning', 'fa-clock', :link, NOW())",
+                [
+                    'user_id' => $admin['id'],
+                    'message' => "New payment of ₱" . number_format($amount, 2) . " from " . ($user['full_name'] ?? 'Guest') . " needs approval",
+                    'link' => '/src/admin/operations/billing_&_payment.php'
+                ]
+            );
+        }
+
         // Commit transaction
         $db->commit();
 
         // Get user data (but NOT updated points)
         $user = $db->query(
-            "SELECT loyalty_points FROM users WHERE id = :id",
+            "SELECT loyalty_points, full_name FROM users WHERE id = :id",
             ['id' => $_SESSION['user_id']]
         )->fetch_one();
 
@@ -208,15 +199,17 @@ try {
             'payment_method' => $paymentMethod['display_name'],
             'date' => date('Y-m-d H:i:s'),
             'points_earned' => $points_earned,
-            'note' => 'Points will be added by admin after verification'
+            'status' => 'pending',
+            'note' => 'Your payment is pending admin approval'
         ];
 
         echo json_encode([
             'success' => true,
-            'message' => 'Payment processed successfully!',
+            'message' => 'Payment submitted successfully! It will be processed upon admin approval.',
             'receipt' => $receipt,
             'points_earned' => $points_earned,
-            'note' => 'Points will be added by admin after verification'
+            'note' => 'Points will be added by admin after approval',
+            'pending' => true
         ]);
 
     } elseif ($action === 'add_payment_method') {

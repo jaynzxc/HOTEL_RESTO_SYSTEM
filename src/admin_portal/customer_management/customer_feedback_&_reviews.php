@@ -72,9 +72,8 @@ $current_page = 'customer_feedback_&_reviews';
             <p class="text-sm text-slate-500 mt-0.5">manage and respond to guest reviews and feedback</p>
           </div>
           <div class="flex gap-3 text-sm">
-            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -114,8 +113,8 @@ $current_page = 'customer_feedback_&_reviews';
 
         <!-- ===== RATING DISTRIBUTION ===== -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-6">
-          <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-              class="fas fa-chart-bar text-amber-600"></i> rating distribution</h2>
+          <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-chart-bar text-amber-600"></i>
+            rating distribution</h2>
           <div class="space-y-2">
             <?php foreach ($ratingDistribution as $dist): ?>
               <div class="flex items-center gap-2">
@@ -137,17 +136,33 @@ $current_page = 'customer_feedback_&_reviews';
 
         <!-- ===== FILTER TABS ===== -->
         <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-6" id="filterTabs">
-          <button class="filter-btn px-4 py-2 bg-amber-600 text-white rounded-full text-sm" data-filter="all">all
-            reviews (<?php echo $stats['total_reviews'] ?? 0; ?>)</button>
-          <button class="filter-btn px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50"
-            data-filter="pending">pending response (<?php echo $stats['pending_responses'] ?? 0; ?>)</button>
-          <button class="filter-btn px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50"
-            data-filter="5">5 star (<?php echo $stats['five_star'] ?? 0; ?>)</button>
-          <button class="filter-btn px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50"
-            data-filter="4">4 star (<?php echo $stats['four_star'] ?? 0; ?>)</button>
-          <button class="filter-btn px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50"
-            data-filter="3">3 star & below
-            (<?php echo ($stats['three_star'] ?? 0) + ($stats['two_star'] ?? 0) + ($stats['one_star'] ?? 0); ?>)</button>
+          <a href="?status=all"
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            all reviews (<?php echo $stats['total_reviews'] ?? 0; ?>)
+          </a>
+          <a href="?status=pending"
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'pending' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            pending response (<?php echo $stats['pending_responses'] ?? 0; ?>)
+          </a>
+          <a href="?status=responded"
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'responded' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            responded (<?php echo ($stats['total_reviews'] ?? 0) - ($stats['pending_responses'] ?? 0); ?>)
+          </a>
+          <a href="?rating=5"
+            class="filter-btn px-4 py-2 <?php echo $ratingFilter == 5 ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            5 star (<?php echo $stats['five_star'] ?? 0; ?>)
+          </a>
+          <a href="?rating=4"
+            class="filter-btn px-4 py-2 <?php echo $ratingFilter == 4 ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            4 star (<?php echo $stats['four_star'] ?? 0; ?>)
+          </a>
+          <a href="?rating=3"
+            class="filter-btn px-4 py-2 <?php echo $ratingFilter == 3 ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'; ?> rounded-full text-sm transition">
+            3 star (<?php echo $stats['three_star'] ?? 0; ?>)
+          </a>
+          <?php if ($statusFilter != 'all' || $ratingFilter > 0): ?>
+            <a href="?" class="text-sm text-amber-600 hover:underline ml-2">clear filters</a>
+          <?php endif; ?>
         </div>
 
         <!-- ===== ACTION BAR ===== -->
@@ -161,8 +176,13 @@ $current_page = 'customer_feedback_&_reviews';
           </div>
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="searchInput" placeholder="search reviews..."
-              class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
+            <form id="searchForm" method="GET" action="">
+              <input type="hidden" name="status" value="<?php echo $statusFilter; ?>">
+              <input type="hidden" name="rating" value="<?php echo $ratingFilter; ?>">
+              <input type="text" name="search" id="searchInput" placeholder="search reviews..."
+                value="<?php echo htmlspecialchars($searchFilter); ?>"
+                class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
+            </form>
           </div>
         </div>
 
@@ -260,8 +280,7 @@ $current_page = 'customer_feedback_&_reviews';
                       <?php endif; ?>
 
                       <div class="flex items-center gap-3 mt-3">
-                        <span class="text-xs text-slate-400"><i
-                            class="fas fa-clock mr-1"></i><?php echo $timeAgo; ?></span>
+                        <span class="text-xs text-slate-400"><i class="fas fa-clock mr-1"></i><?php echo $timeAgo; ?></span>
                       </div>
                     </div>
                   </div>
@@ -303,16 +322,37 @@ $current_page = 'customer_feedback_&_reviews';
 
         <!-- pagination -->
         <div class="flex items-center justify-between mb-8">
-          <span class="text-xs text-slate-500">Showing 1-<?php echo min(10, count($reviews)); ?> of
-            <?php echo number_format($stats['total_reviews'] ?? 0); ?> reviews</span>
+          <span class="text-xs text-slate-500">
+            Showing
+            <?php echo (($currentPage - 1) * $limit) + 1; ?>-<?php echo min($currentPage * $limit, $totalReviews); ?>
+            of <?php echo number_format($totalReviews); ?> reviews
+          </span>
           <div class="flex gap-2">
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">Previous</button>
-            <button class="bg-amber-600 text-white px-3 py-1 rounded-lg text-sm">1</button>
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">2</button>
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">3</button>
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">4</button>
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">5</button>
-            <button class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50">Next</button>
+            <a href="?page=<?php echo $currentPage - 1; ?>&status=<?php echo $statusFilter; ?>&rating=<?php echo $ratingFilter; ?>"
+              class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition <?php echo $currentPage <= 1 ? 'pointer-events-none opacity-50' : ''; ?>">
+              Previous
+            </a>
+
+            <?php
+            // Show up to 5 page buttons
+            $startPage = max(1, $currentPage - 2);
+            $endPage = min($totalPages, $startPage + 4);
+            if ($endPage - $startPage < 4) {
+              $startPage = max(1, $endPage - 4);
+            }
+
+            for ($i = $startPage; $i <= $endPage; $i++):
+              ?>
+              <a href="?page=<?php echo $i; ?>&status=<?php echo $statusFilter; ?>&rating=<?php echo $ratingFilter; ?>"
+                class="px-3 py-1 rounded-lg text-sm transition <?php echo $i == $currentPage ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'; ?>">
+                <?php echo $i; ?>
+              </a>
+            <?php endfor; ?>
+
+            <a href="?page=<?php echo $currentPage + 1; ?>&status=<?php echo $statusFilter; ?>&rating=<?php echo $ratingFilter; ?>"
+              class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50 transition <?php echo $currentPage >= $totalPages ? 'pointer-events-none opacity-50' : ''; ?>">
+              Next
+            </a>
           </div>
         </div>
 
@@ -321,8 +361,8 @@ $current_page = 'customer_feedback_&_reviews';
 
           <!-- common topics -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
-            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fas fa-message text-amber-600"></i> common feedback topics</h2>
+            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-message text-amber-600"></i>
+              common feedback topics</h2>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div class="border rounded-xl p-3 text-center">
                 <p
@@ -359,8 +399,8 @@ $current_page = 'customer_feedback_&_reviews';
 
           <!-- quick response templates -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fas fa-file-lines text-amber-600"></i> response templates</h3>
+            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-file-lines text-amber-600"></i>
+              response templates</h3>
             <ul class="space-y-2 max-h-48 overflow-y-auto">
               <?php if (empty($templates)): ?>
                 <li class="text-sm text-slate-500 italic">No templates available</li>
@@ -382,6 +422,21 @@ $current_page = 'customer_feedback_&_reviews';
       // Global variables
       let currentReviewId = null;
       let currentResponseText = '';
+
+      document.getElementById('searchInput')?.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          document.getElementById('searchForm').submit();
+        }
+      });
+
+      // Add search button
+      const searchContainer = document.querySelector('#searchForm').parentElement;
+      const searchBtn = document.createElement('button');
+      searchBtn.type = 'submit';
+      searchBtn.form = 'searchForm';
+      searchBtn.className = 'absolute right-2 top-1/2 -translate-y-1/2 bg-amber-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-amber-700 transition';
+      searchBtn.innerHTML = '<i class="fa-solid fa-search"></i>';
+      searchContainer.appendChild(searchBtn);
 
       // Filter reviews
       document.querySelectorAll('.filter-btn').forEach(btn => {

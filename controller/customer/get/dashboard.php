@@ -205,7 +205,7 @@ $viewData = [
     'recentBookings' => $recentBookings,
     'notifications' => $notifications,
     'paymentMethods' => $paymentMethods,
-    'unread_count' => $unread_count,
+    
     'initials' => $initials,
     'points' => $points,
     'member_tier' => $member_tier,

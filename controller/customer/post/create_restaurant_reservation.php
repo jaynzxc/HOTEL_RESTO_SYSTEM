@@ -27,39 +27,149 @@ $config = require __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
 
 try {
-    // Check if user has any pending reservations
-    $pendingReservations = $db->query(
-        "SELECT COUNT(*) as count 
-         FROM restaurant_reservations 
+    $user_id = $_SESSION['user_id'];
+
+    // ========== CHECK FOR PENDING HOTEL BOOKINGS ==========
+    $pendingBooking = $db->query(
+        "SELECT id, booking_reference, room_name, check_in, check_out, total_amount, status, payment_status
+         FROM bookings 
          WHERE user_id = :user_id 
-         AND status = 'pending' 
+         AND status IN ('pending', 'confirmed')
          AND payment_status = 'unpaid'
-         AND reservation_date >= CURDATE()",
-        ['user_id' => $_SESSION['user_id']]
+         AND check_out >= CURDATE()
+         ORDER BY created_at DESC 
+         LIMIT 1",
+        ['user_id' => $user_id]
     )->fetch_one();
 
-    if ($pendingReservations['count'] > 0) {
-        // Get the pending reservation details
-        $pending = $db->query(
-            "SELECT id, reservation_reference, guests, reservation_date, reservation_time, down_payment, points_earned
-             FROM restaurant_reservations 
-             WHERE user_id = :user_id 
-             AND status = 'pending' 
-             AND payment_status = 'unpaid'
-             AND reservation_date >= CURDATE()
-             ORDER BY created_at DESC
-             LIMIT 1",
-            ['user_id' => $_SESSION['user_id']]
-        )->fetch_one();
+    if ($pendingBooking) {
+        $formattedAmount = '₱' . number_format($pendingBooking['total_amount'], 2);
 
         echo json_encode([
             'success' => false,
             'has_pending' => true,
-            'message' => 'You already have a pending reservation. Please complete payment for your existing reservation before creating a new one.',
-            'pending_reservation' => $pending
+            'type' => 'hotel_booking',
+            'message' => 'You have an unpaid hotel booking that needs payment or your payment has not been approved before creating a restaurant reservation.',
+            'pending_item' => [
+                'id' => $pendingBooking['id'],
+                'reference' => $pendingBooking['booking_reference'],
+                'type' => 'hotel',
+                'details' => "Room: {$pendingBooking['room_name']}",
+                'date' => $pendingBooking['check_in'],
+                'amount' => $pendingBooking['total_amount'],
+                'amount_formatted' => $formattedAmount
+            ]
         ]);
         exit();
     }
+
+    // ========== CHECK FOR PENDING RESTAURANT RESERVATIONS ==========
+    $pendingReservations = $db->query(
+        "SELECT id, reservation_reference, guests, reservation_date, reservation_time, down_payment, points_earned, status, payment_status
+         FROM restaurant_reservations 
+         WHERE user_id = :user_id 
+         AND status IN ('pending', 'confirmed')
+         AND payment_status = 'unpaid'
+         AND reservation_date >= CURDATE()
+         ORDER BY created_at DESC
+         LIMIT 1",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($pendingReservations) {
+        $formattedAmount = '₱' . number_format($pendingReservations['down_payment'], 2);
+
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'type' => 'restaurant_reservation',
+            'message' => 'You already have a pending restaurant reservation. Please complete payment for your existing reservation before creating a new one.',
+            'pending_item' => [
+                'id' => $pendingReservations['id'],
+                'reference' => $pendingReservations['reservation_reference'],
+                'type' => 'restaurant',
+                'details' => "{$pendingReservations['guests']} guests",
+                'date' => $pendingReservations['reservation_date'],
+                'time' => $pendingReservations['reservation_time'],
+                'amount' => $pendingReservations['down_payment'],
+                'amount_formatted' => $formattedAmount,
+                'points_earned' => $pendingReservations['points_earned']
+            ]
+        ]);
+        exit();
+    }
+
+    // ========== CHECK BALANCE APPROVAL STATUS ==========
+    $balance = $db->query(
+        "SELECT * FROM current_balance 
+         WHERE user_id = :user_id",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($balance) {
+        // Check if there's a pending approval
+        if ($balance['admin_approval'] === 'pending') {
+            echo json_encode([
+                'success' => false,
+                'has_pending' => true,
+                'type' => 'balance_pending',
+                'message' => 'Your account has a pending balance that needs admin approval before you can make new reservations.',
+                'pending_item' => [
+                    'amount' => $balance['pending_balance'],
+                    'total' => $balance['total_balance'],
+                    'available' => $balance['available_balance'],
+                    'amount_formatted' => '₱' . number_format($balance['pending_balance'], 2)
+                ]
+            ]);
+            exit();
+        }
+
+        // Check if there's a rejected balance
+        if ($balance['admin_approval'] === 'rejected' && $balance['pending_balance'] > 0) {
+            echo json_encode([
+                'success' => false,
+                'has_pending' => true,
+                'type' => 'balance_rejected',
+                'message' => 'Your previous payment was rejected. Please contact support to resolve this before making new reservations.',
+                'pending_item' => [
+                    'amount' => $balance['pending_balance'],
+                    'total' => $balance['total_balance'],
+                    'reason' => $balance['rejection_reason'],
+                    'amount_formatted' => '₱' . number_format($balance['pending_balance'], 2)
+                ]
+            ]);
+            exit();
+        }
+    }
+
+    // ========== CHECK FOR PENDING PAYMENTS ==========
+    $pendingPayment = $db->query(
+        "SELECT id, payment_reference, amount, payment_method, approval_status
+         FROM payments 
+         WHERE user_id = :user_id 
+         AND approval_status = 'pending'
+         ORDER BY created_at DESC 
+         LIMIT 1",
+        ['user_id' => $user_id]
+    )->fetch_one();
+
+    if ($pendingPayment) {
+        echo json_encode([
+            'success' => false,
+            'has_pending' => true,
+            'type' => 'payment_pending',
+            'message' => 'You have a payment pending admin approval. Please wait for approval before creating a new reservation.',
+            'pending_item' => [
+                'reference' => $pendingPayment['payment_reference'],
+                'amount' => $pendingPayment['amount'],
+                'amount_formatted' => '₱' . number_format($pendingPayment['amount'], 2),
+                'method' => $pendingPayment['payment_method']
+            ]
+        ]);
+        exit();
+    }
+
+    // ========== ALL CHECKS PASSED - PROCEED WITH RESERVATION CREATION ==========
 
     // Get and validate input
     $first_name = trim($_POST['first_name'] ?? '');
@@ -138,7 +248,7 @@ try {
         )",
         [
             'reservation_reference' => $reservation_reference,
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $user_id,
             'first_name' => $first_name,
             'last_name' => $last_name,
             'email' => $email,
@@ -166,7 +276,7 @@ try {
         "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
          VALUES (:user_id, 'Restaurant Reservation Created', :message, 'success', 'fa-utensils', :link, NOW())",
         [
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $user_id,
             'message' => $notification_message,
             'link' => '/src/customer_portal/my_reservation.php'
         ]
@@ -182,7 +292,7 @@ try {
         "SELECT total_balance, pending_balance, available_balance 
          FROM current_balance 
          WHERE user_id = :user_id",
-        ['user_id' => $_SESSION['user_id']]
+        ['user_id' => $user_id]
     )->fetch_one();
 
     // Return success response

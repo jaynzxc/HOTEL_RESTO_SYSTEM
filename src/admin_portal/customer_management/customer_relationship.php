@@ -66,9 +66,7 @@ $current_page = 'customer_relationship';
             <p class="text-sm text-slate-500 mt-0.5">manage guest profiles, preferences, and communication history</p>
           </div>
           <div class="flex gap-3 text-sm">
-            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i
-                class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?></span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
+            <?php require_once '../components/notification_component.php'; ?>
           </div>
         </div>
 
@@ -232,39 +230,42 @@ $current_page = 'customer_relationship';
         <!-- ===== BOTTOM: RECENT INTERACTIONS & BIRTHDAYS ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <!-- recent guest interactions -->
+          <!-- recent guest interactions with pagination -->
           <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
-            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-                class="fas fa-clock text-amber-600"></i> recent interactions</h2>
-            <div class="space-y-3">
-              <?php if (empty($recentInteractions)): ?>
-                <p class="text-sm text-slate-400 text-center py-4">No recent interactions</p>
-              <?php else: ?>
-                <?php foreach ($recentInteractions as $interaction):
-                  $colors = ['bg-purple-200', 'bg-amber-200', 'bg-blue-200', 'bg-green-200'];
-                  $randColor = $colors[array_rand($colors)];
-                  ?>
-                  <div class="flex items-center gap-3 border-b pb-2 last:border-0">
-                    <div
-                      class="h-8 w-8 rounded-full <?php echo $randColor; ?> flex items-center justify-center text-xs font-bold flex-shrink-0">
-                      <?php echo $interaction['initials'] ?: substr($interaction['user_name'], 0, 2); ?>
-                    </div>
-                    <div class="flex-1">
-                      <p class="font-medium text-sm"><?php echo htmlspecialchars($interaction['user_name']); ?></p>
-                      <p class="text-xs text-slate-500"><?php echo htmlspecialchars($interaction['description']); ?></p>
-                    </div>
-                    <span class="text-xs text-slate-400"><?php echo $interaction['time_ago']; ?></span>
-                  </div>
-                <?php endforeach; ?>
-              <?php endif; ?>
+            <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-clock text-amber-600"></i>
+              recent interactions</h2>
+
+            <!-- Interactions Container with Pagination -->
+            <div id="interactionsContainer" class="space-y-3 min-h-[300px]">
+              <!-- Populated by JavaScript -->
+            </div>
+
+            <!-- Interactions Pagination Controls -->
+            <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-200">
+              <span class="text-xs text-slate-500" id="interactionsPaginationInfo">Showing 0 interactions</span>
+              <div class="flex gap-2">
+                <button id="prevInteractionsPage" onclick="changeInteractionsPage(currentInteractionsPage - 1)"
+                  class="border border-slate-200 px-3 py-1 rounded-lg text-xs hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled>
+                  Previous
+                </button>
+                <div id="interactionsPageButtons" class="flex gap-1">
+                  <!-- Page buttons will be added here -->
+                </div>
+                <button id="nextInteractionsPage" onclick="changeInteractionsPage(currentInteractionsPage + 1)"
+                  class="border border-slate-200 px-3 py-1 rounded-lg text-xs hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled>
+                  Next
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- upcoming birthdays / special occasions -->
           <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-semibold flex items-center gap-2 mb-3"><i
-                class="fas fa-cake-candles text-amber-600"></i> upcoming celebrations</h3>
-            <ul class="space-y-2">
+            <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-cake-candles text-amber-600"></i>
+              upcoming celebrations</h3>
+            <ul class="space-y-2 max-h-[300px] overflow-y-auto">
               <?php if (empty($celebrations)): ?>
                 <li class="text-sm text-slate-500 italic">No upcoming celebrations</li>
               <?php else: ?>
@@ -294,6 +295,12 @@ $current_page = 'customer_relationship';
       let currentStay = <?php echo $stayFilter; ?>;
       let currentSearch = '<?php echo $searchFilter; ?>';
 
+      // Interactions pagination
+      let allInteractions = <?php echo json_encode($recentInteractions); ?>;
+      let currentInteractionsPage = 1;
+      let interactionsPerPage = 5;
+      let totalInteractionsPages = Math.ceil(allInteractions.length / interactionsPerPage);
+
       // ========== SEARCH FUNCTIONALITY ==========
       document.addEventListener('DOMContentLoaded', function () {
         // Set search input value from URL
@@ -317,9 +324,97 @@ $current_page = 'customer_relationship';
           searchBtn.onclick = performSearch;
           searchInput.parentNode.appendChild(searchBtn);
         }
+
+        // Render interactions
+        renderInteractions();
       });
 
-      // Perform search
+      // ========== INTERACTIONS PAGINATION ==========
+      function renderInteractions() {
+        const container = document.getElementById('interactionsContainer');
+        const start = (currentInteractionsPage - 1) * interactionsPerPage;
+        const end = start + interactionsPerPage;
+        const paginatedInteractions = allInteractions.slice(start, end);
+
+        if (paginatedInteractions.length === 0) {
+          container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">No recent interactions</p>';
+        } else {
+          container.innerHTML = paginatedInteractions.map(interaction => {
+            const colors = ['bg-purple-200', 'bg-amber-200', 'bg-blue-200', 'bg-green-200'];
+            const randColor = colors[Math.floor(Math.random() * colors.length)];
+
+            return `
+              <div class="flex items-center gap-3 border-b pb-2 last:border-0">
+                <div class="h-8 w-8 rounded-full ${randColor} flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  ${interaction.initials || interaction.user_name.substring(0, 2).toUpperCase()}
+                </div>
+                <div class="flex-1">
+                  <p class="font-medium text-sm">${escapeHtml(interaction.user_name)}</p>
+                  <p class="text-xs text-slate-500">${escapeHtml(interaction.description)}</p>
+                </div>
+                <span class="text-xs text-slate-400">${interaction.time_ago}</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Update pagination info
+        document.getElementById('interactionsPaginationInfo').textContent =
+          `Showing ${Math.min(start + 1, allInteractions.length)}-${Math.min(end, allInteractions.length)} of ${allInteractions.length} interactions`;
+
+        // Update pagination buttons
+        updateInteractionsPaginationButtons();
+      }
+
+      function updateInteractionsPaginationButtons() {
+        const prevBtn = document.getElementById('prevInteractionsPage');
+        const nextBtn = document.getElementById('nextInteractionsPage');
+        const pageButtonsContainer = document.getElementById('interactionsPageButtons');
+
+        // Update prev/next buttons
+        prevBtn.disabled = currentInteractionsPage === 1;
+        nextBtn.disabled = currentInteractionsPage === totalInteractionsPages || totalInteractionsPages === 0;
+
+        // Generate page buttons
+        let buttonsHtml = '';
+        const maxVisibleButtons = 3;
+        let startPage = Math.max(1, currentInteractionsPage - Math.floor(maxVisibleButtons / 2));
+        let endPage = Math.min(totalInteractionsPages, startPage + maxVisibleButtons - 1);
+
+        if (endPage - startPage + 1 < maxVisibleButtons) {
+          startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+          buttonsHtml += `
+            <button onclick="changeInteractionsPage(${i})" 
+              class="px-2 py-1 rounded-lg text-xs ${i === currentInteractionsPage ? 'bg-amber-600 text-white' : 'border border-slate-200 hover:bg-slate-50'} transition">
+              ${i}
+            </button>
+          `;
+        }
+
+        pageButtonsContainer.innerHTML = buttonsHtml;
+      }
+
+      function changeInteractionsPage(page) {
+        if (page < 1 || page > totalInteractionsPages) return;
+        currentInteractionsPage = page;
+        renderInteractions();
+      }
+
+      // Helper function to escape HTML
+      function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // ========== PERFORM SEARCH ==========
       function performSearch() {
         const search = document.getElementById('searchInput').value;
         const url = new URL(window.location);

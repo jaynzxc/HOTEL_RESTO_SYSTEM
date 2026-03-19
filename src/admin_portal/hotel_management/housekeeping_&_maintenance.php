@@ -159,14 +159,8 @@ $current_page = 'housekeeping_&_maintenance';
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
               <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
-              id="notificationBell">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
-              <?php endif; ?>
-            </span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -678,8 +672,8 @@ $current_page = 'housekeeping_&_maintenance';
 
         <!-- BOTTOM: ROOM STATUS SUMMARY -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
-          <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i
-              class="fas fa-building text-amber-600"></i> floor status summary</h2>
+          <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-building text-amber-600"></i>
+            floor status summary</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <?php foreach ($floorStats as $floor): ?>
               <div class="border rounded-xl p-3 text-center cursor-pointer hover:shadow-md transition"
@@ -2005,10 +1999,6 @@ $current_page = 'housekeeping_&_maintenance';
         }, 100);
       }
 
-      // ========== NOTIFICATION BELL ==========
-      document.getElementById('notificationBell').addEventListener('click', function () {
-        window.location.href = '../notifications.php';
-      });
 
       // ========== INITIALIZE ON PAGE LOAD ==========
       document.addEventListener('DOMContentLoaded', function () {

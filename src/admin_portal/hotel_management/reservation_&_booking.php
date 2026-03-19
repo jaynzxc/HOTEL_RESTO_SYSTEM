@@ -103,14 +103,8 @@ $current_page = 'reservation_&_booking';
               <i class="fas fa-calendar text-slate-400"></i>
               <span id="currentDate"><?php echo date('F j, Y'); ?></span>
             </span>
-            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
-              id="notificationBell">
-              <i class="fas fa-bell"></i>
-              <?php if ($unread_count > 0): ?>
-                <span
-                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"><?php echo $unread_count; ?></span>
-              <?php endif; ?>
-            </span>
+            <?php require_once '../components/notification_component.php'; ?>
+
           </div>
         </div>
 
@@ -249,11 +243,11 @@ $current_page = 'reservation_&_booking';
           echo 'bg-slate-100 text-slate-700';
       }
       ?>">
-                                          <?php echo $res['status']; ?>
+                        <?php echo $res['status']; ?>
                       </span>
                     </td>
                     <td class="p-4">
-                                        <?php if ($res['points_earned'] > 0): ?>
+                      <?php if ($res['points_earned'] > 0): ?>
                         <span
                           class="text-xs font-medium <?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'text-green-600' : 'text-amber-600'; ?> cursor-help"
                           title="<?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'Points already awarded: ' . $res['points_earned'] : 'Points to earn: ' . $res['points_earned'] . ' (add manually)'; ?>">
@@ -261,9 +255,9 @@ $current_page = 'reservation_&_booking';
                           <i
                             class="fas <?php echo (isset($res['points_awarded']) && $res['points_awarded']) ? 'fa-circle-check text-green-500' : 'fa-star text-amber-500'; ?>"></i>
                         </span>
-                                        <?php else: ?>
+                      <?php else: ?>
                         <span class="text-xs text-slate-400">—</span>
-                                        <?php endif; ?>
+                      <?php endif; ?>
                     </td>
                     <td class="p-4">
                       <div class="flex gap-2">
@@ -277,32 +271,32 @@ $current_page = 'reservation_&_booking';
                             class="text-blue-600 hover:underline text-xs" title="Update Status">
                             <i class="fas fa-arrow-rotate-right"></i>
                           </button>
-                                          <?php endif; ?>
+                        <?php endif; ?>
 
                         <?php if ($res['status'] === 'cancelled'): ?>
                           <button onclick="archiveReservation(<?php echo $res['id']; ?>)"
                             class="text-slate-400 hover:text-slate-600 text-xs" title="Archive">
                             <i class="fas fa-box-archive"></i>
                           </button>
-                                          <?php endif; ?>
+                        <?php endif; ?>
 
                         <!-- Points button - disabled if already awarded -->
-                                          <?php if ($res['points_earned'] > 0 && isset($res['user_id']) && $res['user_id']): ?>
-                                            <?php if (isset($res['points_awarded']) && $res['points_awarded']): ?>
+                        <?php if ($res['points_earned'] > 0 && isset($res['user_id']) && $res['user_id']): ?>
+                          <?php if (isset($res['points_awarded']) && $res['points_awarded']): ?>
                             <!-- Already awarded - disabled button -->
                             <button disabled class="text-slate-300 cursor-not-allowed text-xs"
                               title="Points already awarded (<?php echo $res['points_earned']; ?> points)">
                               <i class="fas fa-star"></i>
                             </button>
-                                            <?php else: ?>
+                          <?php else: ?>
                             <!-- Not yet awarded - active button -->
                             <button onclick="addPoints(<?php echo $res['id']; ?>, <?php echo $res['points_earned']; ?>)"
                               class="text-amber-600 hover:text-amber-700 text-xs"
                               title="Add <?php echo $res['points_earned']; ?> points to user">
                               <i class="fas fa-star"></i>
                             </button>
-                                            <?php endif; ?>
-                                          <?php endif; ?>
+                          <?php endif; ?>
+                        <?php endif; ?>
                       </div>
                     </td>
                   </tr>
@@ -785,56 +779,46 @@ $current_page = 'reservation_&_booking';
             });
           });
       }
+      const formData = new FormData();
+      formData.append('action', 'get_notifications');
 
-      // View notifications
-      function viewNotifications() {
-        Swal.fire({
-          title: 'Loading...',
-          text: 'Please wait',
-          allowOutsideClick: false,
-          didOpen: () => { Swal.showLoading(); }
-        });
+      fetch('../../../controller/admin/post/reservationBooking_action.php', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          Swal.close();
+          if (data.success) {
+            let html = '<div class="max-h-96 overflow-y-auto">';
 
-        const formData = new FormData();
-        formData.append('action', 'get_notifications');
-
-        fetch('../../../controller/admin/post/reservationBooking_action.php', {
-          method: 'POST',
-          body: formData
-        })
-          .then(response => response.json())
-          .then(data => {
-            Swal.close();
-            if (data.success) {
-              let html = '<div class="max-h-96 overflow-y-auto">';
-
-              if (data.notifications.length === 0) {
-                html += '<p class="text-center text-slate-500 py-4">No notifications</p>';
-              } else {
-                data.notifications.forEach(notif => {
-                  const date = new Date(notif.created_at).toLocaleString();
-                  const bgColor = notif.is_read ? 'bg-white' : 'bg-amber-50';
-                  html += `
+            if (data.notifications.length === 0) {
+              html += '<p class="text-center text-slate-500 py-4">No notifications</p>';
+            } else {
+              data.notifications.forEach(notif => {
+                const date = new Date(notif.created_at).toLocaleString();
+                const bgColor = notif.is_read ? 'bg-white' : 'bg-amber-50';
+                html += `
                         <div class="${bgColor} p-3 rounded-lg mb-2 border-l-4 border-amber-500">
                             <p class="font-medium">${notif.title}</p>
                             <p class="text-xs text-slate-600">${notif.message}</p>
                             <p class="text-xs text-slate-400 mt-1">${date}</p>
                         </div>
                     `;
-                });
-              }
-
-              html += '</div>';
-
-              Swal.fire({
-                title: 'Notifications',
-                html: html,
-                icon: 'info',
-                confirmButtonColor: '#d97706',
-                width: '500px'
               });
             }
-          });
+
+            html += '</div>';
+
+            Swal.fire({
+              title: 'Notifications',
+              html: html,
+              icon: 'info',
+              confirmButtonColor: '#d97706',
+              width: '500px'
+            });
+          }
+        });
       }
 
       // Add event listeners for edit form
@@ -842,8 +826,7 @@ $current_page = 'reservation_&_booking';
       document.getElementById('edit_check_out')?.addEventListener('change', updateEditSummary);
       document.getElementById('edit_room_id')?.addEventListener('change', updateEditSummary);
 
-      // Update notification bell click
-      document.getElementById('notificationBell').addEventListener('click', viewNotifications);
+
 
       // Filter by status
       function filterByStatus(status) {

@@ -325,6 +325,9 @@ require_once '../../controller/customer/get/dashboard.php';
               <h2 class="font-semibold text-slate-800 flex gap-2 items-center">
                 <i class="fas fa-star text-amber-600"></i> how was your last stay?
               </h2>
+              <div>
+                <a href="./reviews.php">View all</a>
+              </div>
               <div class="flex gap-3 my-2">
                 <div class="flex text-yellow-400 text-xl cursor-pointer" id="starRating">
                   <i class="fas fa-star" data-rating="1"></i>
@@ -492,6 +495,11 @@ require_once '../../controller/customer/get/dashboard.php';
         const greeting = '<?php echo $greeting; ?>';
         const latestOrder = <?php echo json_encode($latestOrder); ?>;
 
+        // Rating tracking
+        let currentRating = 0;
+        let ratingsToday = 0;
+        let canRate = true;
+
         // ---------- DATE AND TIME ----------
         function updateDateTime() {
           const now = new Date();
@@ -510,93 +518,345 @@ require_once '../../controller/customer/get/dashboard.php';
           }
         }
 
+        // ---------- CHECK TODAY'S RATINGS ----------
+        function checkTodayRatings() {
+          const today = new Date().toDateString();
+          const lastRatingDate = localStorage.getItem('lastRatingDate');
+          const savedRatings = localStorage.getItem('ratingsToday');
+
+          if (lastRatingDate === today) {
+            ratingsToday = parseInt(savedRatings) || 0;
+          } else {
+            // Reset for new day
+            ratingsToday = 0;
+            localStorage.setItem('lastRatingDate', today);
+            localStorage.setItem('ratingsToday', '0');
+          }
+
+          canRate = ratingsToday < 5;
+
+          // Update UI to show remaining ratings
+          const ratingContainer = document.querySelector('.flex.gap-3.my-2');
+          if (ratingContainer) {
+            let remainingEl = document.getElementById('ratingsRemaining');
+            if (!remainingEl) {
+              remainingEl = document.createElement('span');
+              remainingEl.id = 'ratingsRemaining';
+              remainingEl.className = 'text-xs text-slate-500 ml-2';
+              ratingContainer.appendChild(remainingEl);
+            }
+            remainingEl.textContent = canRate ?
+              `${5 - ratingsToday} ratings remaining today` :
+              'Daily limit reached (5/5)';
+          }
+
+          // Check if there was a saved rating
+          const savedRating = localStorage.getItem('lastRating');
+          if (savedRating && canRate) {
+            currentRating = parseInt(savedRating);
+          }
+        }
+
         // ---------- STAR RATING ----------
         function initStarRating() {
           const stars = document.querySelectorAll('#starRating i');
-          stars.forEach(star => {
+
+          // Check today's ratings
+          checkTodayRatings();
+
+          stars.forEach((star, index) => {
+            // Remove any existing event listeners
+            star.replaceWith(star.cloneNode(true));
+          });
+
+          // Re-query stars after cloning
+          const freshStars = document.querySelectorAll('#starRating i');
+
+          freshStars.forEach((star, index) => {
+            // Mouse enter - highlight stars up to current (preview)
             star.addEventListener('mouseenter', function () {
-              const rating = parseInt(this.dataset.rating);
-              stars.forEach((s, index) => {
-                if (index < rating) {
+              if (!canRate) return;
+
+              const rating = index + 1;
+              freshStars.forEach((s, i) => {
+                if (i < rating) {
                   s.className = 'fa-solid fa-star text-yellow-400';
                 } else {
-                  s.className = 'fas fa-star text-yellow-400';
+                  s.className = 'far fa-star text-yellow-400';
                 }
               });
             });
 
+            // Mouse leave - revert to selected rating (if any)
             star.addEventListener('mouseleave', function () {
-              stars.forEach(s => {
-                s.className = 'fas fa-star text-yellow-400';
+              freshStars.forEach((s, i) => {
+                if (i < currentRating) {
+                  s.className = 'fa-solid fa-star text-yellow-400';
+                } else {
+                  s.className = 'far fa-star text-yellow-400';
+                }
               });
             });
 
+            // Click - set rating
             star.addEventListener('click', function () {
-              const rating = parseInt(this.dataset.rating);
-              stars.forEach((s, index) => {
-                if (index < rating) {
+              if (!canRate) {
+                Swal.fire({
+                  title: 'Daily Limit Reached',
+                  text: 'You can only rate 5 times per day. Please come back tomorrow!',
+                  icon: 'warning',
+                  confirmButtonColor: '#d97706'
+                });
+                return;
+              }
+
+              const newRating = index + 1;
+
+              // If clicking the same rating, maybe they want to change it
+              if (newRating === currentRating) {
+                // Allow them to reselect
+              }
+
+              currentRating = newRating;
+
+              // Update stars
+              freshStars.forEach((s, i) => {
+                if (i < currentRating) {
                   s.className = 'fa-solid fa-star text-yellow-400';
                 } else {
-                  s.className = 'fas fa-star text-yellow-400';
+                  s.className = 'far fa-star text-yellow-400';
                 }
               });
-              localStorage.setItem('lastRating', rating);
+
+              // Save to localStorage
+              localStorage.setItem('lastRating', currentRating);
             });
           });
+
+          // Apply saved rating if exists
+          if (currentRating > 0 && canRate) {
+            freshStars.forEach((s, i) => {
+              if (i < currentRating) {
+                s.className = 'fa-solid fa-star text-yellow-400';
+              } else {
+                s.className = 'far fa-star text-yellow-400';
+              }
+            });
+          }
         }
 
-        // ---------- ACTION FUNCTIONS ----------
+        // ---------- SUBMIT REVIEW ----------
+        window.submitReview = function () {
+          const reviewText = document.getElementById('reviewText').value.trim();
+
+          if (currentRating === 0) {
+            Swal.fire({
+              title: 'Rating Required',
+              text: 'Please select a star rating before submitting',
+              icon: 'warning',
+              confirmButtonColor: '#d97706'
+            });
+            return;
+          }
+
+          if (!reviewText) {
+            Swal.fire({
+              title: 'Review Required',
+              text: 'Please write a review before submitting',
+              icon: 'warning',
+              confirmButtonColor: '#d97706'
+            });
+            return;
+          }
+
+          if (!canRate) {
+            Swal.fire({
+              title: 'Daily Limit Reached',
+              text: 'You can only rate 5 times per day. Please come back tomorrow!',
+              icon: 'warning',
+              confirmButtonColor: '#d97706'
+            });
+            return;
+          }
+
+          Swal.fire({
+            title: 'Submitting...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          const formData = new FormData();
+          formData.append('action', 'submit_review');
+          formData.append('rating', currentRating);
+          formData.append('review_text', reviewText);
+          formData.append('experience', 'Hotel Stay');
+
+          fetch('../../controller/customer/post/dashboard_actions.php', {
+            method: 'POST',
+            body: formData
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Increment today's rating count
+                ratingsToday++;
+                localStorage.setItem('ratingsToday', ratingsToday.toString());
+
+                // Update remaining display
+                const remainingEl = document.getElementById('ratingsRemaining');
+                if (remainingEl) {
+                  if (ratingsToday >= 5) {
+                    remainingEl.textContent = 'Daily limit reached (5/5)';
+                    canRate = false;
+                  } else {
+                    remainingEl.textContent = `${5 - ratingsToday} ratings remaining today`;
+                  }
+                }
+
+                // Clear the form
+                document.getElementById('reviewText').value = '';
+
+                // Reset stars
+                currentRating = 0;
+                localStorage.removeItem('lastRating');
+
+                const stars = document.querySelectorAll('#starRating i');
+                stars.forEach(star => {
+                  star.className = 'far fa-star text-yellow-400';
+                });
+
+                // Update points display if points were awarded
+                if (data.points_earned > 0) {
+                  const pointsDisplay = document.getElementById('pointsDisplay');
+                  if (pointsDisplay) {
+                    const currentPoints = parseInt(userData.points) + data.points_earned;
+                    pointsDisplay.textContent = currentPoints.toLocaleString();
+                    userData.points = currentPoints; // Update stored value
+                  }
+                }
+
+                Swal.fire({
+                  title: 'Thank You!',
+                  html: `
+                    <p>${data.message}</p>
+                    <p class="text-sm text-amber-600 mt-2">+${data.points_earned} loyalty point earned!</p>
+                    <p class="text-xs text-slate-500 mt-1">${5 - ratingsToday} ratings remaining today</p>
+                  `,
+                  icon: 'success',
+                  confirmButtonColor: '#d97706'
+                });
+              } else {
+                Swal.fire({
+                  title: 'Error',
+                  text: data.message,
+                  icon: 'error',
+                  confirmButtonColor: '#d97706'
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#d97706'
+              });
+            });
+        };
+
+        // ---------- CONTACT SUPPORT ----------
+        window.contactSupport = function () {
+          Swal.fire({
+            title: 'Contact Support',
+            html: `
+              <div class="text-left">
+                <div class="mb-3">
+                  <label class="text-sm font-medium">Subject</label>
+                  <input type="text" id="supportSubject" class="w-full border rounded-lg p-2 mt-1" placeholder="e.g., Booking issue">
+                </div>
+                <div>
+                  <label class="text-sm font-medium">Message</label>
+                  <textarea id="supportMessage" class="w-full border rounded-lg p-2 mt-1" rows="4" placeholder="How can we help you?"></textarea>
+                </div>
+              </div>
+            `,
+            showCancelButton: true,
+            confirmButtonColor: '#d97706',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Send Message',
+            preConfirm: () => {
+              const subject = document.getElementById('supportSubject').value;
+              const message = document.getElementById('supportMessage').value;
+
+              if (!subject || !message) {
+                Swal.showValidationMessage('Please fill in all fields');
+                return false;
+              }
+
+              return { subject, message };
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.fire({
+                title: 'Sending...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                didOpen: () => {
+                  Swal.showLoading();
+                }
+              });
+
+              const formData = new FormData();
+              formData.append('action', 'contact_support');
+              formData.append('subject', result.value.subject);
+              formData.append('message', result.value.message);
+
+              fetch('../../controller/customer/post/dashboard_actions.php', {
+                method: 'POST',
+                body: formData
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    Swal.fire({
+                      title: 'Message Sent!',
+                      text: data.message,
+                      icon: 'success',
+                      confirmButtonColor: '#d97706'
+                    });
+                  } else {
+                    Swal.fire({
+                      title: 'Error',
+                      text: data.message,
+                      icon: 'error',
+                      confirmButtonColor: '#d97706'
+                    });
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#d97706'
+                  });
+                });
+            }
+          });
+        };
+
+        // ---------- OTHER FUNCTIONS ----------
         window.makeReservation = function () {
           window.location.href = './restaurant_reservation.php';
         };
 
         window.addToCart = function () {
           window.location.href = './order_food.php';
-        };
-
-        window.submitReview = function () {
-          const review = document.getElementById('reviewText').value;
-          const rating = localStorage.getItem('lastRating') || 0;
-
-          if (review.trim() || rating > 0) {
-            Swal.fire({
-              title: 'Thank You!',
-              text: 'Your feedback has been submitted.',
-              icon: 'success',
-              confirmButtonColor: '#d97706',
-              timer: 2000
-            });
-            document.getElementById('reviewText').value = '';
-
-            // Reset stars
-            document.querySelectorAll('#starRating i').forEach(s => {
-              s.className = 'fas fa-star text-yellow-400';
-            });
-            localStorage.removeItem('lastRating');
-          } else {
-            Swal.fire({
-              title: 'Oops...',
-              text: 'Please write a review or rate us',
-              icon: 'info',
-              confirmButtonColor: '#d97706'
-            });
-          }
-        };
-
-        window.contactSupport = function () {
-          Swal.fire({
-            title: 'Contact Support',
-            html: `
-              <div class="text-left">
-                <p><i class="fa-solid fa-phone text-amber-600 mr-2"></i> +63 (2) 1234 5678</p>
-                <p><i class="fa-solid fa-envelope text-amber-600 mr-2"></i> support@lucas.stay</p>
-                <p class="mt-2 text-sm">Available 24/7 for your convenience.</p>
-              </div>
-            `,
-            icon: 'info',
-            confirmButtonColor: '#d97706',
-            confirmButtonText: 'Close'
-          });
         };
 
         // ---------- CHECK FOR PENDING RESERVATIONS ----------
