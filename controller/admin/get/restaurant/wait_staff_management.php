@@ -1,7 +1,7 @@
 <?php
 /**
  * GET Controller - Admin Wait Staff Management
- * Handles fetching staff members from HR API
+ * Handles fetching staff members from HR API with ratings
  */
 
 session_start();
@@ -34,6 +34,30 @@ $admin = $db->query(
      FROM users WHERE id = :id",
     ['id' => $_SESSION['user_id']]
 )->fetch_one();
+
+// Create staff_notes table if it doesn't exist
+$db->query("CREATE TABLE IF NOT EXISTS staff_notes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50) NOT NULL,
+    note TEXT NOT NULL,
+    rating TINYINT(1) DEFAULT NULL,
+    rating_type ENUM('performance','attitude','punctuality','overall') DEFAULT 'overall',
+    created_by INT UNSIGNED,
+    created_at DATETIME,
+    KEY employee_id (employee_id),
+    KEY created_by (created_by)
+)");
+
+// Create staff_assignments table if it doesn't exist
+$db->query("CREATE TABLE IF NOT EXISTS staff_assignments (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(50) NOT NULL,
+    assigned_tables VARCHAR(255),
+    assigned_by INT UNSIGNED,
+    assigned_date DATETIME,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_employee (employee_id)
+)");
 
 // HR API Configuration
 define('HR_API_BASE', 'https://humanresource.up.railway.app/api');
@@ -93,16 +117,14 @@ date_default_timezone_set('Asia/Manila');
 $department = isset($_GET['department']) ? $_GET['department'] : '';
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all';
 $searchFilter = isset($_GET['search']) ? $_GET['search'] : '';
-// Use local date instead of UTC
-$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); // This will now use Asia/Manila date
+$date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $limit = 10;
 $offset = ($page - 1) * $limit;
 
-// Log the date being used
 error_log("Using local date: " . $date);
 
-// Try to get staff from different departments if Restaurant doesn't return data
+// Try to get staff from different departments
 $departmentsToTry = ['Restaurant', 'Food and Beverage', 'F&B', 'Kitchen', 'Service'];
 $allStaff = [];
 $hrData = null;
@@ -110,7 +132,7 @@ $hrData = null;
 foreach ($departmentsToTry as $dept) {
     $apiParams = [
         'department' => $dept,
-        'date' => $date  // Pass the local date to API
+        'date' => $date
     ];
 
     $hrData = callHrApi('/employee-attendance.php', $apiParams);
@@ -131,7 +153,7 @@ if (empty($allStaff)) {
     }
 }
 
-// Process staff data
+// Process staff data and fetch ratings from local DB
 $restaurantStaff = [];
 
 if (!empty($allStaff)) {
@@ -139,6 +161,7 @@ if (!empty($allStaff)) {
         $emp = $staff['employee'] ?? [];
         $dept = strtolower($emp['department'] ?? '');
         $position = strtolower($emp['position'] ?? '');
+        $employeeNumber = $emp['employee_number'] ?? '';
 
         // Include if related to restaurant/food service
         if (
@@ -153,6 +176,26 @@ if (!empty($allStaff)) {
             strpos($position, 'chef') !== false ||
             strpos($position, 'cook') !== false
         ) {
+            // Get average rating from local database
+            $avgRating = $db->query(
+                "SELECT AVG(rating) as avg_rating, COUNT(*) as rating_count 
+                 FROM staff_notes 
+                 WHERE employee_id = :emp_id 
+                 AND rating IS NOT NULL",
+                ['emp_id' => $employeeNumber]
+            )->fetch_one();
+
+            $staff['avg_rating'] = $avgRating['avg_rating'] ? round($avgRating['avg_rating'], 1) : null;
+            $staff['rating_count'] = $avgRating['rating_count'] ?? 0;
+
+            // Get table assignments
+            $assignment = $db->query(
+                "SELECT assigned_tables FROM staff_assignments WHERE employee_id = :emp_id",
+                ['emp_id' => $employeeNumber]
+            )->fetch_one();
+
+            $staff['assigned_tables'] = $assignment['assigned_tables'] ?? null;
+
             $restaurantStaff[] = $staff;
         }
     }
@@ -195,6 +238,54 @@ if ($statusFilter !== 'all' && !empty($restaurantStaff)) {
 $totalStaff = count($restaurantStaff);
 $totalPages = $totalStaff > 0 ? ceil($totalStaff / $limit) : 1;
 $paginatedStaff = $totalStaff > 0 ? array_slice($restaurantStaff, $offset, $limit) : [];
+
+// Get recent ratings for the dashboard
+$recentRatings = $db->query(
+    "SELECT 
+        n.*,
+        u.full_name as created_by_name,
+        n.employee_id,
+        n.rating,
+        n.rating_type,
+        n.note,
+        n.created_at
+     FROM staff_notes n
+     LEFT JOIN users u ON n.created_by = u.id
+     WHERE n.rating IS NOT NULL
+     ORDER BY n.created_at DESC
+     LIMIT 10",
+    []
+)->find() ?: [];
+
+// Get top rated staff (average rating > 4)
+$topRatedStaff = $db->query(
+    "SELECT 
+        employee_id,
+        AVG(rating) as avg_rating,
+        COUNT(*) as total_ratings,
+        MAX(created_at) as last_rated
+     FROM staff_notes 
+     WHERE rating IS NOT NULL
+     GROUP BY employee_id
+     HAVING avg_rating >= 4.0
+     ORDER BY avg_rating DESC, total_ratings DESC
+     LIMIT 5",
+    []
+)->find() ?: [];
+
+// Get staff with most ratings
+$mostRatedStaff = $db->query(
+    "SELECT 
+        employee_id,
+        COUNT(*) as rating_count,
+        AVG(rating) as avg_rating
+     FROM staff_notes 
+     WHERE rating IS NOT NULL
+     GROUP BY employee_id
+     ORDER BY rating_count DESC, avg_rating DESC
+     LIMIT 5",
+    []
+)->find() ?: [];
 
 // Get statistics from HR API summary or calculate from our data
 if ($hrData && isset($hrData['data']['summary'])) {
@@ -242,21 +333,15 @@ foreach ($restaurantStaff as $staff) {
 
     if ($shift && isset($shift['start_time'])) {
         $startTime = $shift['start_time'];
+        $hour = 0;
 
-        // Convert to 24-hour format for comparison
         if (is_string($startTime)) {
-            // Handle different time formats
-            $hour = 0;
-
             if (strpos($startTime, 'AM') !== false || strpos($startTime, 'PM') !== false) {
-                // Format like "7:00 AM"
                 $hour = date('H', strtotime($startTime));
             } else {
-                // Format like "07:00:00" or "07:00"
                 $hour = (int) substr($startTime, 0, 2);
             }
 
-            // Categorize by hour (24-hour format)
             if ($hour >= 5 && $hour < 12) {
                 $morningStaff[] = $emp['full_name'] ?? explode(' ', $emp['full_name'] ?? '')[0];
             } elseif ($hour >= 12 && $hour < 17) {
@@ -277,16 +362,11 @@ $shiftSummary = [
     'evening_staff' => implode(', ', array_slice($eveningStaff, 0, 3)) . (count($eveningStaff) > 3 ? '...' : '')
 ];
 
-// Get top performers (by attendance/presence)
-$topPerformers = [];
-foreach (array_slice($restaurantStaff, 0, 5) as $staff) {
-    if ($staff['status']['present'] && !empty($staff['employee'])) {
-        $topPerformers[] = $staff['employee'];
-    }
-}
-
-// Calculate tables assigned (placeholder - you'd need a local table for this)
-$tablesAssigned = 0;
+// Calculate tables assigned from local DB
+$tablesAssigned = $db->query(
+    "SELECT COUNT(DISTINCT employee_id) as assigned_count FROM staff_assignments"
+)->fetch_one();
+$tablesAssigned = $tablesAssigned['assigned_count'] ?? 0;
 $totalTables = 24;
 
 // Get admin initials
@@ -307,15 +387,15 @@ if ($admin) {
     }
 }
 
-
-
-// Store data for view - use local date for display
+// Store data for view
 $viewData = [
     'admin' => $admin,
     'initials' => $initials,
     'staffMembers' => $paginatedStaff,
     'allStaff' => $restaurantStaff,
-    'topPerformers' => $topPerformers,
+    'recentRatings' => $recentRatings,
+    'topRatedStaff' => $topRatedStaff,
+    'mostRatedStaff' => $mostRatedStaff,
     'shiftSummary' => $shiftSummary,
     'summary' => $summary,
     'tablesAssigned' => $tablesAssigned,
@@ -327,10 +407,9 @@ $viewData = [
     'searchFilter' => $searchFilter,
     'selectedDate' => $date,
     'selectedDepartment' => $department,
-
-    'today' => date('F j, Y'), // This will now show March 19, 2026
-    'todayDay' => date('j'), // Day of month
-    'todayMonth' => date('F'), // Full month name
+    'today' => date('F j, Y'),
+    'todayDay' => date('j'),
+    'todayMonth' => date('F'),
     'hrApiConnected' => ($hrData !== null)
 ];
 

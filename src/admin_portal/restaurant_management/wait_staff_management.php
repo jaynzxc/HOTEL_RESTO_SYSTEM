@@ -127,6 +127,38 @@ $current_page = 'wait_staff_management';
         display: inline-block;
         margin-right: 4px;
       }
+
+      /* Star Rating Styles */
+      .rating-star {
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .rating-star.active {
+        color: #fbbf24;
+      }
+
+      .rating-star.active i {
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+      }
+
+      .rating-star:hover {
+        transform: scale(1.1);
+      }
+
+      .rating-display {
+        display: inline-flex;
+        gap: 2px;
+      }
+
+      .rating-display i {
+        font-size: 12px;
+      }
+
+      .average-rating {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      }
     </style>
   </head>
 
@@ -145,49 +177,93 @@ $current_page = 'wait_staff_management';
       </div>
     </div>
 
-    <!-- Add Note Modal -->
+    <!-- Add Note Modal with Rating -->
     <div id="noteModal" class="modal">
       <div class="modal-content p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Add Staff Note</h3>
+          <h3 class="text-xl font-semibold">Add Staff Note & Rating</h3>
           <button onclick="closeModal('noteModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
         <form id="noteForm" onsubmit="saveNote(event)">
           <input type="hidden" id="noteEmployeeId">
+          <input type="hidden" id="noteEmployeeName">
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Note</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Rating (Optional)</label>
+            <div class="flex gap-2 mb-3">
+              <select id="ratingType" class="border border-slate-200 rounded-lg px-3 py-2 text-sm flex-1">
+                <option value="overall">Overall Performance</option>
+                <option value="performance">Work Performance</option>
+                <option value="attitude">Attitude & Teamwork</option>
+                <option value="punctuality">Punctuality & Attendance</option>
+              </select>
+            </div>
+            <div class="flex gap-2 justify-center py-2" id="starRating">
+              <?php for ($i = 1; $i <= 5; $i++): ?>
+                <button type="button" data-rating="<?php echo $i; ?>"
+                  class="rating-star text-3xl text-gray-300 hover:text-yellow-400 transition">
+                  <i class="fa-regular fa-star"></i>
+                </button>
+              <?php endfor; ?>
+            </div>
+            <input type="hidden" id="noteRating" value="">
+            <p class="text-xs text-slate-400 text-center mt-2">Click on stars to rate</p>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Note / Feedback</label>
             <textarea id="noteContent" rows="4" required
+              placeholder="Write your feedback, observations, or notes here..."
               class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500"></textarea>
           </div>
 
           <div class="flex gap-3 mt-4">
-            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">Save
-              Note</button>
+            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">
+              <i class="fas fa-save mr-2"></i>Save Note
+            </button>
             <button type="button" onclick="closeModal('noteModal')"
-              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Cancel</button>
+              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">
+              Cancel
+            </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- View Notes Modal -->
+    <!-- View Notes Modal with Rating Display -->
     <div id="viewNotesModal" class="modal">
       <div class="modal-content p-6">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold" id="viewNotesTitle">Staff Notes</h3>
+          <h3 class="text-xl font-semibold" id="viewNotesTitle">Staff Notes & Ratings</h3>
           <button onclick="closeModal('viewNotesModal')" class="text-slate-400 hover:text-slate-600">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
+
+        <!-- Average Rating Display -->
+        <div id="avgRatingDisplay" class="mb-4 p-4 average-rating rounded-lg hidden">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-star text-yellow-500"></i>
+              <span class="font-semibold text-slate-700">Average Rating:</span>
+            </div>
+            <div id="avgRatingStars" class="flex gap-1"></div>
+            <span id="avgRatingValue" class="text-sm font-medium text-slate-700"></span>
+          </div>
+        </div>
+
+        <!-- Notes List -->
         <div id="notesList" class="space-y-3 max-h-96 overflow-y-auto">
           <!-- Notes will be loaded here -->
         </div>
+
         <div class="flex gap-3 mt-4">
           <button onclick="closeModal('viewNotesModal')"
-            class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Close</button>
+            class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -211,17 +287,21 @@ $current_page = 'wait_staff_management';
           </div>
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Table Numbers</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Select Tables</label>
             <div class="grid grid-cols-5 gap-2" id="tableGrid">
               <!-- Table numbers 1-25 will be generated here -->
             </div>
+            <p class="text-xs text-slate-400 mt-2">Click on table numbers to select/deselect</p>
           </div>
 
           <div class="flex gap-3 mt-4">
-            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">Save
-              Assignment</button>
+            <button type="submit" class="flex-1 bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700">
+              <i class="fas fa-check mr-2"></i>Save Assignment
+            </button>
             <button type="button" onclick="closeModal('assignTablesModal')"
-              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">Cancel</button>
+              class="flex-1 border border-slate-200 py-2 rounded-lg hover:bg-slate-50">
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -238,11 +318,21 @@ $current_page = 'wait_staff_management';
 
         <!-- header with title and date -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+
+          <!-- LEFT SIDE -->
           <div>
-            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Wait Staff Management</h1>
-            <p class="text-sm text-slate-500 mt-0.5">real-time staff data from HR system</p>
+            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">
+              Wait Staff Management
+            </h1>
+            <p class="text-sm text-slate-500 mt-0.5">
+              real-time staff data from HR system with performance ratings
+            </p>
           </div>
-          <div class="flex gap-3 text-sm">
+
+          <!-- RIGHT SIDE -->
+          <div class="flex items-center gap-3 text-sm">
+
+            <!-- HR Status -->
             <?php if (!$hrApiConnected): ?>
               <span
                 class="bg-red-100 text-red-700 border border-red-200 rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
@@ -254,12 +344,22 @@ $current_page = 'wait_staff_management';
                 <i class="fas fa-circle-check"></i> HR API Connected
               </span>
             <?php endif; ?>
-            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
-            </span>
-            <?php require_once '../components/notification_component.php'; ?>
 
+            <!-- Date -->
+            <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+              <i class="fas fa-calendar text-slate-400"></i>
+              <?php echo $today; ?>
+            </span>
+
+            <!-- Notifications -->
+            <?php require_once '../components/notification_component.php'; ?>
+            <!-- Job Requisition Icon -->
+            <a href="../jobRequisition.php"
+              class="bg-white border rounded-full px-3 py-2 flex items-center justify-center shadow-sm hover:bg-slate-100 transition">
+              <i class="fas fa-briefcase text-slate-600"></i>
+            </a>
           </div>
+
         </div>
 
         <!-- STATS CARDS from HR API -->
@@ -309,8 +409,9 @@ $current_page = 'wait_staff_management';
               <i class="fa-solid fa-rotate-right mr-1"></i> refresh from HR
             </button>
             <button onclick="openAssignTablesModal()"
-              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">assign
-              tables</button>
+              class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">
+              <i class="fas fa-table mr-1"></i>assign tables
+            </button>
           </div>
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -332,19 +433,20 @@ $current_page = 'wait_staff_management';
             <table class="w-full text-sm" id="staffTable">
               <thead class="text-slate-500 text-xs border-b">
                 <tr>
-                  <td class="p-3">Employee</td>
-                  <td class="p-3">Position</td>
-                  <td class="p-3">Schedule</td>
-                  <td class="p-3">Status</td>
-                  <td class="p-3">Attendance</td>
-                  <td class="p-3">Assigned tables</td>
-                  <td class="p-3">Actions</td>
+                  <th class="p-3 text-left">Employee</th>
+                  <th class="p-3 text-left">Position</th>
+                  <th class="p-3 text-left">Schedule</th>
+                  <th class="p-3 text-left">Status</th>
+                  <th class="p-3 text-left">Attendance</th>
+                  <th class="p-3 text-left">Rating</th>
+                  <th class="p-3 text-left">Assigned tables</th>
+                  <th class="p-3 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y" id="staffTableBody">
                 <?php if (empty($staffMembers)): ?>
                   <tr>
-                    <td colspan="7" class="p-8 text-center text-slate-500">No staff members found</td>
+                    <td colspan="8" class="p-8 text-center text-slate-500">No staff members found</td>
                   </tr>
                 <?php else: ?>
                   <?php foreach ($staffMembers as $staff):
@@ -352,6 +454,7 @@ $current_page = 'wait_staff_management';
                     $shift = $staff['shift'];
                     $attendance = $staff['attendance'];
                     $status = $staff['status'];
+                    $avgRating = $staff['avg_rating'] ?? null;
 
                     $statusColors = [
                       'present' => 'bg-green-100 text-green-700',
@@ -427,6 +530,30 @@ $current_page = 'wait_staff_management';
                           <span class="text-slate-400">No record</span>
                         <?php endif; ?>
                       </td>
+                      <td class="p-3" id="rating-<?php echo $emp['employee_number']; ?>">
+                        <?php if ($avgRating): ?>
+                          <div class="flex items-center gap-1">
+                            <div class="rating-display">
+                              <?php
+                              $fullStars = floor($avgRating);
+                              $hasHalf = $avgRating - $fullStars >= 0.5;
+                              for ($i = 1; $i <= 5; $i++):
+                                if ($i <= $fullStars):
+                                  echo '<i class="fa-solid fa-star text-yellow-400 text-xs"></i>';
+                                elseif ($hasHalf && $i == $fullStars + 1):
+                                  echo '<i class="fa-solid fa-star-half-alt text-yellow-400 text-xs"></i>';
+                                else:
+                                  echo '<i class="fa-regular fa-star text-gray-300 text-xs"></i>';
+                                endif;
+                              endfor;
+                              ?>
+                            </div>
+                            <span class="text-xs text-slate-500 ml-1">(<?php echo number_format($avgRating, 1); ?>)</span>
+                          </div>
+                        <?php else: ?>
+                          <span class="text-xs text-slate-400">No ratings yet</span>
+                        <?php endif; ?>
+                      </td>
                       <td class="p-3" id="tables-<?php echo $emp['employee_number']; ?>">
                         <?php
                         // You would fetch this from local DB
@@ -441,12 +568,12 @@ $current_page = 'wait_staff_management';
                         </button>
                         <button
                           onclick="openNoteModal('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
-                          class="text-blue-600 hover:text-blue-800 text-xs mr-2" title="Add Note">
-                          <i class="fas fa-note-sticky"></i>
+                          class="text-blue-600 hover:text-blue-800 text-xs mr-2" title="Add Note & Rating">
+                          <i class="fas fa-star"></i>
                         </button>
                         <button
                           onclick="viewNotes('<?php echo $emp['employee_number']; ?>', '<?php echo htmlspecialchars($fullName); ?>')"
-                          class="text-slate-600 hover:text-slate-800 text-xs" title="View Notes">
+                          class="text-slate-600 hover:text-slate-800 text-xs" title="View Notes & Ratings">
                           <i class="fas fa-eye"></i>
                         </button>
                       </td>
@@ -468,7 +595,7 @@ $current_page = 'wait_staff_management';
           </div>
         </div>
 
-        <!-- BOTTOM: SCHEDULE SUMMARY -->
+        <!-- BOTTOM: SCHEDULE SUMMARY & PERFORMANCE INSIGHTS -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- today's shift schedule -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5">
@@ -511,10 +638,10 @@ $current_page = 'wait_staff_management';
             </div>
           </div>
 
-          <!-- attendance summary -->
-          <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+          <!-- performance insights -->
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5">
             <h3 class="font-semibold flex items-center gap-2 mb-3">
-              <i class="fas fa-chart-line text-amber-600"></i> attendance summary
+              <i class="fas fa-chart-line text-amber-600"></i> performance insights
             </h3>
             <div class="space-y-3">
               <div class="flex justify-between items-center">
@@ -541,6 +668,12 @@ $current_page = 'wait_staff_management';
                   </p>
                 </div>
               </div>
+              <div class="border-t border-amber-200 pt-3 mt-2">
+                <p class="text-xs text-amber-700">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Rate staff performance to track progress and identify top performers
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -552,6 +685,7 @@ $current_page = 'wait_staff_management';
       let currentPage = <?php echo $currentPage; ?>;
       const totalPages = <?php echo $totalPages; ?>;
       const itemsPerPage = <?php echo $limit; ?>;
+      let currentRating = 0;
 
       // ========== TOAST NOTIFICATION ==========
       function showToast(message, type = 'success') {
@@ -560,6 +694,7 @@ $current_page = 'wait_staff_management';
         const toastTime = document.getElementById('toastTime');
         const now = new Date();
 
+        toast.className = 'toast ' + type;
         toastMessage.textContent = message;
         toastTime.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         toast.classList.remove('hidden');
@@ -580,6 +715,84 @@ $current_page = 'wait_staff_management';
         document.getElementById(modalId).classList.remove('show');
       }
 
+      // ========== STAR RATING FUNCTIONS ==========
+      function initStarRating() {
+        const stars = document.querySelectorAll('#starRating .rating-star');
+        const ratingInput = document.getElementById('noteRating');
+
+        stars.forEach(star => {
+          star.addEventListener('click', function () {
+            const rating = parseInt(this.dataset.rating);
+            currentRating = rating;
+            ratingInput.value = rating;
+
+            // Update star display
+            stars.forEach((s, index) => {
+              if (index < rating) {
+                s.classList.add('active');
+                s.innerHTML = '<i class="fa-solid fa-star"></i>';
+              } else {
+                s.classList.remove('active');
+                s.innerHTML = '<i class="fa-regular fa-star"></i>';
+              }
+            });
+          });
+
+          // Hover effect
+          star.addEventListener('mouseenter', function () {
+            const hoverRating = parseInt(this.dataset.rating);
+            stars.forEach((s, index) => {
+              if (index < hoverRating) {
+                s.innerHTML = '<i class="fa-solid fa-star"></i>';
+              } else {
+                s.innerHTML = '<i class="fa-regular fa-star"></i>';
+              }
+            });
+          });
+        });
+
+        // Reset on mouse leave
+        const starContainer = document.getElementById('starRating');
+        if (starContainer) {
+          starContainer.addEventListener('mouseleave', function () {
+            stars.forEach((s, index) => {
+              if (index < currentRating) {
+                s.innerHTML = '<i class="fa-solid fa-star"></i>';
+              } else {
+                s.innerHTML = '<i class="fa-regular fa-star"></i>';
+              }
+            });
+          });
+        }
+      }
+
+      // Helper function to generate star display HTML
+      function renderStars(rating) {
+        if (!rating || rating === 0) return '';
+        const fullStars = Math.floor(rating);
+        const hasHalf = rating - fullStars >= 0.5;
+        let stars = '';
+
+        for (let i = 1; i <= 5; i++) {
+          if (i <= fullStars) {
+            stars += '<i class="fa-solid fa-star text-yellow-400 text-xs"></i>';
+          } else if (hasHalf && i === fullStars + 1) {
+            stars += '<i class="fa-solid fa-star-half-alt text-yellow-400 text-xs"></i>';
+          } else {
+            stars += '<i class="fa-regular fa-star text-gray-300 text-xs"></i>';
+          }
+        }
+
+        return stars;
+      }
+
+      // Helper function to escape HTML
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
       // ========== REFRESH HR DATA ==========
       function refreshHRData() {
         showToast('Refreshing data from HR system...', 'info');
@@ -591,7 +804,18 @@ $current_page = 'wait_staff_management';
       // ========== NOTE FUNCTIONS ==========
       function openNoteModal(employeeId, employeeName) {
         document.getElementById('noteEmployeeId').value = employeeId;
+        document.getElementById('noteEmployeeName').value = employeeName;
         document.getElementById('noteContent').value = '';
+        document.getElementById('noteRating').value = '';
+        document.getElementById('ratingType').value = 'overall';
+        currentRating = 0;
+
+        // Reset stars
+        document.querySelectorAll('#starRating .rating-star').forEach(star => {
+          star.classList.remove('active');
+          star.innerHTML = '<i class="fa-regular fa-star"></i>';
+        });
+
         openModal('noteModal');
       }
 
@@ -600,6 +824,8 @@ $current_page = 'wait_staff_management';
 
         const employeeId = document.getElementById('noteEmployeeId').value;
         const note = document.getElementById('noteContent').value;
+        const rating = document.getElementById('noteRating').value;
+        const ratingType = document.getElementById('ratingType').value;
 
         if (!note.trim()) {
           showToast('Please enter a note', 'error');
@@ -619,6 +845,10 @@ $current_page = 'wait_staff_management';
         formData.append('action', 'add_note');
         formData.append('employee_id', employeeId);
         formData.append('note', note);
+        if (rating) {
+          formData.append('rating', rating);
+          formData.append('rating_type', ratingType);
+        }
 
         fetch('../../../controller/admin/post/restaurant/staff_actions.php', {
           method: 'POST',
@@ -633,21 +863,35 @@ $current_page = 'wait_staff_management';
                 return JSON.parse(text);
               } catch (e) {
                 console.error('Invalid JSON response:', text.substring(0, 200));
-                throw new Error('Server returned invalid JSON. Please check the console for details.');
+                throw new Error('Server returned invalid JSON');
               }
             });
           })
           .then(data => {
             Swal.close();
             if (data.success) {
+              let message = data.message;
+              if (data.rating) {
+                const stars = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating);
+                message += ` (Rating: ${stars} ${data.rating}/5)`;
+              }
               Swal.fire({
                 title: 'Success!',
-                text: data.message,
+                html: message,
                 icon: 'success',
                 confirmButtonColor: '#d97706'
               }).then(() => {
                 closeModal('noteModal');
                 document.getElementById('noteContent').value = '';
+                document.getElementById('noteRating').value = '';
+                currentRating = 0;
+                // Reset stars
+                document.querySelectorAll('#starRating .rating-star').forEach(star => {
+                  star.classList.remove('active');
+                  star.innerHTML = '<i class="fa-regular fa-star"></i>';
+                });
+                // Refresh the page to show updated rating
+                setTimeout(() => location.reload(), 1000);
               });
             } else {
               showToast(data.message, 'error');
@@ -695,18 +939,48 @@ $current_page = 'wait_staff_management';
             Swal.close();
             if (data.success) {
               const notesList = document.getElementById('notesList');
-              document.getElementById('viewNotesTitle').textContent = `Notes - ${employeeName}`;
+              document.getElementById('viewNotesTitle').textContent = `Notes & Ratings - ${employeeName}`;
+
+              // Display average rating
+              const avgRatingDiv = document.getElementById('avgRatingDisplay');
+              if (data.avg_rating && data.avg_rating > 0) {
+                avgRatingDiv.classList.remove('hidden');
+                document.getElementById('avgRatingStars').innerHTML = renderStars(data.avg_rating);
+                document.getElementById('avgRatingValue').textContent =
+                  `${data.avg_rating} out of 5 (${data.total_ratings} rating${data.total_ratings !== 1 ? 's' : ''})`;
+              } else {
+                avgRatingDiv.classList.add('hidden');
+              }
 
               if (!data.notes || data.notes.length === 0) {
-                notesList.innerHTML = '<p class="text-center text-slate-500 py-4">No notes found</p>';
+                notesList.innerHTML = '<p class="text-center text-slate-500 py-4">No notes or ratings found</p>';
               } else {
                 let html = '';
                 data.notes.forEach(note => {
                   const date = note.created_at ? new Date(note.created_at).toLocaleString() : 'Unknown date';
+                  const ratingDisplay = note.rating ? `
+                    <div class="flex items-center gap-2 mt-1 p-2 bg-amber-50 rounded">
+                      <span class="text-xs font-medium text-slate-600 capitalize">${note.rating_type.replace('_', ' ')}:</span>
+                      <div class="rating-display">${renderStars(note.rating)}</div>
+                      <span class="text-xs font-semibold text-amber-600">(${note.rating}/5)</span>
+                    </div>
+                  ` : '';
+
                   html += `
-                    <div class="border rounded-lg p-3 bg-slate-50">
-                        <p class="text-sm">${note.note}</p>
-                        <p class="text-xs text-slate-500 mt-2">${date}</p>
+                    <div class="border rounded-lg p-3 bg-white hover:shadow-md transition">
+                      <div class="flex items-start gap-2">
+                        <i class="fas fa-quote-left text-amber-400 text-xs mt-1"></i>
+                        <p class="text-sm flex-1">${escapeHtml(note.note)}</p>
+                      </div>
+                      ${ratingDisplay}
+                      <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
+                        <p class="text-xs text-slate-500">
+                          <i class="fas fa-user-circle mr-1"></i>By: ${note.created_by_name || 'Admin'}
+                        </p>
+                        <p class="text-xs text-slate-400">
+                          <i class="far fa-clock mr-1"></i>${date}
+                        </p>
+                      </div>
                     </div>
                   `;
                 });
@@ -727,16 +1001,12 @@ $current_page = 'wait_staff_management';
 
       // ========== ASSIGN TABLES FUNCTIONS ==========
       function openAssignTablesModal(employeeId = null, employeeName = null) {
-        // Set the employee ID if provided
         if (employeeId) {
           document.getElementById('assignEmployeeId').value = employeeId;
-
-          // Optionally show a toast with the employee name
           if (employeeName) {
             console.log(`Assigning tables for ${employeeName}`);
           }
         }
-
         generateTableGrid();
         openModal('assignTablesModal');
       }
@@ -824,7 +1094,6 @@ $current_page = 'wait_staff_management';
           .then(data => {
             Swal.close();
             if (data.success) {
-              // Update the table cell
               const tableCell = document.getElementById(`tables-${employeeId}`);
               if (tableCell) {
                 tableCell.textContent = tables;
@@ -874,9 +1143,9 @@ $current_page = 'wait_staff_management';
       function updatePagination() {
         const rows = document.querySelectorAll('#staffTableBody tr');
         const totalItems = rows.length;
-        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        const totalPagesCount = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
-        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage > totalPagesCount) currentPage = totalPagesCount;
         if (currentPage < 1) currentPage = 1;
 
         rows.forEach((row, index) => {
@@ -892,47 +1161,49 @@ $current_page = 'wait_staff_management';
         document.getElementById('paginationInfo').textContent =
           totalItems > 0 ? `Showing ${start}-${end} of ${totalItems} staff` : 'Showing 0 staff';
 
-        generatePaginationButtons(totalPages);
+        generatePaginationButtons(totalPagesCount);
       }
 
-      function generatePaginationButtons(totalPages) {
+      function generatePaginationButtons(totalPagesCount) {
         const container = document.getElementById('paginationButtons');
         if (!container) return;
 
         let buttons = `<button onclick="changePage('prev')" class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
 
-        for (let i = 1; i <= totalPages; i++) {
+        for (let i = 1; i <= totalPagesCount; i++) {
           buttons += `<button onclick="changePage(${i})" class="border px-3 py-1 rounded-lg text-sm page-btn ${i === currentPage ? 'bg-amber-600 text-white' : 'border-slate-200 hover:bg-slate-50'}">${i}</button>`;
         }
 
-        buttons += `<button onclick="changePage('next')" class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+        buttons += `<button onclick="changePage('next')" class="border border-slate-200 px-3 py-1 rounded-lg text-sm hover:bg-slate-50" ${currentPage === totalPagesCount ? 'disabled' : ''}>Next</button>`;
 
         container.innerHTML = buttons;
       }
 
       function changePage(direction) {
         const rows = document.querySelectorAll('#staffTableBody tr');
-        const totalPages = Math.max(1, Math.ceil(rows.length / itemsPerPage));
+        const totalPagesCount = Math.max(1, Math.ceil(rows.length / itemsPerPage));
 
         if (direction === 'prev' && currentPage > 1) {
           currentPage--;
-        } else if (direction === 'next' && currentPage < totalPages) {
+        } else if (direction === 'next' && currentPage < totalPagesCount) {
           currentPage++;
         } else if (typeof direction === 'number') {
-          if (direction >= 1 && direction <= totalPages) {
+          if (direction >= 1 && direction <= totalPagesCount) {
             currentPage = direction;
           }
         }
 
         updatePagination();
       }
+
       // ========== INITIALIZATION ==========
       document.addEventListener('DOMContentLoaded', function () {
         updatePagination();
-        // Initialize the assign employee ID field if it exists
+        initStarRating();
+
+        // Initialize the assign employee ID field if it doesn't exist
         const assignField = document.getElementById('assignEmployeeId');
         if (!assignField) {
-          // Create the hidden input if it doesn't exist
           const modal = document.getElementById('assignTablesModal');
           if (modal) {
             const form = modal.querySelector('form');

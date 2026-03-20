@@ -4,6 +4,11 @@
  * Handles creating, updating, confirming, editing, and cancelling reservations
  */
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
 session_start();
 require_once __DIR__ . '/../../../Class/Database.php';
 
@@ -19,20 +24,36 @@ if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
     exit();
 }
 
-$config = require __DIR__ . '/../../../config/config.php';
-$db = new Database($config['database']);
-
-// Get user role from database
-$user = $db->query(
-    "SELECT role FROM users WHERE id = :id",
-    ['id' => $_SESSION['user_id']]
-)->fetch_one();
-
-// Check if user has admin or staff role
-if (!$user || !in_array($user['role'], ['admin', 'staff'])) {
+try {
+    $config = require __DIR__ . '/../../../config/config.php';
+    $db = new Database($config['database']);
+} catch (Exception $e) {
     echo json_encode([
         'success' => false,
-        'message' => 'Unauthorized access'
+        'message' => 'Database connection error: ' . $e->getMessage()
+    ]);
+    exit();
+}
+
+// Get user role from database
+try {
+    $user = $db->query(
+        "SELECT role FROM users WHERE id = :id",
+        ['id' => $_SESSION['user_id']]
+    )->fetch_one();
+
+    // Check if user has admin or staff role
+    if (!$user || !in_array($user['role'], ['admin', 'staff'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Unauthorized access'
+        ]);
+        exit();
+    }
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error checking user role: ' . $e->getMessage()
     ]);
     exit();
 }
@@ -62,17 +83,44 @@ try {
         }
 
         try {
+            // First, get the booking details
             $booking = $db->query(
                 "SELECT 
-                b.*,
-                u.id as user_id,
-                u.full_name,
-                u.email,
-                u.phone,
-                u.member_tier
-             FROM bookings b
-             LEFT JOIN users u ON b.user_id = u.id
-             WHERE b.id = :id",
+                    b.id,
+                    b.booking_reference,
+                    b.user_id,
+                    b.guest_first_name,
+                    b.guest_last_name,
+                    b.guest_email,
+                    b.guest_phone,
+                    b.check_in,
+                    b.check_out,
+                    b.nights,
+                    b.room_id,
+                    b.room_name,
+                    b.room_price,
+                    b.adults,
+                    b.children,
+                    b.subtotal,
+                    b.tax,
+                    b.total_amount,
+                    b.status,
+                    b.payment_status,
+                    b.special_requests,
+                    b.points_earned,
+                    b.points_awarded,
+                    b.points_awarded_at,
+                    b.created_at,
+                    b.updated_at,
+                    u.id as user_id,
+                    u.full_name,
+                    u.email,
+                    u.phone,
+                    u.member_tier,
+                    u.loyalty_points
+                 FROM bookings b
+                 LEFT JOIN users u ON b.user_id = u.id
+                 WHERE b.id = :id",
                 ['id' => $booking_id]
             )->fetch_one();
 
@@ -87,6 +135,11 @@ try {
             // Format dates for input fields
             $booking['check_in'] = date('Y-m-d', strtotime($booking['check_in']));
             $booking['check_out'] = date('Y-m-d', strtotime($booking['check_out']));
+
+            // Ensure points_awarded is set
+            if (!isset($booking['points_awarded'])) {
+                $booking['points_awarded'] = 0;
+            }
 
             echo json_encode([
                 'success' => true,
@@ -168,7 +221,7 @@ try {
         }
 
         // Calculate totals
-        $subtotal = $room['price'] * $nights;
+        $subtotal = floatval($room['price']) * $nights;
         $tax = $subtotal * 0.12;
         $total_amount = $subtotal + $tax;
 
@@ -176,10 +229,6 @@ try {
         $points_earned = floor($total_amount / 100) * 5;
 
         $db->beginTransaction();
-
-        // Store old room and status for availability check
-        $old_room_id = $currentBooking['room_id'];
-        $old_status = $currentBooking['status'];
 
         // Update booking
         $db->query(
@@ -230,7 +279,9 @@ try {
         );
 
         // Handle room availability based on status changes
-        // If room changed or status changed to/from confirmed/checked-in
+        $old_room_id = $currentBooking['room_id'];
+        $old_status = $currentBooking['status'];
+
         if ($old_room_id != $room_id) {
             // Old room might become available if no other active bookings
             checkAndUpdateRoomAvailability($db, $old_room_id);
@@ -251,37 +302,6 @@ try {
                 // Booking became inactive - check if room should be available
                 checkAndUpdateRoomAvailability($db, $room_id);
             }
-        }
-
-        // Handle balance updates if amount changed and payment is unpaid
-        if (
-            $currentBooking['payment_status'] === 'unpaid' &&
-            $currentBooking['status'] !== 'cancelled' &&
-            $currentBooking['total_amount'] != $total_amount
-        ) {
-            // Remove old amount
-            $db->query(
-                "UPDATE current_balance 
-                 SET total_balance = GREATEST(0, total_balance - :old_amount),
-                     available_balance = GREATEST(0, available_balance - :old_amount)
-                 WHERE user_id = :user_id",
-                [
-                    'old_amount' => $currentBooking['total_amount'],
-                    'user_id' => $currentBooking['user_id'] ?? null
-                ]
-            );
-
-            // Add new amount
-            $db->query(
-                "UPDATE current_balance 
-                 SET total_balance = total_balance + :new_amount,
-                     available_balance = available_balance + :new_amount
-                 WHERE user_id = :user_id",
-                [
-                    'new_amount' => $total_amount,
-                    'user_id' => $currentBooking['user_id'] ?? null
-                ]
-            );
         }
 
         // Create notification for admin
@@ -366,7 +386,7 @@ try {
         }
 
         // Calculate totals
-        $subtotal = $room['price'] * $nights;
+        $subtotal = floatval($room['price']) * $nights;
         $tax = $subtotal * 0.12;
         $total_amount = $subtotal + $tax;
 
@@ -379,7 +399,7 @@ try {
         $last_name = $name_parts[1] ?? '';
 
         // Generate booking reference
-        $reference = 'HR' . date('Ymd') . strtoupper(substr(uniqid(), -4));
+        $reference = 'HOT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
 
         $db->beginTransaction();
 
@@ -419,28 +439,6 @@ try {
         );
 
         $booking_id = $db->lastInsertId();
-
-        // Add to current_balance (for walk-in guests, use NULL user_id)
-        $balanceExists = $db->query(
-            "SELECT id FROM current_balance WHERE user_id IS NULL"
-        )->fetch_one();
-
-        if (!$balanceExists) {
-            $db->query(
-                "INSERT INTO current_balance (user_id, total_balance, pending_balance, available_balance, last_updated)
-                 VALUES (NULL, :amount, 0, :amount, NOW())",
-                ['amount' => $total_amount]
-            );
-        } else {
-            $db->query(
-                "UPDATE current_balance 
-                 SET total_balance = total_balance + :amount,
-                     available_balance = available_balance + :amount,
-                     last_updated = NOW()
-                 WHERE user_id IS NULL",
-                ['amount' => $total_amount]
-            );
-        }
 
         // Create notification for admin
         $db->query(
@@ -523,37 +521,6 @@ try {
             checkAndUpdateRoomAvailability($db, $booking['room_id']);
         }
 
-        // Handle balance updates based on status change
-        if ($old_status === 'cancelled' && $new_status !== 'cancelled') {
-            // Restore to balance if uncancelled
-            if ($booking['payment_status'] === 'unpaid') {
-                $db->query(
-                    "UPDATE current_balance 
-                     SET total_balance = total_balance + :amount,
-                         available_balance = available_balance + :amount
-                     WHERE user_id = :user_id",
-                    [
-                        'amount' => $booking['total_amount'],
-                        'user_id' => $booking['user_id'] ?? null
-                    ]
-                );
-            }
-        } elseif ($old_status !== 'cancelled' && $new_status === 'cancelled') {
-            // Remove from balance if cancelled
-            if ($booking['payment_status'] === 'unpaid') {
-                $db->query(
-                    "UPDATE current_balance 
-                     SET total_balance = GREATEST(0, total_balance - :amount),
-                         available_balance = GREATEST(0, available_balance - :amount)
-                     WHERE user_id = :user_id",
-                    [
-                        'amount' => $booking['total_amount'],
-                        'user_id' => $booking['user_id'] ?? null
-                    ]
-                );
-            }
-        }
-
         // Create notification for admin
         $db->query(
             "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
@@ -624,7 +591,7 @@ try {
         }
 
         // Check if points already awarded
-        if (isset($booking['points_awarded']) && $booking['points_awarded']) {
+        if (isset($booking['points_awarded']) && $booking['points_awarded'] == 1) {
             throw new Exception('Points already awarded for this booking');
         }
 
@@ -753,7 +720,7 @@ try {
         ]);
         exit();
     } else {
-        throw new Exception('Invalid action');
+        throw new Exception('Invalid action: ' . $action);
     }
 
 } catch (Exception $e) {
@@ -769,6 +736,9 @@ try {
 // Helper function to check and update room availability
 function checkAndUpdateRoomAvailability($db, $room_id)
 {
+    if (!$room_id)
+        return;
+
     // Check if there are any active bookings for this room
     $activeBookings = $db->query(
         "SELECT COUNT(*) as count 
@@ -783,6 +753,11 @@ function checkAndUpdateRoomAvailability($db, $room_id)
     if ($activeBookings['count'] == 0) {
         $db->query(
             "UPDATE rooms SET is_available = 1 WHERE id = :room_id",
+            ['room_id' => $room_id]
+        );
+    } else {
+        $db->query(
+            "UPDATE rooms SET is_available = 0 WHERE id = :room_id",
             ['room_id' => $room_id]
         );
     }

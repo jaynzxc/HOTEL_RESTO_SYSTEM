@@ -89,10 +89,12 @@ try {
         exit();
     }
 
-    // ADD NOTE TO STAFF
+    // ADD NOTE TO STAFF (WITH RATING)
     elseif ($action === 'add_note') {
         $employee_id = trim($_POST['employee_id'] ?? '');
         $note = trim($_POST['note'] ?? '');
+        $rating = isset($_POST['rating']) ? intval($_POST['rating']) : null;
+        $rating_type = $_POST['rating_type'] ?? 'overall';
 
         if (empty($employee_id) || empty($note)) {
             throw new Exception('Employee ID and note required');
@@ -103,29 +105,34 @@ try {
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             employee_id VARCHAR(50) NOT NULL,
             note TEXT NOT NULL,
+            rating TINYINT(1) DEFAULT NULL,
+            rating_type ENUM('performance','attitude','punctuality','overall') DEFAULT 'overall',
             created_by INT UNSIGNED,
             created_at DATETIME,
             KEY employee_id (employee_id)
         )");
 
         $db->query(
-            "INSERT INTO staff_notes (employee_id, note, created_by, created_at)
-             VALUES (:emp_id, :note, :user_id, NOW())",
+            "INSERT INTO staff_notes (employee_id, note, rating, rating_type, created_by, created_at)
+             VALUES (:emp_id, :note, :rating, :rating_type, :user_id, NOW())",
             [
                 'emp_id' => $employee_id,
                 'note' => $note,
+                'rating' => $rating,
+                'rating_type' => $rating_type,
                 'user_id' => $_SESSION['user_id']
             ]
         );
 
         echo json_encode([
             'success' => true,
-            'message' => 'Note added successfully'
+            'message' => 'Note added successfully',
+            'rating' => $rating
         ]);
         exit();
     }
 
-    // GET STAFF NOTES
+    // GET STAFF NOTES (WITH RATING)
     elseif ($action === 'get_notes') {
         $employee_id = trim($_POST['employee_id'] ?? '');
 
@@ -138,22 +145,39 @@ try {
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             employee_id VARCHAR(50) NOT NULL,
             note TEXT NOT NULL,
+            rating TINYINT(1) DEFAULT NULL,
+            rating_type ENUM('performance','attitude','punctuality','overall') DEFAULT 'overall',
             created_by INT UNSIGNED,
             created_at DATETIME,
             KEY employee_id (employee_id)
         )");
 
         $notes = $db->query(
-            "SELECT * FROM staff_notes 
-             WHERE employee_id = :emp_id 
-             ORDER BY created_at DESC 
+            "SELECT n.*, u.full_name as created_by_name
+             FROM staff_notes n
+             LEFT JOIN users u ON n.created_by = u.id
+             WHERE n.employee_id = :emp_id 
+             ORDER BY n.created_at DESC 
              LIMIT 20",
             ['emp_id' => $employee_id]
         )->find() ?: [];
 
+        // Calculate average rating for this employee
+        $avgRating = $db->query(
+            "SELECT 
+                AVG(rating) as avg_rating,
+                COUNT(*) as total_ratings
+             FROM staff_notes 
+             WHERE employee_id = :emp_id 
+             AND rating IS NOT NULL",
+            ['emp_id' => $employee_id]
+        )->fetch_one();
+
         echo json_encode([
             'success' => true,
-            'notes' => $notes
+            'notes' => $notes,
+            'avg_rating' => $avgRating['avg_rating'] ? round($avgRating['avg_rating'], 1) : null,
+            'total_ratings' => $avgRating['total_ratings'] ?? 0
         ]);
         exit();
     }

@@ -632,6 +632,8 @@ $current_page = 'reservation_&_booking';
 
       // Edit reservation function
       function editReservation(id) {
+        console.log('Editing booking ID:', id);
+
         Swal.fire({
           title: 'Loading...',
           text: 'Please wait',
@@ -647,46 +649,76 @@ $current_page = 'reservation_&_booking';
           method: 'POST',
           body: formData
         })
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
           .then(data => {
             Swal.close();
+
             if (data.success) {
               const b = data.booking;
 
-              // Populate form
-              document.getElementById('edit_booking_id').value = b.id;
-              document.getElementById('edit_first_name').value = b.guest_first_name || '';
-              document.getElementById('edit_last_name').value = b.guest_last_name || '';
-              document.getElementById('edit_email').value = b.guest_email || '';
-              document.getElementById('edit_phone').value = b.guest_phone || '';
-              document.getElementById('edit_check_in').value = b.check_in;
-              document.getElementById('edit_check_out').value = b.check_out;
-              document.getElementById('edit_room_id').value = b.room_id || '';
-              document.getElementById('edit_adults').value = b.adults || 2;
-              document.getElementById('edit_children').value = b.children || 0;
-              document.getElementById('edit_status').value = b.status || 'pending';
-              document.getElementById('edit_payment_status').value = b.payment_status || 'unpaid';
-              document.getElementById('edit_special_requests').value = b.special_requests || '';
+              console.log('Booking data received:', b);
+
+              // Populate form with fallback values - check if elements exist first
+              const elements = {
+                edit_booking_id: document.getElementById('edit_booking_id'),
+                edit_first_name: document.getElementById('edit_first_name'),
+                edit_last_name: document.getElementById('edit_last_name'),
+                edit_email: document.getElementById('edit_email'),
+                edit_phone: document.getElementById('edit_phone'),
+                edit_check_in: document.getElementById('edit_check_in'),
+                edit_check_out: document.getElementById('edit_check_out'),
+                edit_room_id: document.getElementById('edit_room_id'),
+                edit_adults: document.getElementById('edit_adults'),
+                edit_children: document.getElementById('edit_children'),
+                edit_status: document.getElementById('edit_status'),
+                edit_payment_status: document.getElementById('edit_payment_status'),
+                edit_special_requests: document.getElementById('edit_special_requests')
+              };
+
+              // Only populate if elements exist
+              if (elements.edit_booking_id) elements.edit_booking_id.value = b.id || '';
+              if (elements.edit_first_name) elements.edit_first_name.value = b.guest_first_name || '';
+              if (elements.edit_last_name) elements.edit_last_name.value = b.guest_last_name || '';
+              if (elements.edit_email) elements.edit_email.value = b.guest_email || '';
+              if (elements.edit_phone) elements.edit_phone.value = b.guest_phone || '';
+              if (elements.edit_check_in) elements.edit_check_in.value = b.check_in || '';
+              if (elements.edit_check_out) elements.edit_check_out.value = b.check_out || '';
+              if (elements.edit_room_id) elements.edit_room_id.value = b.room_id || '';
+              if (elements.edit_adults) elements.edit_adults.value = b.adults || 2;
+              if (elements.edit_children) elements.edit_children.value = b.children || 0;
+              if (elements.edit_status) elements.edit_status.value = b.status || 'pending';
+              if (elements.edit_payment_status) elements.edit_payment_status.value = b.payment_status || 'unpaid';
+              if (elements.edit_special_requests) elements.edit_special_requests.value = b.special_requests || '';
 
               // Calculate and show summary
               updateEditSummary();
 
               // Show modal
-              document.getElementById('editModal').classList.remove('hidden');
-              document.getElementById('editModal').classList.add('flex');
+              const modal = document.getElementById('editModal');
+              if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+              }
             } else {
               Swal.fire({
                 title: 'Error',
-                text: data.message,
+                text: data.message || 'Failed to load reservation details',
                 icon: 'error',
                 confirmButtonColor: '#d97706'
               });
             }
           })
           .catch(error => {
+            console.error('Fetch error:', error);
+            Swal.close();
             Swal.fire({
               title: 'Error',
-              text: 'An error occurred',
+              text: 'An error occurred while loading the reservation. Please check the browser console for details.',
               icon: 'error',
               confirmButtonColor: '#d97706'
             });
@@ -695,19 +727,33 @@ $current_page = 'reservation_&_booking';
 
       // Close edit modal
       function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-        document.getElementById('editModal').classList.remove('flex');
+        const modal = document.getElementById('editModal');
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }
       }
 
-      // Update edit summary
+      // Update edit summary - with null checks
       function updateEditSummary() {
-        const checkIn = document.getElementById('edit_check_in').value;
-        const checkOut = document.getElementById('edit_check_out').value;
+        // Get all required elements with null checks
+        const checkInInput = document.getElementById('edit_check_in');
+        const checkOutInput = document.getElementById('edit_check_out');
         const roomSelect = document.getElementById('edit_room_id');
+        const summaryDiv = document.getElementById('editSummary');
+
+        // If any required element doesn't exist, exit silently
+        if (!checkInInput || !checkOutInput || !roomSelect || !summaryDiv) {
+          console.warn('Edit summary elements not found');
+          return;
+        }
+
+        const checkIn = checkInInput.value;
+        const checkOut = checkOutInput.value;
         const selectedOption = roomSelect.options[roomSelect.selectedIndex];
 
-        if (!checkIn || !checkOut || !selectedOption.value) {
-          document.getElementById('editSummary').classList.add('hidden');
+        if (!checkIn || !checkOut || !selectedOption || !selectedOption.value) {
+          summaryDiv.classList.add('hidden');
           return;
         }
 
@@ -721,13 +767,20 @@ $current_page = 'reservation_&_booking';
         const total = subtotal + tax;
         const points = Math.floor(total / 100) * 5;
 
-        document.getElementById('edit_nights_display').textContent = nights;
-        document.getElementById('edit_subtotal_display').textContent = '₱' + subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('edit_tax_display').textContent = '₱' + tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('edit_total_display').textContent = '₱' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('edit_points_display').textContent = points;
+        // Update display elements with null checks
+        const nightsDisplay = document.getElementById('edit_nights_display');
+        const subtotalDisplay = document.getElementById('edit_subtotal_display');
+        const taxDisplay = document.getElementById('edit_tax_display');
+        const totalDisplay = document.getElementById('edit_total_display');
+        const pointsDisplay = document.getElementById('edit_points_display');
 
-        document.getElementById('editSummary').classList.remove('hidden');
+        if (nightsDisplay) nightsDisplay.textContent = nights;
+        if (subtotalDisplay) subtotalDisplay.textContent = '₱' + subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (taxDisplay) taxDisplay.textContent = '₱' + tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (totalDisplay) totalDisplay.textContent = '₱' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (pointsDisplay) pointsDisplay.textContent = points;
+
+        summaryDiv.classList.remove('hidden');
       }
 
       // Submit edit form
@@ -781,6 +834,17 @@ $current_page = 'reservation_&_booking';
             });
           });
       }
+
+      // Add event listeners for edit form - with null checks
+      document.addEventListener('DOMContentLoaded', function () {
+        const checkIn = document.getElementById('edit_check_in');
+        const checkOut = document.getElementById('edit_check_out');
+        const roomSelect = document.getElementById('edit_room_id');
+
+        if (checkIn) checkIn.addEventListener('change', updateEditSummary);
+        if (checkOut) checkOut.addEventListener('change', updateEditSummary);
+        if (roomSelect) roomSelect.addEventListener('change', updateEditSummary);
+      });
 
       // ========== NOTIFICATION FUNCTIONS ==========
 
@@ -844,11 +908,6 @@ $current_page = 'reservation_&_booking';
           });
       }
 
-      // Add event listeners for edit form
-      document.getElementById('edit_check_in')?.addEventListener('change', updateEditSummary);
-      document.getElementById('edit_check_out')?.addEventListener('change', updateEditSummary);
-      document.getElementById('edit_room_id')?.addEventListener('change', updateEditSummary);
-
       // ========== FILTER FUNCTIONS ==========
 
       // Filter by status
@@ -864,18 +923,21 @@ $current_page = 'reservation_&_booking';
       }
 
       // Search
-      document.getElementById('searchInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-          const url = new URL(window.location);
-          if (this.value.trim()) {
-            url.searchParams.set('search', this.value.trim());
-          } else {
-            url.searchParams.delete('search');
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') {
+            const url = new URL(window.location);
+            if (this.value.trim()) {
+              url.searchParams.set('search', this.value.trim());
+            } else {
+              url.searchParams.delete('search');
+            }
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
           }
-          url.searchParams.set('page', '1');
-          window.location.href = url.toString();
-        }
-      });
+        });
+      }
 
       // Filter buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -896,20 +958,31 @@ $current_page = 'reservation_&_booking';
 
       // Update status modal
       function updateStatus(id, currentStatus) {
-        document.getElementById('statusBookingId').value = id;
-        document.getElementById('newStatus').value = currentStatus;
-        document.getElementById('statusModal').classList.remove('hidden');
-        document.getElementById('statusModal').classList.add('flex');
+        const statusBookingId = document.getElementById('statusBookingId');
+        const newStatus = document.getElementById('newStatus');
+        const statusModal = document.getElementById('statusModal');
+
+        if (statusBookingId) statusBookingId.value = id;
+        if (newStatus) newStatus.value = currentStatus;
+        if (statusModal) {
+          statusModal.classList.remove('hidden');
+          statusModal.classList.add('flex');
+        }
       }
 
       function closeStatusModal() {
-        document.getElementById('statusModal').classList.add('hidden');
-        document.getElementById('statusModal').classList.remove('flex');
+        const statusModal = document.getElementById('statusModal');
+        if (statusModal) {
+          statusModal.classList.add('hidden');
+          statusModal.classList.remove('flex');
+        }
       }
 
       function submitStatusUpdate() {
-        const id = document.getElementById('statusBookingId').value;
-        const newStatus = document.getElementById('newStatus').value;
+        const id = document.getElementById('statusBookingId')?.value;
+        const newStatus = document.getElementById('newStatus')?.value;
+
+        if (!id || !newStatus) return;
 
         Swal.fire({
           title: 'Update Status',
@@ -1080,8 +1153,8 @@ $current_page = 'reservation_&_booking';
 
       // Check availability
       function checkAvailability() {
-        const checkIn = document.getElementById('checkIn').value;
-        const checkOut = document.getElementById('checkOut').value;
+        const checkIn = document.getElementById('checkIn')?.value;
+        const checkOut = document.getElementById('checkOut')?.value;
 
         if (!checkIn || !checkOut) {
           showToast('Please select check-in and check-out dates', 'error');
@@ -1107,39 +1180,41 @@ $current_page = 'reservation_&_booking';
           .then(response => response.json())
           .then(data => {
             Swal.close();
-            if (data.success) {
-              const resultDiv = document.getElementById('availabilityResult');
-              if (data.count > 0) {
-                resultDiv.innerHTML = `
-              <div class="bg-green-50 text-green-700 p-3 rounded-lg">
-                <i class="fas fa-circle-check mr-2"></i>
-                ${data.count} rooms available for these dates
-              </div>
-            `;
+            const resultDiv = document.getElementById('availabilityResult');
+            if (resultDiv) {
+              if (data.success) {
+                if (data.count > 0) {
+                  resultDiv.innerHTML = `
+                    <div class="bg-green-50 text-green-700 p-3 rounded-lg">
+                        <i class="fas fa-circle-check mr-2"></i>
+                        ${data.count} rooms available for these dates
+                    </div>
+                    `;
+                } else {
+                  resultDiv.innerHTML = `
+                    <div class="bg-red-50 text-red-700 p-3 rounded-lg">
+                        <i class="fas fa-circle-exclamation mr-2"></i>
+                        No rooms available for these dates
+                    </div>
+                    `;
+                }
+                resultDiv.classList.remove('hidden');
               } else {
-                resultDiv.innerHTML = `
-              <div class="bg-red-50 text-red-700 p-3 rounded-lg">
-                <i class="fas fa-circle-exclamation mr-2"></i>
-                No rooms available for these dates
-              </div>
-            `;
+                showToast(data.message, 'error');
               }
-              resultDiv.classList.remove('hidden');
-            } else {
-              showToast(data.message, 'error');
             }
           });
       }
 
       // Create booking
       function createBooking() {
-        const guestName = document.getElementById('guestName').value.trim();
-        const roomId = document.getElementById('roomType').value;
-        const checkIn = document.getElementById('checkIn').value;
-        const checkOut = document.getElementById('checkOut').value;
-        const adults = document.getElementById('adults').value;
-        const children = document.getElementById('children').value;
-        const specialRequests = document.getElementById('specialRequests').value;
+        const guestName = document.getElementById('guestName')?.value.trim();
+        const roomId = document.getElementById('roomType')?.value;
+        const checkIn = document.getElementById('checkIn')?.value;
+        const checkOut = document.getElementById('checkOut')?.value;
+        const adults = document.getElementById('adults')?.value;
+        const children = document.getElementById('children')?.value;
+        const specialRequests = document.getElementById('specialRequests')?.value;
 
         if (!guestName || !roomId || !checkIn || !checkOut) {
           showToast('Please fill in all required fields', 'error');
@@ -1203,9 +1278,6 @@ $current_page = 'reservation_&_booking';
             });
           });
       }
-
-      // Auto-refresh every 60 seconds (optional)
-      // setInterval(() => { location.reload(); }, 60000);
     </script>
   </body>
 

@@ -139,10 +139,16 @@ $current_page = 'housekeeping_&_maintenance';
 
         <!-- header -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+
+          <!-- LEFT SIDE -->
           <div>
-            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Housekeeping & Maintenance</h1>
-            <p class="text-sm text-slate-500 mt-0.5">manage room cleaning status, staff assignments, and
-              maintenance requests</p>
+            <h1 class="text-2xl lg:text-3xl font-light text-slate-800">
+              Housekeeping & Maintenance
+            </h1>
+            <p class="text-sm text-slate-500 mt-0.5">
+              manage room cleaning status, staff assignments, and maintenance requests
+            </p>
+
             <?php if ($hr_api_connected): ?>
               <span class="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
                 <i class="fa-solid fa-circle-check"></i>
@@ -155,13 +161,27 @@ $current_page = 'housekeeping_&_maintenance';
               </span>
             <?php endif; ?>
           </div>
-          <div class="flex gap-3 text-sm">
+
+          <!-- RIGHT SIDE -->
+          <div class="flex items-center gap-3 text-sm">
+
+            <!-- Date -->
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
-              <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
+              <i class="fas fa-calendar text-slate-400"></i>
+              <?php echo $today; ?>
             </span>
+
+            <!-- Notifications -->
             <?php require_once '../components/notification_component.php'; ?>
 
+            <!-- Job Requisition Icon -->
+            <a href="../jobRequisition.php"
+              class="bg-white border rounded-full px-3 py-2 flex items-center justify-center shadow-sm hover:bg-slate-100 transition">
+              <i class="fas fa-briefcase text-slate-600"></i>
+            </a>
+
           </div>
+
         </div>
 
         <!-- STATS CARDS -->
