@@ -628,7 +628,9 @@ $current_page = 'reservation_&_booking';
         }, 3000);
       }
 
-      // Edit reservation function (MODAL VERSION - KEEP THIS ONE)
+      // ========== EDIT RESERVATION FUNCTIONS ==========
+
+      // Edit reservation function
       function editReservation(id) {
         Swal.fire({
           title: 'Loading...',
@@ -751,11 +753,11 @@ $current_page = 'reservation_&_booking';
               Swal.fire({
                 title: 'Success!',
                 html: `
-                    <p>${data.message}</p>
-                    <p class="text-sm mt-2"><strong>Reference:</strong> ${data.booking.reference}</p>
-                    <p class="text-sm"><strong>Guest:</strong> ${data.booking.guest}</p>
-                    <p class="text-sm"><strong>Total:</strong> ₱${data.booking.total.toLocaleString()}</p>
-                `,
+                <p>${data.message}</p>
+                <p class="text-sm mt-2"><strong>Reference:</strong> ${data.booking.reference}</p>
+                <p class="text-sm"><strong>Guest:</strong> ${data.booking.guest}</p>
+                <p class="text-sm"><strong>Total:</strong> ₱${data.booking.total.toLocaleString()}</p>
+            `,
                 icon: 'success',
                 confirmButtonColor: '#d97706'
               }).then(() => {
@@ -779,46 +781,67 @@ $current_page = 'reservation_&_booking';
             });
           });
       }
-      const formData = new FormData();
-      formData.append('action', 'get_notifications');
 
-      fetch('../../../controller/admin/post/reservationBooking_action.php', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          Swal.close();
-          if (data.success) {
-            let html = '<div class="max-h-96 overflow-y-auto">';
+      // ========== NOTIFICATION FUNCTIONS ==========
 
-            if (data.notifications.length === 0) {
-              html += '<p class="text-center text-slate-500 py-4">No notifications</p>';
-            } else {
-              data.notifications.forEach(notif => {
-                const date = new Date(notif.created_at).toLocaleString();
-                const bgColor = notif.is_read ? 'bg-white' : 'bg-amber-50';
-                html += `
-                        <div class="${bgColor} p-3 rounded-lg mb-2 border-l-4 border-amber-500">
-                            <p class="font-medium">${notif.title}</p>
-                            <p class="text-xs text-slate-600">${notif.message}</p>
-                            <p class="text-xs text-slate-400 mt-1">${date}</p>
-                        </div>
-                    `;
+      // View notifications
+      function viewNotifications() {
+        Swal.fire({
+          title: 'Loading...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        const formData = new FormData();
+        formData.append('action', 'get_notifications');
+
+        fetch('../../../controller/admin/post/reservationBooking_action.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            Swal.close();
+            if (data.success) {
+              let html = '<div class="max-h-96 overflow-y-auto">';
+
+              if (data.notifications.length === 0) {
+                html += '<p class="text-center text-slate-500 py-4">No notifications</p>';
+              } else {
+                data.notifications.forEach(notif => {
+                  const date = new Date(notif.created_at).toLocaleString();
+                  const bgColor = notif.is_read ? 'bg-white' : 'bg-amber-50';
+                  html += `
+                <div class="${bgColor} p-3 rounded-lg mb-2 border-l-4 border-amber-500">
+                  <p class="font-medium">${notif.title}</p>
+                  <p class="text-xs text-slate-600">${notif.message}</p>
+                  <p class="text-xs text-slate-400 mt-1">${date}</p>
+                </div>
+              `;
+                });
+              }
+
+              html += '</div>';
+
+              Swal.fire({
+                title: 'Notifications',
+                html: html,
+                icon: 'info',
+                confirmButtonColor: '#d97706',
+                width: '500px'
               });
             }
-
-            html += '</div>';
-
+          })
+          .catch(error => {
+            Swal.close();
             Swal.fire({
-              title: 'Notifications',
-              html: html,
-              icon: 'info',
-              confirmButtonColor: '#d97706',
-              width: '500px'
+              title: 'Error',
+              text: 'An error occurred',
+              icon: 'error',
+              confirmButtonColor: '#d97706'
             });
-          }
-        });
+          });
       }
 
       // Add event listeners for edit form
@@ -826,7 +849,7 @@ $current_page = 'reservation_&_booking';
       document.getElementById('edit_check_out')?.addEventListener('change', updateEditSummary);
       document.getElementById('edit_room_id')?.addEventListener('change', updateEditSummary);
 
-
+      // ========== FILTER FUNCTIONS ==========
 
       // Filter by status
       function filterByStatus(status) {
@@ -868,6 +891,8 @@ $current_page = 'reservation_&_booking';
         url.searchParams.set('page', page);
         window.location.href = url.toString();
       }
+
+      // ========== STATUS UPDATE MODAL FUNCTIONS ==========
 
       // Update status modal
       function updateStatus(id, currentStatus) {
@@ -946,7 +971,8 @@ $current_page = 'reservation_&_booking';
         closeStatusModal();
       }
 
-      // Add points to user
+      // ========== POINTS FUNCTIONS ==========
+
       // Add points to user
       function addPoints(id, points) {
         // First check if points are already awarded
@@ -973,9 +999,9 @@ $current_page = 'reservation_&_booking';
             Swal.fire({
               title: 'Add Loyalty Points',
               html: `
-        <p>Are you sure you want to add <strong>${points} points</strong> to this user?</p>
-        <p class="text-xs text-slate-500 mt-2">This action cannot be undone.</p>
-      `,
+            <p>Are you sure you want to add <strong>${points} points</strong> to this user?</p>
+            <p class="text-xs text-slate-500 mt-2">This action cannot be undone.</p>
+          `,
               icon: 'question',
               showCancelButton: true,
               confirmButtonColor: '#d97706',
@@ -1022,6 +1048,9 @@ $current_page = 'reservation_&_booking';
             });
           });
       }
+
+      // ========== OTHER FUNCTIONS ==========
+
       // Archive reservation
       function archiveReservation(id) {
         Swal.fire({
