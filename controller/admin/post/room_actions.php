@@ -506,6 +506,80 @@ try {
         exit();
     }
 
+    // ========== CHECK-IN GUEST (ADD THIS) ==========
+    elseif ($action === 'checkin_guest') {
+        $booking_id = $_POST['booking_id'] ?? '';
+        $room_id = $_POST['room_id'] ?? '';
+
+        if (empty($booking_id) || empty($room_id)) {
+            throw new Exception('Booking ID and Room ID required');
+        }
+
+        $db->beginTransaction();
+
+        // Get booking details
+        $booking = $db->query(
+            "SELECT * FROM bookings WHERE booking_reference = :reference OR id = :id",
+            [
+                'reference' => $booking_id,
+                'id' => is_numeric($booking_id) ? $booking_id : 0
+            ]
+        )->fetch_one();
+
+        if (!$booking) {
+            throw new Exception('Booking not found');
+        }
+
+        // Update booking status to checked-in
+        $db->query(
+            "UPDATE bookings SET 
+                status = 'checked-in',
+                check_in_time = NOW(),
+                updated_at = NOW()
+             WHERE id = :id",
+            ['id' => $booking['id']]
+        );
+
+        // Update room to occupied
+        $db->query(
+            "UPDATE rooms SET 
+                is_available = 0,
+                needs_cleaning = 0
+             WHERE id = :id",
+            ['id' => $room_id]
+        );
+
+        // Create notification for admin
+        $db->query(
+            "INSERT INTO notifications (user_id, title, message, type, icon, created_at) 
+             VALUES (:user_id, 'Guest Checked In', :message, 'success', 'fa-calendar-check', NOW())",
+            [
+                'user_id' => $_SESSION['user_id'],
+                'message' => "Guest checked in to room {$room_id}"
+            ]
+        );
+
+        // If booking has a user, notify them
+        if ($booking['user_id']) {
+            $db->query(
+                "INSERT INTO notifications (user_id, title, message, type, icon, link, created_at) 
+                 VALUES (:user_id, 'Checked In', :message, 'success', 'fa-door-open', '/src/customer_portal/my_reservation.php', NOW())",
+                [
+                    'user_id' => $booking['user_id'],
+                    'message' => "You have been checked in to room {$room_id}. Enjoy your stay!"
+                ]
+            );
+        }
+
+        $db->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Guest checked in successfully'
+        ]);
+        exit();
+    }
+
     // CHECK-OUT GUEST
     elseif ($action === 'checkout_guest') {
         $booking_id = $_POST['booking_id'] ?? '';
