@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: Mar 19, 2026 at 11:13 AM
+-- Generation Time: Mar 20, 2026 at 02:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,25 @@ SET time_zone = "+00:00";
 --
 -- Database: `hotelrestaurant`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin_notifications`
+--
+
+CREATE TABLE `admin_notifications` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `admin_id` int(10) UNSIGNED DEFAULT NULL,
+  `title` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `type` enum('info','success','warning','danger') NOT NULL DEFAULT 'info',
+  `icon` varchar(50) DEFAULT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `read_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -64,6 +83,13 @@ CREATE TABLE `bookings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bookings`
+--
+
+INSERT INTO `bookings` (`id`, `booking_reference`, `user_id`, `guest_first_name`, `guest_last_name`, `guest_email`, `guest_phone`, `booking_type`, `check_in`, `check_in_time`, `check_out`, `check_out_time`, `nights`, `room_id`, `room_assigned`, `room_name`, `room_price`, `adults`, `children`, `subtotal`, `tax`, `total_amount`, `status`, `payment_status`, `payment_method`, `payment_date`, `special_requests`, `payment_id`, `points_earned`, `points_awarded`, `points_awarded_at`, `points_used`, `points_discount`, `created_at`, `updated_at`) VALUES
+(82, 'HOT-20260320-49F326', 8, 'jzel', 'dols', 'janzeldol4@gmail.com', '+639565819969', 'hotel', '2026-03-21', NULL, '2026-03-23', NULL, 2, '302', NULL, 'Ocean Suite', 6900.00, 2, 0, 13800.00, 1656.00, 15456.00, 'confirmed', 'paid', NULL, '2026-03-20 20:59:42', '', NULL, 770, 1, '2026-03-20 21:00:30', 0, 0.00, '2026-03-20 12:57:08', '2026-03-20 13:00:30');
 
 --
 -- Triggers `bookings`
@@ -118,9 +144,13 @@ DELIMITER ;
 CREATE TABLE `current_balance` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED DEFAULT NULL,
-  `total_balance` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `pending_balance` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `available_balance` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_balance` decimal(10,2) UNSIGNED NOT NULL DEFAULT 0.00,
+  `pending_balance` decimal(10,2) UNSIGNED NOT NULL DEFAULT 0.00,
+  `available_balance` decimal(10,2) UNSIGNED NOT NULL DEFAULT 0.00,
+  `admin_approval` enum('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+  `approved_by` int(10) UNSIGNED DEFAULT NULL,
+  `approved_at` datetime DEFAULT NULL,
+  `rejection_reason` varchar(255) DEFAULT NULL,
   `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -128,8 +158,40 @@ CREATE TABLE `current_balance` (
 -- Dumping data for table `current_balance`
 --
 
-INSERT INTO `current_balance` (`id`, `user_id`, `total_balance`, `pending_balance`, `available_balance`, `last_updated`) VALUES
-(135, 8, 0.00, 0.00, 0.00, '2026-03-19 10:07:30');
+INSERT INTO `current_balance` (`id`, `user_id`, `total_balance`, `pending_balance`, `available_balance`, `admin_approval`, `approved_by`, `approved_at`, `rejection_reason`, `last_updated`) VALUES
+(176, 8, 0.00, 0.00, 0.00, 'approved', NULL, NULL, NULL, '2026-03-20 12:59:42');
+
+--
+-- Triggers `current_balance`
+--
+DELIMITER $$
+CREATE TRIGGER `prevent_negative_balance_insert` BEFORE INSERT ON `current_balance` FOR EACH ROW BEGIN
+    IF NEW.total_balance < 0 THEN
+        SET NEW.total_balance = 0;
+    END IF;
+    IF NEW.available_balance < 0 THEN
+        SET NEW.available_balance = 0;
+    END IF;
+    IF NEW.pending_balance < 0 THEN
+        SET NEW.pending_balance = 0;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `prevent_negative_balance_update` BEFORE UPDATE ON `current_balance` FOR EACH ROW BEGIN
+    IF NEW.total_balance < 0 THEN
+        SET NEW.total_balance = 0;
+    END IF;
+    IF NEW.available_balance < 0 THEN
+        SET NEW.available_balance = 0;
+    END IF;
+    IF NEW.pending_balance < 0 THEN
+        SET NEW.pending_balance = 0;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -177,13 +239,6 @@ CREATE TABLE `food_orders` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `food_orders`
---
-
-INSERT INTO `food_orders` (`id`, `order_reference`, `user_id`, `items`, `order_type`, `subtotal`, `service_fee`, `total_amount`, `points_used`, `points_earned`, `status`, `created_at`, `updated_at`) VALUES
-(11, 'FOOD-202603-923E81', 8, '[{\"name\":\"Sizzling Sisig\",\"price\":290,\"quantity\":1,\"isFree\":false},{\"name\":\"Halo-Halo\",\"price\":150,\"quantity\":1,\"isFree\":false},{\"name\":\"Halo-Halo (loyalty free)\",\"price\":0,\"quantity\":1,\"isFree\":true}]', 'dine-in', 440.00, 22.00, 222.00, 240, 20, '', '2026-03-19 10:07:53', '2026-03-19 10:08:56');
 
 -- --------------------------------------------------------
 
@@ -288,11 +343,11 @@ CREATE TABLE `menu_items` (
 --
 
 INSERT INTO `menu_items` (`id`, `item_code`, `name`, `description`, `price`, `cost`, `stock`, `category`, `is_available`, `status`, `image_url`, `preparation_time`, `created_at`, `updated_at`) VALUES
-(1, 'M001', 'Sinigang na Baboy', 'tamarind soup, pork, veggies', 320.00, 160.00, 50, '', 1, 'available', NULL, 20, '2026-03-16 14:11:26', '2026-03-19 10:05:38'),
+(1, 'M001', 'Sinigang na Baboy', 'tamarind soup, pork, veggies', 320.00, 160.00, 50, 'mains', 1, 'available', NULL, 20, '2026-03-16 14:11:26', '2026-03-19 17:08:33'),
 (2, 'M002', 'Sizzling Sisig', 'chopped pork, onion, egg', 290.00, 145.00, 50, 'mains', 1, 'available', NULL, 15, '2026-03-16 14:11:26', '2026-03-18 15:40:46'),
-(3, 'M003', 'Crispy Pata', 'deep-fried pork knuckle', 550.00, 275.00, 50, 'mains', 1, 'available', NULL, 25, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
-(4, 'D004', 'Halo-Halo', 'shaved ice, fruits, leche flan', 150.00, 75.00, 50, 'desserts', 1, 'available', NULL, 10, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
-(5, 'B005', 'Fresh Buko Juice', 'with coconut pulp', 90.00, 45.00, 50, 'beverages', 1, 'available', NULL, 5, '2026-03-16 14:11:26', '2026-03-18 15:37:29'),
+(3, 'M003', 'Crispy Pata', 'deep-fried pork knuckle', 550.00, 275.00, 50, 'appetizers', 1, 'available', NULL, 25, '2026-03-16 14:11:26', '2026-03-19 17:08:10'),
+(4, 'D004', 'Halo-Halo', 'shaved ice, fruits, leche flan', 150.00, 75.00, 50, 'desserts', 1, 'available', NULL, 10, '2026-03-16 14:11:26', '2026-03-19 17:08:42'),
+(5, 'B005', 'Fresh Buko Juice', 'with coconut pulp', 90.00, 45.00, 50, 'beverages', 1, 'available', NULL, 5, '2026-03-16 14:11:26', '2026-03-19 17:08:27'),
 (6, 'M006', 'Garlic Rice', 'sinangag, plain', 50.00, 25.00, 50, 'mains', 1, 'available', NULL, 5, '2026-03-16 14:11:26', '2026-03-18 15:37:29');
 
 -- --------------------------------------------------------
@@ -319,75 +374,72 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `icon`, `link`, `is_read`, `created_at`, `read_at`) VALUES
-(172, 7, 'New Task Assigned', 'A new maintenance task has been assigned to you', 'info', 'fa-broom', NULL, 0, '2026-03-18 11:44:14', NULL),
-(200, 7, 'New Task Assigned', 'A new maintenance task has been assigned to you', 'info', 'fa-broom', NULL, 0, '2026-03-18 19:11:55', NULL),
-(202, 8, 'Task Completed', 'Task #2 has been completed', 'success', 'fa-check-circle', NULL, 1, '2026-03-19 03:56:53', '2026-03-19 11:58:51'),
-(203, 8, 'Restaurant Reservation Created', 'Your reservation for 1 guests on 2026-03-20 at 5:30 PM:00 has been created. Down payment: ₱100.00 You\'ll earn 10 loyalty points (admin will add after payment).', 'success', 'fa-utensils', '/src/customer_portal/my_reservation.php', 1, '2026-03-19 03:58:43', '2026-03-19 11:58:51'),
-(204, 8, 'Maintenance Reported', 'Maintenance reported for room 101: g', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:00:24', NULL),
-(205, 8, 'Room Updated', 'Room 101 details were updated', 'success', 'fa-pen-to-square', NULL, 0, '2026-03-19 04:00:37', NULL),
-(206, 8, 'Maintenance Reported', 'Maintenance reported for room 101: g', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:00:49', NULL),
-(207, 8, 'Maintenance Reported', 'Maintenance reported for room 101: hi', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 04:06:19', NULL),
-(208, 8, 'Task Assigned', 'Task #5 assigned to bstmsn', 'success', 'fa-user-check', NULL, 0, '2026-03-19 04:15:46', NULL),
-(209, 8, 'Task Completed', 'Task #5 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 04:19:39', NULL),
-(210, 8, 'Booking Created', 'Your booking for Family Room from 2026-03-20 to 2026-03-22 has been created. Total: ₱12,320.00 You\'ll earn 615 loyalty points (admin will add after payment).', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 04:51:04', NULL),
-(211, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from pending to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 04:51:22', NULL),
-(212, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 04:51:22', NULL),
-(213, 8, 'Room Updated', 'Room 201 details were updated', 'success', 'fa-pen-to-square', NULL, 0, '2026-03-19 04:52:02', NULL),
-(214, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to pending', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:27:09', NULL),
-(215, 8, 'Booking Status Update', 'Your booking status has been updated to pending (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:27:09', NULL),
-(216, 8, 'Maintenance Reported', 'Maintenance reported for room 101: d', 'warning', 'fa-wrench', NULL, 0, '2026-03-19 06:36:03', NULL),
-(217, 8, 'Task Completed', 'Task #6 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 06:36:44', NULL),
-(218, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from pending to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:07', NULL),
-(219, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:07', NULL),
-(220, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from  to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:25', NULL),
-(221, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:25', NULL),
-(222, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from  to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 06:37:35', NULL),
-(223, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:37:35', NULL),
-(224, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:40:37', NULL),
-(225, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 06:40:57', NULL),
-(226, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 06:44:08', NULL),
-(227, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:44:08', NULL),
-(228, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:44:17', NULL),
-(229, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 06:44:51', NULL),
-(230, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 06:44:51', NULL),
-(231, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 06:50:11', NULL),
-(232, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 06:50:15', NULL),
-(233, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 07:03:53', NULL),
-(234, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 07:04:20', NULL),
-(235, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:04:20', NULL),
-(236, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 07:04:29', NULL),
-(237, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:12:02', NULL),
-(238, 8, 'Task Completed', 'Task #7 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:12:27', NULL),
-(239, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:12:47', NULL),
-(240, 8, 'Task Completed', 'Task #8 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:12:59', NULL),
-(241, 8, 'Cleaning Task Assigned', 'Cleaning task for room 204 assigned to bstmsn', 'success', 'fa-broom', NULL, 0, '2026-03-19 07:22:05', NULL),
-(242, 8, 'Task Completed', 'Task #9 has been completed', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 07:22:36', NULL),
-(243, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 07:22:52', NULL),
-(244, 8, 'Loyalty Points Awarded!', 'You\'ve earned 615 loyalty points for your booking #HOT-20260319-895EE0', 'loyalty', 'fa-star', '/src/customer_portal/loyalty_rewards.php', 0, '2026-03-19 07:23:55', NULL),
-(245, 8, 'Points Awarded', 'Added 615 points to user for booking #HOT-20260319-895EE0', 'success', 'fa-star', NULL, 0, '2026-03-19 07:23:55', NULL),
-(246, 8, 'Booking Updated', 'Booking #HOT-20260319-895EE0 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-19 07:25:09', NULL),
-(247, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-895EE0 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:25:09', NULL),
-(248, 8, 'Reservation Updated', 'Reservation #REST-202603-3D78AE status changed from pending to confirmed (Guest has outstanding balance)', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:39:09', NULL),
-(249, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:41:54', NULL),
-(250, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:41:54', NULL),
-(251, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from Checked-in to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:46:49', NULL),
-(252, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:46:49', NULL),
-(253, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:47:37', NULL),
-(254, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:47:37', NULL),
-(255, 8, 'Payment Successful', 'Payment of ₱12,420.00 processed successfully. You\'ll earn 620 loyalty points (admin will add after verification).', 'success', 'fa-credit-card', '/src/customer_portal/payments.php', 0, '2026-03-19 07:48:13', NULL),
-(256, 8, 'Guests Imported', 'Successfully imported 0 guests with 2 errors', 'success', 'fa-file-import', NULL, 0, '2026-03-19 07:49:21', NULL),
-(257, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from Checked-in to pending', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 07:50:15', NULL),
-(258, 8, 'Booking Status Update', 'Your booking status has been updated to pending (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 07:50:15', NULL),
-(259, 8, 'New Event Created', 'Event \'test\' created for 2026-03-19', 'success', 'fa-calendar-plus', NULL, 0, '2026-03-19 09:58:31', NULL),
-(260, 8, 'Reminder from Front Desk', 'Reminder about your upcoming stay', 'info', 'fa-bell', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 10:02:59', NULL),
-(261, 8, 'Booking Status Updated', 'Booking #HOT-20260319-895EE0 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 10:03:47', NULL),
-(262, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-895EE0)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 10:03:47', NULL),
-(263, 8, 'Guest Checked Out', 'Guest checked out from room 204. Room marked for cleaning.', 'info', 'fa-door-open', NULL, 0, '2026-03-19 10:03:56', NULL),
-(264, 8, 'Room Marked Clean', 'Room 204 has been marked as clean and ready for guests.', 'success', 'fa-sparkles', NULL, 0, '2026-03-19 10:04:49', NULL),
-(265, 8, 'Reservation Updated', 'Reservation #REST-202603-3D78AE status changed from confirmed to cancelled', 'info', 'fa-calendar-check', NULL, 0, '2026-03-19 10:05:10', NULL),
-(266, 8, 'Order Placed', 'Your order #FOOD-202603-923E81 has been placed. Total: ₱222.00', 'success', 'fa-bag-shopping', '/src/customer_portal/order_food.php', 0, '2026-03-19 10:07:53', NULL),
-(267, 8, 'Order Status Update', 'Order #FOOD-202603-923E81 status changed from pending to preparing', 'info', 'fa-utensils', NULL, 0, '2026-03-19 10:08:35', NULL),
-(268, 8, '⚠️ URGENT ORDER', 'Order #FOOD-202603-923E81 marked as URGENT!', 'warning', 'fa-exclamation-triangle', NULL, 0, '2026-03-19 10:08:56', NULL);
+(385, 7, 'Payment Pending Approval', 'New payment of ₱19,040.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 14:10:46', NULL),
+(391, 7, 'Payment Pending Approval', 'New payment of ₱300.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 14:13:09', NULL),
+(396, 7, 'Payment Pending Approval', 'New payment of ₱19,040.00 needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 15:26:06', NULL),
+(401, 4, 'd', 's', 'promo', 'fa-bullhorn', NULL, 0, '2026-03-19 16:04:59', NULL),
+(406, 8, 'Booking Created', 'Your booking for Ocean Suite from 2026-03-20 to 2026-03-22 has been created. Total: ₱15,456.00 You\'ll earn 770 loyalty points after payment.', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 17:41:50', NULL),
+(407, 8, 'Payment Pending Approval', 'Payment of ₱15,456.00 received and pending admin approval. You\'ll earn 770 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-19 17:41:59', NULL),
+(408, 7, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 17:41:59', NULL),
+(409, 8, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 17:41:59', NULL),
+(410, 8, 'Payment Approved', 'Your payment of ₱15,456.00 has been approved. All your bookings are now confirmed. You earned 770 loyalty points!', 'success', 'fa-check-circle', '/src/customer_portal/payments.php', 0, '2026-03-19 17:42:11', NULL),
+(411, 8, 'Payment Approved', 'Payment #PAY-202603-56756C77 approved. All unpaid bookings for user have been confirmed.', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 17:42:11', NULL),
+(412, 8, 'Restaurant Reservation Created', 'Your reservation for 1 guests on 2026-03-22 at 5:30 PM:00 has been created. Down payment: ₱100.00 You\'ll earn 10 loyalty points (admin will add after payment).', 'success', 'fa-utensils', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 18:03:00', NULL),
+(413, 8, 'Payment Pending Approval', 'Payment of ₱100.00 received and pending admin approval. You\'ll earn 5 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-19 18:03:05', NULL),
+(414, 7, 'Payment Pending Approval', 'New payment of ₱100.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:03:05', NULL),
+(415, 8, 'Payment Pending Approval', 'New payment of ₱100.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:03:05', NULL),
+(416, 8, 'Reservation Cancelled', 'Your restaurant reservation #43 has been cancelled. 10 points have been deducted.', 'warning', 'fa-times-circle', NULL, 0, '2026-03-19 18:03:35', NULL),
+(417, 8, 'Restaurant Reservation Created', 'Your reservation for 1 guests on 2026-03-20 at 5:30 PM:00 has been created. Down payment: ₱100.00 You\'ll earn 10 loyalty points (admin will add after payment).', 'success', 'fa-utensils', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 18:10:41', NULL),
+(418, 8, 'Payment Pending Approval', 'Payment of ₱100.00 received and pending admin approval. You\'ll earn 5 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-19 18:10:46', NULL),
+(419, 7, 'Payment Pending Approval', 'New payment of ₱100.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:10:46', NULL),
+(420, 8, 'Payment Pending Approval', 'New payment of ₱100.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:10:46', NULL),
+(421, 8, 'Payment Approved', 'Your payment of ₱100.00 has been approved. All your bookings are now confirmed. You earned 5 loyalty points!', 'success', 'fa-check-circle', '/src/customer_portal/payments.php', 0, '2026-03-19 18:10:58', NULL),
+(422, 8, 'Payment Approved', 'Payment #PAY-202603-C268F7BE approved. All unpaid bookings for user have been confirmed.', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 18:10:58', NULL),
+(423, 8, 'Booking Created', 'Your booking for Executive Suite from 2026-03-20 to 2026-03-22 has been created. Total: ₱19,040.00 You\'ll earn 950 loyalty points after payment.', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-19 18:13:40', NULL),
+(424, 8, 'Payment Pending Approval', 'Payment of ₱19,040.00 received and pending admin approval. You\'ll earn 950 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-19 18:13:46', NULL),
+(425, 7, 'Payment Pending Approval', 'New payment of ₱19,040.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:13:46', NULL),
+(426, 8, 'Payment Pending Approval', 'New payment of ₱19,040.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-19 18:13:46', NULL),
+(427, 8, 'Payment Approved', 'Your payment of ₱19,040.00 has been approved. All your bookings are now confirmed. You earned 950 loyalty points!', 'success', 'fa-check-circle', '/src/customer_portal/payments.php', 0, '2026-03-19 18:13:58', NULL),
+(428, 8, 'Payment Approved', 'Payment #PAY-202603-CDA8F2D8 approved. All unpaid bookings for user have been confirmed.', 'success', 'fa-check-circle', NULL, 0, '2026-03-19 18:13:58', NULL),
+(429, 8, 'Booking Updated', 'Booking #HOT-20260319-46EC48 was updated', 'info', 'fa-pen-to-square', NULL, 0, '2026-03-20 07:18:46', NULL),
+(430, 8, 'Your Booking Was Updated', 'Your booking #HOT-20260319-46EC48 has been updated by staff', 'info', 'fa-pen-to-square', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 07:18:46', NULL),
+(431, 8, 'Room Updated', 'Room 205 details were updated', 'success', 'fa-pen-to-square', NULL, 0, '2026-03-20 07:49:05', NULL),
+(432, 8, 'Payment Pending Approval', 'New payment of ₱19,040.00 from jzel needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 07:51:55', NULL),
+(433, 7, 'Payment Pending Approval', 'New payment of ₱19,040.00 needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 07:51:55', NULL),
+(434, 8, 'Payment Pending Approval', 'Payment of ₱19,040.00 received and pending admin approval. You\'ll earn 950 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-20 07:51:55', NULL),
+(435, 8, 'Payment Approved', 'Your payment of ₱19,040.00 has been approved. All your bookings are now confirmed. You earned 950 loyalty points!', 'success', 'fa-check-circle', '/src/customer_portal/payments.php', 0, '2026-03-20 07:52:21', NULL),
+(436, 8, 'Payment Approved', 'Payment #PAY-202603-C9B1B7A0 approved. All unpaid bookings for user have been confirmed.', 'success', 'fa-check-circle', NULL, 0, '2026-03-20 07:52:21', NULL),
+(437, 8, 'Booking Status Updated', 'Booking #HOT-20260319-46EC48 status changed from Checked-in to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 07:53:27', NULL),
+(438, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-46EC48)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 07:53:27', NULL),
+(439, 8, 'Booking Status Updated', 'Booking #HOT-20260319-46EC48 status changed from Checked-in to pending', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 07:53:57', NULL),
+(440, 8, 'Booking Status Update', 'Your booking status has been updated to pending (Booking #HOT-20260319-46EC48)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 07:53:57', NULL),
+(441, 8, 'Booking Status Updated', 'Booking #HOT-20260319-46EC48 status changed from pending to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 07:54:05', NULL),
+(442, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-46EC48)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 07:54:05', NULL),
+(443, 8, 'Booking Status Updated', 'Booking #HOT-20260319-46EC48 status changed from confirmed to confirmed', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 08:16:23', NULL),
+(444, 8, 'Booking Status Update', 'Your booking has been confirmed! (Booking #HOT-20260319-46EC48)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 08:16:23', NULL),
+(445, 8, 'Booking Status Updated', 'Booking #HOT-20260319-46EC48 status changed from confirmed to checked-in', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 08:18:50', NULL),
+(446, 8, 'Booking Status Update', 'You have been checked in. Enjoy your stay! (Booking #HOT-20260319-46EC48)', 'info', 'fa-info-circle', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 08:18:50', NULL),
+(447, 8, 'Loyalty Points Awarded!', 'You\'ve earned 950 loyalty points for your booking #HOT-20260319-46EC48', 'loyalty', 'fa-star', '/src/customer_portal/loyalty_rewards.php', 0, '2026-03-20 08:18:54', NULL),
+(448, 8, 'Points Awarded', 'Added 950 points to user for booking #HOT-20260319-46EC48', 'success', 'fa-star', NULL, 0, '2026-03-20 08:18:54', NULL),
+(449, 8, 'New Booking Created', 'New booking #HOT-20260320-748B29 created for f', 'success', 'fa-plus-circle', NULL, 0, '2026-03-20 08:19:35', NULL),
+(450, 8, 'Booking Status Updated', 'Booking #HOT-20260320-748B29 status changed from pending to cancelled', 'info', 'fa-calendar-check', NULL, 0, '2026-03-20 08:19:55', NULL),
+(451, 8, 'Booking Created', 'Your booking for Ocean Suite from 2026-03-21 to 2026-03-23 has been created. Total: ₱15,456.00 You\'ll earn 770 loyalty points after payment.', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 12:54:29', NULL),
+(452, 8, 'Payment Pending Approval', 'Payment of ₱15,456.00 received and pending admin approval. You\'ll earn 770 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-20 12:54:39', NULL),
+(453, 7, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:54:39', NULL),
+(454, 8, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:54:39', NULL),
+(455, 8, 'Booking Created', 'Your booking for Ocean Suite from 2026-03-21 to 2026-03-23 has been created. Total: ₱15,456.00 You\'ll earn 770 loyalty points after payment.', 'success', 'fa-hotel', '/src/customer_portal/my_reservation.php', 0, '2026-03-20 12:57:08', NULL),
+(456, 8, 'Payment Pending Approval', 'Payment of ₱15,456.00 received and pending admin approval. You\'ll earn 770 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-20 12:57:17', NULL),
+(457, 7, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:57:17', NULL),
+(458, 8, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:57:17', NULL),
+(459, 8, 'Payment Rejected', 'Your payment of ₱15,456.00 has been rejected. Reason: test', 'warning', 'fa-times-circle', '/src/customer_portal/payments.php', 0, '2026-03-20 12:58:45', NULL),
+(460, 8, 'Payment Rejected', 'Payment #PAY-202603-42DB30E7 has been rejected: test', 'warning', 'fa-times-circle', NULL, 0, '2026-03-20 12:58:45', NULL),
+(461, 8, 'Payment Pending Approval', 'Payment of ₱15,456.00 received and pending admin approval. You\'ll earn 770 loyalty points after approval.', 'info', 'fa-clock', '/src/customer_portal/payments.php', 0, '2026-03-20 12:59:33', NULL),
+(462, 7, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:59:33', NULL),
+(463, 8, 'Payment Pending Approval', 'New payment of ₱15,456.00 from Guest needs approval', 'warning', 'fa-clock', '/src/admin/operations/billing_&_payment.php', 0, '2026-03-20 12:59:33', NULL),
+(464, 8, 'Payment Approved', 'Your payment of ₱15,456.00 has been approved. All your bookings are now confirmed. You earned 770 loyalty points!', 'success', 'fa-check-circle', '/src/customer_portal/payments.php', 0, '2026-03-20 12:59:42', NULL),
+(465, 8, 'Payment Approved', 'Payment #PAY-202603-4B5659CE approved. All unpaid bookings for user have been confirmed.', 'success', 'fa-check-circle', NULL, 0, '2026-03-20 12:59:42', NULL),
+(466, 8, 'Loyalty Points Awarded!', 'You\'ve earned 770 loyalty points for your booking #HOT-20260320-49F326', 'loyalty', 'fa-star', '/src/customer_portal/loyalty_rewards.php', 0, '2026-03-20 13:00:30', NULL),
+(467, 8, 'Points Awarded', 'Added 770 points to user for booking #HOT-20260320-49F326', 'success', 'fa-star', NULL, 0, '2026-03-20 13:00:30', NULL);
 
 -- --------------------------------------------------------
 
@@ -425,29 +477,46 @@ CREATE TABLE `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `payment_reference`, `user_id`, `booking_type`, `booking_id`, `amount`, `payment_method`, `payment_status`, `approval_status`, `approved_by`, `approved_at`, `rejection_reason`, `transaction_id`, `payment_date`, `created_at`) VALUES
+(57, 'PAY-202603-42DB30E7', 8, '', 0, 15456.00, 'GCash', 'failed', 'rejected', 8, '2026-03-20 20:58:45', 'test', NULL, '2026-03-20 20:57:17', '2026-03-20 12:57:17'),
+(58, 'PAY-202603-4B5659CE', 8, '', 0, 15456.00, 'GCash', 'completed', 'approved', 8, '2026-03-20 20:59:42', NULL, NULL, '2026-03-20 20:59:42', '2026-03-20 12:59:33');
+
+--
 -- Triggers `payments`
 --
 DELIMITER $$
 CREATE TRIGGER `update_balance_on_payment_insert` AFTER INSERT ON `payments` FOR EACH ROW BEGIN
-    IF NEW.payment_status = 'pending' THEN
-        -- Add to pending balance
+    -- Only handle pending payments
+    IF NEW.payment_status = 'pending' AND NEW.approval_status = 'pending' THEN
+        -- When payment is created as pending, move amount from available to pending
         UPDATE current_balance 
         SET pending_balance = pending_balance + NEW.amount,
-            available_balance = available_balance - NEW.amount
-        WHERE user_id = NEW.user_id;
-    ELSEIF NEW.payment_status = 'completed' THEN
-        -- Remove from total balance (payment completed)
-        UPDATE current_balance 
-        SET total_balance = total_balance - NEW.amount,
-            available_balance = available_balance - NEW.amount
+            available_balance = available_balance - NEW.amount,
+            last_updated = NOW()
         WHERE user_id = NEW.user_id;
         
-        -- Update the original booking/reservation payment status
+    -- Handle pre-approved payments (if any)
+    ELSEIF NEW.payment_status = 'completed' AND NEW.approval_status = 'approved' THEN
+        -- When payment is already approved on insert
+        UPDATE current_balance 
+        SET total_balance = GREATEST(0, total_balance - NEW.amount),
+            pending_balance = GREATEST(0, pending_balance - NEW.amount),
+            last_updated = NOW()
+        WHERE user_id = NEW.user_id;
+        
+        -- Update booking/reservation
         IF NEW.booking_type = 'hotel' THEN
-            UPDATE bookings SET payment_status = 'paid', payment_date = NOW() 
+            UPDATE bookings 
+            SET payment_status = 'paid', 
+                payment_date = NOW() 
             WHERE id = NEW.booking_id;
         ELSEIF NEW.booking_type = 'restaurant' THEN
-            UPDATE restaurant_reservations SET payment_status = 'paid', payment_date = NOW() 
+            UPDATE restaurant_reservations 
+            SET payment_status = 'paid', 
+                payment_date = NOW() 
             WHERE id = NEW.booking_id;
         END IF;
     END IF;
@@ -456,40 +525,57 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `update_balance_on_payment_update` AFTER UPDATE ON `payments` FOR EACH ROW BEGIN
-    -- Handle status changes
-    IF OLD.payment_status != NEW.payment_status THEN
-        -- Remove old status effects
-        IF OLD.payment_status = 'pending' THEN
-            UPDATE current_balance 
-            SET pending_balance = pending_balance - OLD.amount,
-                available_balance = available_balance + OLD.amount
-            WHERE user_id = OLD.user_id;
-        ELSEIF OLD.payment_status = 'completed' THEN
-            -- This shouldn't normally happen, but handle it
-            UPDATE current_balance 
-            SET total_balance = total_balance + OLD.amount,
-                available_balance = available_balance + OLD.amount
-            WHERE user_id = OLD.user_id;
-        END IF;
+    -- Handle approval/rejection status changes
+    IF OLD.approval_status != NEW.approval_status OR OLD.payment_status != NEW.payment_status THEN
         
-        -- Add new status effects
-        IF NEW.payment_status = 'pending' THEN
+        -- Case 1: Payment was pending and is now APPROVED
+        IF OLD.payment_status = 'pending' 
+           AND OLD.approval_status = 'pending' 
+           AND NEW.payment_status = 'completed' 
+           AND NEW.approval_status = 'approved' 
+        THEN
+            -- When approved: Remove from pending and total balance
             UPDATE current_balance 
-            SET pending_balance = pending_balance + NEW.amount,
-                available_balance = available_balance - NEW.amount
-            WHERE user_id = NEW.user_id;
-        ELSEIF NEW.payment_status = 'completed' THEN
-            UPDATE current_balance 
-            SET total_balance = total_balance - NEW.amount,
-                available_balance = available_balance - NEW.amount
+            SET total_balance = GREATEST(0, total_balance - NEW.amount),
+                pending_balance = GREATEST(0, pending_balance - NEW.amount),
+                last_updated = NOW()
             WHERE user_id = NEW.user_id;
             
-            -- Update the original booking/reservation payment status
+            -- Update the booking/reservation payment status
             IF NEW.booking_type = 'hotel' THEN
-                UPDATE bookings SET payment_status = 'paid', payment_date = NOW() 
+                UPDATE bookings 
+                SET payment_status = 'paid', 
+                    payment_date = NOW() 
                 WHERE id = NEW.booking_id;
             ELSEIF NEW.booking_type = 'restaurant' THEN
-                UPDATE restaurant_reservations SET payment_status = 'paid', payment_date = NOW() 
+                UPDATE restaurant_reservations 
+                SET payment_status = 'paid', 
+                    payment_date = NOW() 
+                WHERE id = NEW.booking_id;
+            END IF;
+            
+        -- Case 2: Payment was pending and is now REJECTED
+        ELSEIF OLD.payment_status = 'pending' 
+               AND OLD.approval_status = 'pending' 
+               AND NEW.payment_status = 'failed' 
+               AND NEW.approval_status = 'rejected' 
+        THEN
+            -- When rejected: Return amount from pending back to available
+            -- DO NOT touch total_balance (since payment wasn't completed)
+            UPDATE current_balance 
+            SET pending_balance = GREATEST(0, pending_balance - NEW.amount),
+                available_balance = available_balance + NEW.amount,
+                last_updated = NOW()
+            WHERE user_id = NEW.user_id;
+            
+            -- Update booking/reservation back to unpaid
+            IF NEW.booking_type = 'hotel' THEN
+                UPDATE bookings 
+                SET payment_status = 'unpaid' 
+                WHERE id = NEW.booking_id;
+            ELSEIF NEW.booking_type = 'restaurant' THEN
+                UPDATE restaurant_reservations 
+                SET payment_status = 'unpaid' 
                 WHERE id = NEW.booking_id;
             END IF;
         END IF;
@@ -521,9 +607,7 @@ CREATE TABLE `payment_methods` (
 --
 
 INSERT INTO `payment_methods` (`id`, `user_id`, `method_type`, `display_name`, `account_name`, `account_number`, `expiry_date`, `is_default`, `created_at`) VALUES
-(2, 4, 'gcash', 'GCash', 'janzeldols', '09565819961', '2026-04', 1, '2026-03-15 15:45:36'),
-(3, 7, 'gcash', 'GCash', 'sdasd', '123', '2026-04', 1, '2026-03-17 04:20:05'),
-(4, 8, 'gcash', 'GCash', 'janzeldols', '1213242', '', 1, '2026-03-18 01:13:12');
+(6, 8, 'gcash', 'GCash', 'sdasd', '09565819982', '2026-08', 1, '2026-03-19 14:10:40');
 
 -- --------------------------------------------------------
 
@@ -540,6 +624,14 @@ CREATE TABLE `redemptions` (
   `status` enum('pending','completed','cancelled') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `redemptions`
+--
+
+INSERT INTO `redemptions` (`id`, `user_id`, `reward_name`, `points_cost`, `experience`, `status`, `created_at`) VALUES
+(23, 8, 'Free Coffee / Tea', 240, 'beverage', 'pending', '2026-03-19 13:40:50'),
+(24, 8, 'Room Upgrade', 1200, 'hotel', 'pending', '2026-03-19 13:41:02');
 
 -- --------------------------------------------------------
 
@@ -661,14 +753,14 @@ CREATE TABLE `restaurant_tables` (
 --
 
 INSERT INTO `restaurant_tables` (`id`, `table_number`, `capacity`, `location`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'T1', 2, 'Window', 'occupied', '2026-03-16 10:28:37', '2026-03-16 10:39:53'),
+(1, 'T1', 2, 'Window', 'available', '2026-03-16 10:28:37', '2026-03-19 10:29:50'),
 (2, 'T2', 4, 'Center', 'available', '2026-03-16 10:28:37', '2026-03-18 15:11:12'),
 (3, 'T3', 2, 'Window', 'available', '2026-03-16 10:28:37', '2026-03-18 14:06:23'),
-(4, 'T4', 6, 'Private', 'occupied', '2026-03-16 10:28:37', '2026-03-18 15:51:28'),
-(5, 'T5', 2, 'Bar', 'reserved', '2026-03-16 10:28:37', '2026-03-16 10:40:09'),
-(6, 'T6', 4, 'Center', 'occupied', '2026-03-16 10:28:37', '2026-03-18 14:03:17'),
+(4, 'T4', 6, 'Private', 'available', '2026-03-16 10:28:37', '2026-03-19 10:29:54'),
+(5, 'T5', 2, 'Bar', 'available', '2026-03-16 10:28:37', '2026-03-19 10:32:47'),
+(6, 'T6', 4, 'Center', 'available', '2026-03-16 10:28:37', '2026-03-19 10:30:01'),
 (7, 'T7', 2, 'Window', 'available', '2026-03-16 10:28:37', '2026-03-18 14:06:16'),
-(8, 'T8', 8, 'Private', 'available', '2026-03-16 10:28:37', '2026-03-18 13:58:40');
+(8, 'T8', 8, 'Private', 'available', '2026-03-16 10:28:37', '2026-03-19 13:45:27');
 
 -- --------------------------------------------------------
 
@@ -727,12 +819,12 @@ CREATE TABLE `rewards` (
 --
 
 INSERT INTO `rewards` (`id`, `reward_name`, `description`, `points_cost`, `category`, `image_url`, `is_active`, `stock_limit`, `times_redeemed`, `created_at`, `updated_at`) VALUES
-(1, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, NULL, 7, '2026-03-16 17:30:12', '2026-03-17 08:03:18'),
-(2, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, NULL, 2, '2026-03-16 17:30:12', '2026-03-17 10:56:34'),
-(3, 'Late Check-out (2pm)', 'subject to availability', 600, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-18 02:16:22'),
-(4, 'Room Upgrade', 'deluxe to suite (subject to availability)', 1200, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-16 18:24:35'),
-(5, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 240, 'beverage', NULL, 1, 100, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
-(6, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 480, 'dining', NULL, 1, 50, 0, '2026-03-16 18:23:40', '2026-03-16 18:23:40'),
+(1, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 2400, 'beverage', NULL, 1, NULL, 8, '2026-03-16 17:30:12', '2026-03-20 13:01:19'),
+(2, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 4800, 'dining', NULL, 1, NULL, 2, '2026-03-16 17:30:12', '2026-03-20 13:01:24'),
+(3, 'Late Check-out (2pm)', 'subject to availability', 6000, 'hotel', NULL, 1, NULL, 1, '2026-03-16 17:30:12', '2026-03-20 13:01:29'),
+(4, 'Room Upgrade', 'deluxe to suite (subject to availability)', 12000, 'hotel', NULL, 1, NULL, 2, '2026-03-16 17:30:12', '2026-03-20 13:01:32'),
+(5, 'Free Coffee / Tea', 'any hot beverage at Azure Lounge', 2400, 'beverage', NULL, 1, 100, 0, '2026-03-16 18:23:40', '2026-03-20 13:01:37'),
+(6, 'Complimentary Breakfast', 'for one person at Azure Restaurant', 4800, 'dining', NULL, 1, 50, 0, '2026-03-16 18:23:40', '2026-03-20 13:01:40'),
 (11, 'xx', 'd', 6600, 'dining', NULL, 1, NULL, 0, '2026-03-16 18:32:08', '2026-03-16 18:32:08');
 
 -- --------------------------------------------------------
@@ -767,7 +859,8 @@ INSERT INTO `rooms` (`id`, `name`, `description`, `price`, `beds`, `view`, `amen
 ('202', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-15 07:19:38'),
 ('203', 'Superior Double', NULL, 3500.00, 'double bed', 'city view', 'Free WiFi, TV', 2, NULL, 1, 0, '2026-03-15 07:19:38'),
 ('204', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, 0, '2026-03-15 07:19:38'),
-('205', 'Executive Suite', NULL, 8500.00, '1 king bed', 'ocean view', 'Jacuzzi, Living Area, Free WiFi', 2, NULL, 1, 0, '2026-03-15 07:19:38'),
+('205', 'Executive Suite', NULL, 8500.00, '1 king bed', 'ocean view', 'Jacuzzi, Living Area, Free WiFi', 2, NULL, 0, 0, '2026-03-15 07:19:38'),
+('211', 'Rooftop', NULL, 2000.00, '1 double bed', 'city view', '', 10, NULL, 1, 0, '2026-03-19 10:21:28'),
 ('301', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-17 12:34:03'),
 ('302', 'Ocean Suite', NULL, 6900.00, '1 king bed', 'ocean view', 'Jacuzzi, Free WiFi, Mini Bar', 3, NULL, 1, 0, '2026-03-17 12:34:03'),
 ('401', 'Family Room', NULL, 5500.00, '2 queen beds', 'pool view', 'Free WiFi, TV, Mini Fridge', 4, NULL, 1, 0, '2026-03-17 12:34:03'),
@@ -852,9 +945,19 @@ CREATE TABLE `staff_notes` (
   `id` int(10) UNSIGNED NOT NULL,
   `employee_id` varchar(50) NOT NULL,
   `note` text NOT NULL,
+  `rating` tinyint(1) DEFAULT NULL,
+  `rating_type` enum('performance','attitude','punctuality','overall') DEFAULT 'overall',
   `created_by` int(10) UNSIGNED DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `staff_notes`
+--
+
+INSERT INTO `staff_notes` (`id`, `employee_id`, `note`, `rating`, `rating_type`, `created_by`, `created_at`) VALUES
+(3, 'EMP-083', 'd', 3, 'attitude', 8, '2026-03-20 17:19:05'),
+(4, 'EMP-083', 'f', 5, 'performance', 8, '2026-03-20 17:23:58');
 
 -- --------------------------------------------------------
 
@@ -942,9 +1045,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `first_name`, `last_name`, `email`, `phone`, `alternative_phone`, `date_of_birth`, `gender`, `nationality`, `address`, `city`, `postal_code`, `country`, `preferred_language`, `loyalty_points`, `preferences`, `allergies`, `birthday`, `anniversary`, `role`, `status`, `email_verified`, `email_verification_token`, `email_verification_expires`, `phone_verified`, `notify_email`, `notify_sms`, `notify_promo`, `notify_loyalty`, `avatar`, `member_tier`, `join_date`, `password`, `remember_token`, `token_expires`, `created_at`, `updated_at`, `last_login`) VALUES
-(4, 'Dolo dols', 'Dolo', 'dols', 'janzeldol1s@gmail.com', '+639565819961', '+639565819961', '2026-03-16', 'prefer not to say', 'ako ay', 'Sampaloc', 'caloocan city', 'NONE', 'Philippines', 'English', 285, '', '', '2026-03-18', '0000-00-00', 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 1, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$LSPIJZd7kcJxavwyEteiEehuiwbeIZKh1oM1DRXKF2zIuvh5Fsxma', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-17 03:09:18', NULL),
-(7, 'Janzel', NULL, NULL, 'janzeldols@gmail.com', '+639565819964', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 1320, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-17 02:41:59', '$2y$12$rAvNuAJvNvuKu.h.NhWoJutf4N9ZQ5z9mWFuHQazyx0gROkH9Wr2y', NULL, NULL, '2026-03-17 02:41:59', '2026-03-17 14:44:10', NULL),
-(8, 'jzel dols', 'jzel', 'dols', 'janzeldol4@gmail.com', '+639565819969', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 410, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-18 01:01:04', '$2y$12$l53nMaAIcd2Nq0NLFfLqwOlm4KP.6cVMjuMw8QQUAZftZT9KnnWQy', NULL, NULL, '2026-03-18 01:01:04', '2026-03-19 10:07:53', NULL);
+(4, 'Dolo dols', 'Dolo', 'dols', 'janzeldol1s@gmail.com', '+639565819961', '+639565819961', '2026-03-16', 'prefer not to say', 'ako ay', 'Sampaloc', 'caloocan city', 'NONE', 'Philippines', 'English', 0, '', '', '2026-03-18', '0000-00-00', 'customer', 'active', 0, NULL, NULL, 1, 1, 1, 1, 1, NULL, 'platinum', '2026-03-15 08:48:13', '$2y$12$LSPIJZd7kcJxavwyEteiEehuiwbeIZKh1oM1DRXKF2zIuvh5Fsxma', '5cb23af2f6febd413ce82c4e766863f3197872ae273e0c1864b766ef15ae12d7', '2026-04-14 09:58:38', '2026-03-15 08:48:13', '2026-03-19 12:36:36', NULL),
+(7, 'Janzel', NULL, NULL, 'janzeldols@gmail.com', '+639565819964', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 0, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-17 02:41:59', '$2y$12$rAvNuAJvNvuKu.h.NhWoJutf4N9ZQ5z9mWFuHQazyx0gROkH9Wr2y', NULL, NULL, '2026-03-17 02:41:59', '2026-03-19 12:36:33', NULL),
+(8, 'jzel dols', 'jzel', 'dols', 'janzeldol4@gmail.com', '+639565819969', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Philippines', 'English', 1540, NULL, NULL, NULL, NULL, 'admin', 'active', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'bronze', '2026-03-18 01:01:04', '$2y$12$l53nMaAIcd2Nq0NLFfLqwOlm4KP.6cVMjuMw8QQUAZftZT9KnnWQy', NULL, NULL, '2026-03-18 01:01:04', '2026-03-20 13:00:30', '2026-03-20 20:58:26');
 
 -- --------------------------------------------------------
 
@@ -1038,6 +1141,14 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`` SQL SECURITY DEFINER VIEW `user_balance_su
 --
 
 --
+-- Indexes for table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `admin_id` (`admin_id`),
+  ADD KEY `is_read` (`is_read`);
+
+--
 -- Indexes for table `bookings`
 --
 ALTER TABLE `bookings`
@@ -1056,7 +1167,9 @@ ALTER TABLE `bookings`
 --
 ALTER TABLE `current_balance`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+  ADD UNIQUE KEY `user_id` (`user_id`),
+  ADD KEY `idx_admin_approval` (`admin_approval`),
+  ADD KEY `fk_current_balance_approved_by` (`approved_by`);
 
 --
 -- Indexes for table `events`
@@ -1270,16 +1383,22 @@ ALTER TABLE `waiting_list`
 --
 
 --
+-- AUTO_INCREMENT for table `admin_notifications`
+--
+ALTER TABLE `admin_notifications`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `current_balance`
 --
 ALTER TABLE `current_balance`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=177;
 
 --
 -- AUTO_INCREMENT for table `events`
@@ -1291,7 +1410,7 @@ ALTER TABLE `events`
 -- AUTO_INCREMENT for table `food_orders`
 --
 ALTER TABLE `food_orders`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `guest_interactions`
@@ -1321,25 +1440,25 @@ ALTER TABLE `menu_items`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=269;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=468;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
 --
 ALTER TABLE `payment_methods`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `redemptions`
 --
 ALTER TABLE `redemptions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `response_templates`
@@ -1351,7 +1470,7 @@ ALTER TABLE `response_templates`
 -- AUTO_INCREMENT for table `restaurant_reservations`
 --
 ALTER TABLE `restaurant_reservations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `restaurant_tables`
@@ -1363,13 +1482,13 @@ ALTER TABLE `restaurant_tables`
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `review_responses`
 --
 ALTER TABLE `review_responses`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `rewards`
@@ -1399,7 +1518,7 @@ ALTER TABLE `staff_assignments`
 -- AUTO_INCREMENT for table `staff_notes`
 --
 ALTER TABLE `staff_notes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `staff_performance`
@@ -1445,7 +1564,8 @@ ALTER TABLE `bookings`
 -- Constraints for table `current_balance`
 --
 ALTER TABLE `current_balance`
-  ADD CONSTRAINT `current_balance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `current_balance_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_current_balance_approved_by` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `events`
