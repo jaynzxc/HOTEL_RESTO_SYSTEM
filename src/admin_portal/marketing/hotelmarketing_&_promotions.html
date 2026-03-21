@@ -14,14 +14,290 @@
     details[open] .dropdown-arrow { transform: rotate(90deg); }
     details > summary { list-style: none; }
     details summary::-webkit-details-marker { display: none; }
+    
+    /* Toast notification style */
+    .toast-notification {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      background: #1e293b;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .toast-notification.show { opacity: 1; }
+    .toast-notification i { font-size: 1.1rem; }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      animation: slideIn 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    /* View mode styles */
+    .view-mode .modal-input {
+      background-color: #f8fafc;
+      cursor: default;
+      border-color: #e2e8f0;
+    }
+    .view-mode button:not(.close-modal) {
+      display: none;
+    }
+    .view-mode .edit-actions {
+      display: none;
+    }
+    .edit-mode .view-actions {
+      display: none;
+    }
+    /* Required field indicator */
+    .required:after {
+      content: " *";
+      color: #ef4444;
+    }
+    .field-error {
+      border-color: #ef4444 !important;
+      background-color: #fef2f2 !important;
+    }
   </style>
 </head>
 <body class="bg-white font-sans antialiased">
 
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast-notification">
+    <i class="fa-regular fa-circle-check"></i>
+    <span>Ready</span>
+  </div>
+
+  <!-- New Campaign Modal -->
+  <div id="campaignModal" class="modal">
+    <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-megaphone text-amber-600"></i> <span id="campaignModalTitle">New Campaign</span>
+        </h3>
+        <button onclick="closeModal('campaignModal')" class="close-modal text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+      </div>
+      <div class="space-y-3 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Campaign Name</label>
+          <input type="text" id="campaignName" class="modal-input w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="e.g., Summer Special" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Description</label>
+          <textarea id="campaignDesc" rows="2" class="modal-input w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="Campaign description" required></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Discount Type</label>
+          <select id="campaignDiscount" class="modal-input w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" required>
+            <option value="">Select discount type</option>
+            <option>Percentage (%)</option>
+            <option>Fixed Amount (₱)</option>
+            <option>Free Add-on</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Valid Until</label>
+          <input type="date" id="campaignEndDate" class="modal-input w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" required>
+        </div>
+        <div id="campaignStatusContainer" style="display: none;">
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Status</label>
+          <select id="campaignStatus" class="modal-input w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" required>
+            <option>active</option>
+            <option>scheduled</option>
+            <option>drafts</option>
+            <option>ended</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-3 edit-actions">
+        <button onclick="saveCampaign()" class="flex-1 bg-amber-600 text-white py-3 rounded-xl hover:bg-amber-700 transition font-medium">Save Changes</button>
+        <button onclick="closeModal('campaignModal')" class="flex-1 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+      </div>
+      <div class="flex gap-3 view-actions" style="display: none;">
+        <button onclick="enableEditMode()" class="flex-1 bg-amber-600 text-white py-3 rounded-xl hover:bg-amber-700 transition font-medium">Edit Campaign</button>
+        <button onclick="closeModal('campaignModal')" class="flex-1 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Promo Modal -->
+  <div id="promoModal" class="modal">
+    <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-ticket text-amber-600"></i> Create Promo Code
+        </h3>
+        <button onclick="closeModal('promoModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+      </div>
+      <div class="space-y-3 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Promo Code</label>
+          <input type="text" id="promoCode" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="e.g., SUMMER2025" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Discount Value</label>
+          <input type="text" id="promoValue" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="20% off" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Valid Until</label>
+          <input type="date" id="promoEndDate" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Usage Limit</label>
+          <input type="number" id="promoLimit" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="e.g., 100" required min="1">
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="createPromo()" class="flex-1 bg-amber-600 text-white py-3 rounded-xl hover:bg-amber-700 transition font-medium">Create Promo</button>
+        <button onclick="closeModal('promoModal')" class="flex-1 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Blast Modal -->
+  <div id="emailModal" class="modal">
+    <div class="modal-content bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold flex items-center gap-2">
+          <i class="fa-regular fa-envelope text-amber-600"></i> Email Blast
+        </h3>
+        <button onclick="closeModal('emailModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+      </div>
+      <div class="space-y-3 mb-6">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Subject</label>
+          <input type="text" id="emailSubject" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="Email subject" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Message</label>
+          <textarea id="emailMessage" rows="4" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" placeholder="Your email message..." required></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1 required">Recipients</label>
+          <select id="emailRecipients" class="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-amber-500" required>
+            <option value="">Select recipient group</option>
+            <option>All Subscribers (2,345)</option>
+            <option>Loyalty Members (876)</option>
+            <option>Recent Guests (432)</option>
+            <option>Test Group (50)</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="sendEmailBlast()" class="flex-1 bg-amber-600 text-white py-3 rounded-xl hover:bg-amber-700 transition font-medium">Send Blast</button>
+        <button onclick="closeModal('emailModal')" class="flex-1 border border-slate-200 py-3 rounded-xl hover:bg-slate-50 transition">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Modal -->
+  <div id="analyticsModal" class="modal">
+    <div class="modal-content bg-white rounded-2xl p-6 max-w-2xl w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-chart-line text-amber-600"></i> Campaign Analytics
+        </h3>
+        <button onclick="closeModal('analyticsModal')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-50 p-4 rounded-xl text-center">
+            <p class="text-xs text-slate-500">Total Campaigns</p>
+            <p class="text-2xl font-bold text-amber-600" id="totalCampaignsCount">6</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl text-center">
+            <p class="text-xs text-slate-500">Active Now</p>
+            <p class="text-2xl font-bold text-green-600" id="activeCampaignsCount">3</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl text-center">
+            <p class="text-xs text-slate-500">Total Redemptions</p>
+            <p class="text-2xl font-bold" id="totalRedemptionsCount">579</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl text-center">
+            <p class="text-xs text-slate-500">Revenue Impact</p>
+            <p class="text-2xl font-bold text-green-600">₱1.42M</p>
+          </div>
+        </div>
+        <div class="border-t pt-4">
+          <p class="text-sm font-medium mb-2">Top Performing Campaigns</p>
+          <div id="topCampaignsList" class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span>Summer Escape</span>
+              <span class="text-green-600">124 redemptions · ₱248K</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span>Weekend Getaway</span>
+              <span class="text-green-600">87 redemptions · ₱182.7K</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span>Spring Fling</span>
+              <span class="text-green-600">312 redemptions · ₱624K</span>
+            </div>
+          </div>
+        </div>
+        <div class="border-t pt-4">
+          <p class="text-sm font-medium mb-2">Conversion Rate</p>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full" style="width: 18.5%"></div>
+            </div>
+            <span class="text-sm font-semibold">18.5%</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-6">
+        <button onclick="closeModal('analyticsModal')" class="w-full border border-amber-600 text-amber-700 py-2 rounded-xl hover:bg-amber-50 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- APP CONTAINER: flex row (sidebar + main) -->
   <div class="min-h-screen flex flex-col lg:flex-row">
 
-    <!-- ========== SIDEBAR (exact copy from index2.html) ========== -->
+    <!-- ========== SIDEBAR (exact copy from original) ========== -->
     <aside class="lg:w-80 bg-white border-r border-slate-200 shadow-sm lg:min-h-screen shrink-0 overflow-y-auto">
       <!-- brand -->
       <div class="px-5 py-6 border-b border-slate-100 flex items-center gap-2">
@@ -39,16 +315,12 @@
         </div>
       </div>
 
-      <!-- ===== SIDEBAR MENU (grouped with dropdowns) ===== -->
+      <!-- ===== SIDEBAR MENU (unchanged) ===== -->
       <nav class="p-4 space-y-2 text-sm">
-
-        <!-- Dashboard -->
         <a href="../dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 transition">
           <i class="fa-solid fa-table-cells-large w-5 text-slate-400"></i>
           <span>Dashboard</span>
         </a>
-
-        <!-- HOTEL MANAGEMENT GROUP -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fa-solid fa-hotel w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -63,8 +335,6 @@
             <a href="../hotel_management/event_&_conference.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fas fa-calendar w-4 text-slate-400"></i> Events & Conference</a>
           </div>
         </details>
-
-        <!-- RESTAURANT MANAGEMENT GROUP -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fa-solid fa-utensils w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -79,8 +349,6 @@
             <a href="../restaurant_management/wait_staff_management.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fas fa-user w-4"></i> Wait Staff Management</a>
           </div>
         </details>
-
-        <!-- CUSTOMER MANAGEMENT GROUP -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fas fa-address-book w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -93,8 +361,6 @@
             <a href="../customer_management/customer_feedback_&_reviews.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fas fa-pen-to-square w-4"></i> Customer Feedback & Reviews</a>
           </div>
         </details>
-
-        <!-- OPERATIONS GROUP -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fa-solid fa-gears w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -107,8 +373,6 @@
             <a href="../operations/payment_gateway.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-wifi w-4"></i> Payment Gateway</a>
           </div>
         </details>
-
-        <!-- MARKETING - open with Hotel Marketing highlighted -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-amber-800 bg-amber-50 cursor-pointer transition-side">
             <i class="fa-solid fa-megaphone w-5 text-amber-600"></i>
@@ -120,8 +384,6 @@
             <a href="../marketing/online_ordering_integration.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-cart-shopping w-4 text-slate-400"></i> Online Ordering Integration</a>
           </div>
         </details>
-
-        <!-- REPORTS & ANALYTICS -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fa-solid fa-chart-simple w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -134,8 +396,6 @@
             <a href="../reports_&_analytics/analytics_dashboard.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-chart-pie w-4"></i> Analytics Dashboard</a>
           </div>
         </details>
-
-        <!-- SYSTEM -->
         <details class="group" open>
           <summary class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:bg-amber-50 cursor-pointer">
             <i class="fa-solid fa-computer w-5 text-slate-400 group-open:text-amber-600"></i>
@@ -148,8 +408,6 @@
             <a href="../system/settings.html" class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-amber-50"><i class="fa-solid fa-sliders w-4"></i> Settings</a>
           </div>
         </details>
-
-        <!-- logout -->
         <div class="border-t border-slate-200 pt-3 mt-3">
           <a href="../../login-register/login_form.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 hover:bg-red-50 hover:text-red-700">
             <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
@@ -169,7 +427,7 @@
           <p class="text-sm text-slate-500 mt-0.5">manage campaigns, discounts, and promotional offers</p>
         </div>
         <div class="flex gap-3 text-sm">
-          <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i class="fas fa-calendar text-slate-400"></i> May 21, 2025</span>
+          <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm"><i class="fas fa-calendar text-slate-400"></i> <span id="currentDate"></span></span>
           <span class="bg-white border rounded-full px-4 py-2 shadow-sm"><i class="fas fa-bell"></i></span>
         </div>
       </div>
@@ -178,7 +436,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <p class="text-xs text-slate-500">Active campaigns</p>
-          <p class="text-2xl font-semibold">8</p>
+          <p class="text-2xl font-semibold" id="activeCampaignsStat">3</p>
         </div>
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <p class="text-xs text-slate-500">This month revenue</p>
@@ -186,7 +444,7 @@
         </div>
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <p class="text-xs text-slate-500">Redemptions</p>
-          <p class="text-2xl font-semibold">342</p>
+          <p class="text-2xl font-semibold" id="totalRedemptionsStat">579</p>
         </div>
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
           <p class="text-xs text-slate-500">Conversion rate</p>
@@ -198,184 +456,37 @@
         </div>
       </div>
 
-      <!-- ===== ACTION BAR ===== -->
+      <!-- ===== ACTION BAR (with interactive buttons) ===== -->
       <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-6 flex flex-wrap gap-3 items-center justify-between">
         <div class="flex gap-2 flex-wrap">
-          <button class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm">+ new campaign</button>
-          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50">create promo</button>
-          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50">email blast</button>
-          <button class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50">analytics</button>
+          <button onclick="openNewCampaignModal()" class="bg-amber-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-amber-700 transition">+ new campaign</button>
+          <button onclick="openPromoModal()" class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">create promo</button>
+          <button onclick="openEmailModal()" class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">email blast</button>
+          <button onclick="openAnalyticsModal()" class="border border-slate-200 px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition">analytics</button>
         </div>
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input type="text" placeholder="search campaigns..." class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
+          <input type="text" id="searchCampaigns" placeholder="search campaigns..." class="border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm w-64 focus:ring-1 focus:ring-amber-500 outline-none">
         </div>
       </div>
 
       <!-- ===== FILTER TABS ===== -->
-      <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-6">
-        <button class="px-4 py-2 bg-amber-600 text-white rounded-full text-sm">all campaigns</button>
-        <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50">active</button>
-        <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50">scheduled</button>
-        <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50">ended</button>
-        <button class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50">drafts</button>
+      <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-6" id="filterTabs">
+        <button class="filter-tab px-4 py-2 bg-amber-600 text-white rounded-full text-sm" data-filter="all">all campaigns</button>
+        <button class="filter-tab px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50" data-filter="active">active</button>
+        <button class="filter-tab px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50" data-filter="scheduled">scheduled</button>
+        <button class="filter-tab px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50" data-filter="ended">ended</button>
+        <button class="filter-tab px-4 py-2 bg-white border border-slate-200 rounded-full text-sm hover:bg-slate-50" data-filter="drafts">drafts</button>
       </div>
 
       <!-- ===== CAMPAIGNS GRID ===== -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-
-        <!-- Campaign 1 - Active -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">active</span>
-            <span class="text-xs text-slate-400">ends May 31</span>
-          </div>
-          <h3 class="font-semibold text-lg">Summer Escape</h3>
-          <p class="text-xs text-slate-500 mb-3">20% off on all deluxe rooms</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Redemptions</span>
-              <span class="font-medium">124 / 500</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Revenue generated</span>
-              <span class="font-medium">₱248,000</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">edit</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">view</button>
-          </div>
-        </div>
-
-        <!-- Campaign 2 - Active -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">active</span>
-            <span class="text-xs text-slate-400">ends Jun 15</span>
-          </div>
-          <h3 class="font-semibold text-lg">Weekend Getaway</h3>
-          <p class="text-xs text-slate-500 mb-3">Free breakfast for 2 · Fri-Sun stays</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Redemptions</span>
-              <span class="font-medium">87 / 300</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Revenue generated</span>
-              <span class="font-medium">₱182,700</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">edit</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">view</button>
-          </div>
-        </div>
-
-        <!-- Campaign 3 - Scheduled -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">scheduled</span>
-            <span class="text-xs text-slate-400">starts Jun 1</span>
-          </div>
-          <h3 class="font-semibold text-lg">Father's Day Special</h3>
-          <p class="text-xs text-slate-500 mb-3">15% off + welcome drink for dad</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Target</span>
-              <span class="font-medium">200 redemptions</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Budget</span>
-              <span class="font-medium">₱50,000</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">edit</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">schedule</button>
-          </div>
-        </div>
-
-        <!-- Campaign 4 - Active -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">active</span>
-            <span class="text-xs text-slate-400">ends May 30</span>
-          </div>
-          <h3 class="font-semibold text-lg">Spa & Relax</h3>
-          <p class="text-xs text-slate-500 mb-3">20% off on all spa treatments</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Redemptions</span>
-              <span class="font-medium">56 / 200</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Revenue generated</span>
-              <span class="font-medium">₱84,000</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">edit</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">view</button>
-          </div>
-        </div>
-
-        <!-- Campaign 5 - Draft -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition opacity-80">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">draft</span>
-            <span class="text-xs text-slate-400">—</span>
-          </div>
-          <h3 class="font-semibold text-lg">Anniversary Package</h3>
-          <p class="text-xs text-slate-500 mb-3">Romantic setup + champagne</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Target</span>
-              <span class="font-medium">100 bookings</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Budget</span>
-              <span class="font-medium">₱30,000</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">edit</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">publish</button>
-          </div>
-        </div>
-
-        <!-- Campaign 6 - Ended -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition opacity-70">
-          <div class="flex justify-between items-start mb-2">
-            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full">ended</span>
-            <span class="text-xs text-slate-400">ended May 15</span>
-          </div>
-          <h3 class="font-semibold text-lg">Spring Fling</h3>
-          <p class="text-xs text-slate-500 mb-3">25% off on suites</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-slate-500">Redemptions</span>
-              <span class="font-medium">312 / 300</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Revenue generated</span>
-              <span class="font-medium">₱624,000</span>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-4">
-            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50">view</button>
-            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700">rerun</button>
-          </div>
-        </div>
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8" id="campaignsGrid"></div>
 
       <!-- ===== BOTTOM: PROMO CODES & PERFORMANCE ===== -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- active promo codes -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5">
           <h2 class="font-semibold text-lg flex items-center gap-2 mb-3"><i class="fas fa-ticket text-amber-600"></i> active promo codes</h2>
-          <div class="space-y-3">
+          <div id="promoCodesList" class="space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
               <div><span class="font-medium">SUMMER20</span><p class="text-xs text-slate-500">20% off deluxe · ends May 31</p></div>
               <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">124 used</span>
@@ -390,27 +501,381 @@
             </div>
           </div>
         </div>
-
-        <!-- performance summary -->
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-chart-bar text-amber-600"></i> campaign performance</h3>
           <ul class="space-y-2">
-            <li class="flex justify-between items-center">
-              <span>Conversion rate</span>
-              <span class="font-semibold">18.5%</span>
-            </li>
-            <li class="flex justify-between items-center">
-              <span>Avg. redemption value</span>
-              <span class="font-semibold">₱2,450</span>
-            </li>
-            <li class="flex justify-between items-center">
-              <span>ROI</span>
-              <span class="font-semibold text-green-600">320%</span>
-            </li>
+            <li class="flex justify-between items-center"><span>Conversion rate</span><span class="font-semibold">18.5%</span></li>
+            <li class="flex justify-between items-center"><span>Avg. redemption value</span><span class="font-semibold">₱2,450</span></li>
+            <li class="flex justify-between items-center"><span>ROI</span><span class="font-semibold text-green-600">320%</span></li>
           </ul>
         </div>
       </div>
     </main>
   </div>
+
+  <script>
+    // Campaign data storage
+    let campaignsData = [
+      { name: "Summer Escape", desc: "20% off on all deluxe rooms", status: "active", ends: "ends May 31", redemptions: "124 / 500", revenue: "₱248,000", discountType: "Percentage (%)", endDate: "2025-05-31" },
+      { name: "Weekend Getaway", desc: "Free breakfast for 2 · Fri-Sun stays", status: "active", ends: "ends Jun 15", redemptions: "87 / 300", revenue: "₱182,700", discountType: "Free Add-on", endDate: "2025-06-15" },
+      { name: "Father's Day Special", desc: "15% off + welcome drink for dad", status: "scheduled", ends: "starts Jun 1", redemptions: "Target: 200", revenue: "Budget: ₱50,000", discountType: "Percentage (%)", endDate: "2025-06-01" },
+      { name: "Spa & Relax", desc: "20% off on all spa treatments", status: "active", ends: "ends May 30", redemptions: "56 / 200", revenue: "₱84,000", discountType: "Percentage (%)", endDate: "2025-05-30" },
+      { name: "Anniversary Package", desc: "Romantic setup + champagne", status: "drafts", ends: "—", redemptions: "Target: 100", revenue: "Budget: ₱30,000", discountType: "Free Add-on", endDate: "" },
+      { name: "Spring Fling", desc: "25% off on suites", status: "ended", ends: "ended May 15", redemptions: "312 / 300", revenue: "₱624,000", discountType: "Percentage (%)", endDate: "2025-05-15" }
+    ];
+
+    let currentEditCampaignIndex = null;
+    let isViewMode = true;
+
+    // Helper function to validate required fields
+    function validateRequiredFields(fieldIds) {
+      let isValid = true;
+      fieldIds.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value.trim()) {
+          field.classList.add('field-error');
+          isValid = false;
+        } else if (field) {
+          field.classList.remove('field-error');
+        }
+      });
+      return isValid;
+    }
+
+    // Update stats
+    function updateStats() {
+      const activeCount = campaignsData.filter(c => c.status === 'active').length;
+      document.getElementById('activeCampaignsStat').textContent = activeCount;
+      document.getElementById('activeCampaignsCount').textContent = activeCount;
+      document.getElementById('totalCampaignsCount').textContent = campaignsData.length;
+      
+      const totalRedemptions = campaignsData.reduce((sum, c) => {
+        const match = c.redemptions.match(/\d+/);
+        return sum + (match ? parseInt(match[0]) : 0);
+      }, 0);
+      document.getElementById('totalRedemptionsStat').textContent = totalRedemptions;
+      document.getElementById('totalRedemptionsCount').textContent = totalRedemptions;
+    }
+
+    // Initialize
+    function renderCampaigns() {
+      const campaignsGrid = document.getElementById('campaignsGrid');
+      campaignsGrid.innerHTML = campaignsData.map((camp, idx) => `
+        <div class="campaign-card bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md transition" data-status="${camp.status}" data-index="${idx}">
+          <div class="flex justify-between items-start mb-2">
+            <span class="${camp.status === 'active' ? 'bg-green-100 text-green-700' : camp.status === 'scheduled' ? 'bg-blue-100 text-blue-700' : camp.status === 'drafts' ? 'bg-slate-100 text-slate-600' : 'bg-slate-100 text-slate-600'} text-xs px-2 py-0.5 rounded-full">${camp.status}</span>
+            <span class="text-xs text-slate-400">${camp.ends}</span>
+          </div>
+          <h3 class="font-semibold text-lg">${camp.name}</h3>
+          <p class="text-xs text-slate-500 mb-3">${camp.desc}</p>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Redemptions</span>
+              <span class="font-medium">${camp.redemptions}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Revenue generated</span>
+              <span class="font-medium">${camp.revenue}</span>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button class="flex-1 border border-amber-600 text-amber-700 py-2 rounded-xl text-sm hover:bg-amber-50" onclick="editCampaign(${idx})">edit</button>
+            <button class="flex-1 bg-amber-600 text-white py-2 rounded-xl text-sm hover:bg-amber-700" onclick="viewCampaign(${idx})">view</button>
+          </div>
+        </div>
+      `).join('');
+      updateStats();
+    }
+
+    // View Campaign
+    window.viewCampaign = function(index) {
+      const camp = campaignsData[index];
+      currentEditCampaignIndex = index;
+      isViewMode = true;
+      
+      document.getElementById('campaignModalTitle').textContent = 'View Campaign';
+      document.getElementById('campaignName').value = camp.name;
+      document.getElementById('campaignDesc').value = camp.desc;
+      document.getElementById('campaignDiscount').value = camp.discountType;
+      document.getElementById('campaignEndDate').value = camp.endDate || '';
+      document.getElementById('campaignStatus').value = camp.status;
+      
+      document.getElementById('campaignStatusContainer').style.display = 'block';
+      
+      const modal = document.getElementById('campaignModal');
+      const inputs = modal.querySelectorAll('.modal-input');
+      inputs.forEach(input => {
+        input.disabled = true;
+        input.classList.add('bg-slate-50', 'cursor-default');
+      });
+      
+      document.querySelector('#campaignModal .edit-actions').style.display = 'none';
+      document.querySelector('#campaignModal .view-actions').style.display = 'flex';
+      modal.classList.remove('edit-mode');
+      modal.classList.add('view-mode');
+      
+      openModal('campaignModal');
+    };
+    
+    // Edit Campaign
+    window.editCampaign = function(index) {
+      const camp = campaignsData[index];
+      currentEditCampaignIndex = index;
+      isViewMode = false;
+      
+      document.getElementById('campaignModalTitle').textContent = 'Edit Campaign';
+      document.getElementById('campaignName').value = camp.name;
+      document.getElementById('campaignDesc').value = camp.desc;
+      document.getElementById('campaignDiscount').value = camp.discountType;
+      document.getElementById('campaignEndDate').value = camp.endDate || '';
+      document.getElementById('campaignStatus').value = camp.status;
+      
+      document.getElementById('campaignStatusContainer').style.display = 'block';
+      
+      const modal = document.getElementById('campaignModal');
+      const inputs = modal.querySelectorAll('.modal-input');
+      inputs.forEach(input => {
+        input.disabled = false;
+        input.classList.remove('bg-slate-50', 'cursor-default');
+      });
+      
+      document.querySelector('#campaignModal .edit-actions').style.display = 'flex';
+      document.querySelector('#campaignModal .view-actions').style.display = 'none';
+      modal.classList.remove('view-mode');
+      modal.classList.add('edit-mode');
+      
+      openModal('campaignModal');
+    };
+    
+    // Save Campaign (after edit)
+    window.saveCampaign = function() {
+      if (!validateRequiredFields(['campaignName', 'campaignDesc', 'campaignDiscount', 'campaignEndDate', 'campaignStatus'])) {
+        showToast('fa-regular fa-circle-exclamation', 'Please fill in all required fields', '#ef4444');
+        return;
+      }
+      
+      if (currentEditCampaignIndex !== null) {
+        const newStatus = document.getElementById('campaignStatus').value;
+        campaignsData[currentEditCampaignIndex] = {
+          ...campaignsData[currentEditCampaignIndex],
+          name: document.getElementById('campaignName').value,
+          desc: document.getElementById('campaignDesc').value,
+          discountType: document.getElementById('campaignDiscount').value,
+          endDate: document.getElementById('campaignEndDate').value,
+          status: newStatus,
+          ends: newStatus === 'active' ? `ends ${document.getElementById('campaignEndDate').value || 'TBD'}` : 
+                 newStatus === 'scheduled' ? `starts ${document.getElementById('campaignEndDate').value || 'TBD'}` :
+                 newStatus === 'ended' ? `ended ${document.getElementById('campaignEndDate').value || 'TBD'}` : '—'
+        };
+        
+        renderCampaigns();
+        showToast('fa-regular fa-circle-check', 'Campaign updated successfully!', '#10b981');
+        closeModal('campaignModal');
+        filterCampaigns();
+      }
+    };
+    
+    // Enable edit mode from view
+    window.enableEditMode = function() {
+      const modal = document.getElementById('campaignModal');
+      const inputs = modal.querySelectorAll('.modal-input');
+      inputs.forEach(input => {
+        input.disabled = false;
+        input.classList.remove('bg-slate-50', 'cursor-default');
+      });
+      
+      document.querySelector('#campaignModal .edit-actions').style.display = 'flex';
+      document.querySelector('#campaignModal .view-actions').style.display = 'none';
+      document.getElementById('campaignModalTitle').textContent = 'Edit Campaign';
+    };
+    
+    // New Campaign Modal
+    window.openNewCampaignModal = function() {
+      currentEditCampaignIndex = null;
+      isViewMode = false;
+      
+      document.getElementById('campaignModalTitle').textContent = 'New Campaign';
+      document.getElementById('campaignName').value = '';
+      document.getElementById('campaignDesc').value = '';
+      document.getElementById('campaignDiscount').value = '';
+      document.getElementById('campaignEndDate').value = '';
+      document.getElementById('campaignStatusContainer').style.display = 'none';
+      
+      // Clear error styles
+      ['campaignName', 'campaignDesc', 'campaignDiscount', 'campaignEndDate'].forEach(id => {
+        document.getElementById(id).classList.remove('field-error');
+      });
+      
+      const modal = document.getElementById('campaignModal');
+      const inputs = modal.querySelectorAll('.modal-input');
+      inputs.forEach(input => {
+        input.disabled = false;
+        input.classList.remove('bg-slate-50', 'cursor-default');
+      });
+      
+      document.querySelector('#campaignModal .edit-actions').style.display = 'flex';
+      document.querySelector('#campaignModal .view-actions').style.display = 'none';
+      
+      openModal('campaignModal');
+    };
+    
+    // Create new campaign (from new campaign modal)
+    window.createCampaign = function() {
+      if (!validateRequiredFields(['campaignName', 'campaignDesc', 'campaignDiscount', 'campaignEndDate'])) {
+        showToast('fa-regular fa-circle-exclamation', 'Please fill in all required fields', '#ef4444');
+        return;
+      }
+      
+      const name = document.getElementById('campaignName').value;
+      const desc = document.getElementById('campaignDesc').value;
+      const endDate = document.getElementById('campaignEndDate').value;
+      const discountType = document.getElementById('campaignDiscount').value;
+      
+      const newCampaign = {
+        name: name,
+        desc: desc,
+        discountType: discountType,
+        endDate: endDate,
+        status: 'drafts',
+        ends: endDate ? `ends ${endDate}` : '—',
+        redemptions: '0 / 0',
+        revenue: '₱0'
+      };
+      
+      campaignsData.push(newCampaign);
+      renderCampaigns();
+      showToast('fa-regular fa-circle-check', `Campaign "${name}" created successfully!`, '#10b981');
+      closeModal('campaignModal');
+      filterCampaigns();
+    };
+
+    // Toast function with color support
+    function showToast(iconClass, message, color = '#10b981') {
+      const toast = document.getElementById('toastNotification');
+      const toastIcon = toast.querySelector('i');
+      const toastMessage = toast.querySelector('span');
+      toastIcon.className = iconClass;
+      toastMessage.innerText = message;
+      toast.style.backgroundColor = color;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.style.backgroundColor = '#1e293b';
+      }, 2500);
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    window.openPromoModal = () => openModal('promoModal');
+    window.openEmailModal = () => openModal('emailModal');
+    window.openAnalyticsModal = () => openModal('analyticsModal');
+
+    // Create Promo with validation
+    window.createPromo = function() {
+      if (!validateRequiredFields(['promoCode', 'promoValue', 'promoEndDate', 'promoLimit'])) {
+        showToast('fa-regular fa-circle-exclamation', 'Please fill in all required fields', '#ef4444');
+        return;
+      }
+      
+      const promoCode = document.getElementById('promoCode').value;
+      const promoValue = document.getElementById('promoValue').value;
+      const promoEndDate = document.getElementById('promoEndDate').value;
+      const promoLimit = document.getElementById('promoLimit').value;
+      
+      // Format date for display
+      const endDate = new Date(promoEndDate);
+      const formattedDate = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      // Add to promo codes list
+      const promoCodesList = document.getElementById('promoCodesList');
+      const newPromoDiv = document.createElement('div');
+      newPromoDiv.className = 'flex justify-between items-center border-b pb-2 new-item';
+      newPromoDiv.innerHTML = `
+        <div><span class="font-medium">${promoCode.toUpperCase()}</span><p class="text-xs text-slate-500">${promoValue} · ends ${formattedDate}</p></div>
+        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">0 used</span>
+      `;
+      promoCodesList.insertBefore(newPromoDiv, promoCodesList.firstChild);
+      
+      showToast('fa-regular fa-circle-check', `Promo code "${promoCode.toUpperCase()}" created successfully!`, '#10b981');
+      closeModal('promoModal');
+      
+      // Clear form
+      document.getElementById('promoCode').value = '';
+      document.getElementById('promoValue').value = '';
+      document.getElementById('promoEndDate').value = '';
+      document.getElementById('promoLimit').value = '';
+    }
+
+    // Send Email Blast with validation
+    window.sendEmailBlast = function() {
+      if (!validateRequiredFields(['emailSubject', 'emailMessage', 'emailRecipients'])) {
+        showToast('fa-regular fa-circle-exclamation', 'Please fill in all required fields', '#ef4444');
+        return;
+      }
+      
+      const subject = document.getElementById('emailSubject').value;
+      const recipients = document.getElementById('emailRecipients').value;
+      
+      showToast('fa-regular fa-envelope', `Email blast "${subject}" sent to ${recipients}!`, '#10b981');
+      closeModal('emailModal');
+      document.getElementById('emailSubject').value = '';
+      document.getElementById('emailMessage').value = '';
+      document.getElementById('emailRecipients').value = '';
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('searchCampaigns');
+    
+    function filterCampaigns() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const activeFilter = document.querySelector('.filter-tab.bg-amber-600')?.getAttribute('data-filter') || 'all';
+      
+      document.querySelectorAll('.campaign-card').forEach(card => {
+        const title = card.querySelector('h3')?.innerText.toLowerCase() || '';
+        const description = card.querySelector('p')?.innerText.toLowerCase() || '';
+        const status = card.getAttribute('data-status');
+        
+        const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+        const matchesFilter = activeFilter === 'all' || status === activeFilter;
+        
+        if (matchesSearch && matchesFilter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Filter tabs functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.filter-tab').forEach(t => {
+          t.classList.remove('bg-amber-600', 'text-white');
+          t.classList.add('bg-white', 'border', 'border-slate-200');
+        });
+        this.classList.add('bg-amber-600', 'text-white');
+        this.classList.remove('bg-white', 'border', 'border-slate-200');
+        filterCampaigns();
+      });
+    });
+
+    // Search input listener
+    if (searchInput) {
+      searchInput.addEventListener('input', filterCampaigns);
+    }
+
+    // Initialize date
+    const date = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options);
+    
+    // Render initial campaigns
+    renderCampaigns();
+  </script>
 </body>
 </html>
