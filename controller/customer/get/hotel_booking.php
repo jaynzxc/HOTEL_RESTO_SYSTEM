@@ -32,6 +32,20 @@ $rooms = $db->query(
     "SELECT * FROM rooms WHERE is_available = 1 ORDER BY price"
 )->find();
 
+// Get active promo codes for display
+$activePromos = $db->query(
+    "SELECT pc.*, c.campaign_name 
+     FROM promo_codes pc
+     LEFT JOIN campaigns c ON pc.campaign_id = c.id
+     WHERE pc.is_active = 1 
+     AND pc.valid_from <= NOW() 
+     AND pc.valid_to >= NOW()
+     AND (pc.usage_limit IS NULL OR pc.used_count < pc.usage_limit)
+     ORDER BY pc.discount_value DESC
+     LIMIT 5",
+    []
+)->find() ?: [];
+
 // Get user initials
 $initials = 'G';
 if ($user) {
@@ -51,5 +65,15 @@ if ($user) {
     );
 }
 
-// Get unread notifications count (placeholder)
-$unread_count = 3;
+// Get unread notifications count
+try {
+    $unread_result = $db->query(
+        "SELECT COUNT(*) as count FROM notifications 
+         WHERE user_id = :user_id AND is_read = 0",
+        ['user_id' => $_SESSION['user_id']]
+    )->fetch_one();
+    $unread_count = $unread_result['count'] ?? 0;
+} catch (Exception $e) {
+    $unread_count = 0;
+}
+?>

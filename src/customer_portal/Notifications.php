@@ -91,10 +91,6 @@ require_once '../../controller/customer/get/notifications.php';
             id="preferencesBtn">preferences</button>
         </div>
 
-        <!-- bottom hint -->
-        <div class="mt-10 text-center text-xs text-slate-400 border-t pt-6">
-          ✅ Notifications module — clean state, zero notifications. Functional buttons (add demo, mark read).
-        </div>
       </main>
     </div>
 
@@ -403,7 +399,6 @@ require_once '../../controller/customer/get/notifications.php';
         // Initialize
         renderNotifications();
 
-        // Remove demo double-click handler if you had one
       })();
     </script>
   </body>

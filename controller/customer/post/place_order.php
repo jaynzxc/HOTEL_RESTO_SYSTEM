@@ -177,15 +177,43 @@ try {
     // Calculate points earned (5 points per ₱100 of subtotal)
     $points_earned = floor($subtotal / 100) * 5;
 
-    // Insert food order
+    // Get promo code data if applied
+    $promoCodeId = null;
+    $promoCode = null;
+    $discountApplied = 0;
+
+    if (!empty($_POST['promo_code_id'])) {
+        $promoCodeId = intval($_POST['promo_code_id']);
+        $discountApplied = floatval($_POST['discount_applied'] ?? 0);
+
+        // Get promo code details for validation
+        $promoData = $db->query(
+            "SELECT * FROM promo_codes WHERE id = :id",
+            ['id' => $promoCodeId]
+        )->fetch_one();
+
+        if ($promoData) {
+            $promoCode = $promoData['code'];
+
+            // Update usage count
+            $db->query(
+                "UPDATE promo_codes SET used_count = used_count + 1 WHERE id = :id",
+                ['id' => $promoCodeId]
+            );
+        }
+    }
+
+    // Insert food order with promo code fields
     $db->query(
         "INSERT INTO food_orders (
-            order_reference, user_id, items, order_type, subtotal,
-            service_fee, total_amount, points_used, points_earned, status, created_at
-        ) VALUES (
-            :order_reference, :user_id, :items, :order_type, :subtotal,
-            :service_fee, :total, :points_used, :points_earned, 'pending', NOW()
-        )",
+        order_reference, user_id, items, order_type, subtotal,
+        service_fee, total_amount, points_used, points_earned, 
+        promo_code_id, promo_code, discount_applied, status, created_at
+    ) VALUES (
+        :order_reference, :user_id, :items, :order_type, :subtotal,
+        :service_fee, :total, :points_used, :points_earned,
+        :promo_code_id, :promo_code, :discount_applied, 'pending', NOW()
+    )",
         [
             'order_reference' => $order_reference,
             'user_id' => $_SESSION['user_id'],
@@ -195,7 +223,10 @@ try {
             'service_fee' => $service_fee,
             'total' => $total,
             'points_used' => $points_used,
-            'points_earned' => $points_earned
+            'points_earned' => $points_earned,
+            'promo_code_id' => $promoCodeId,
+            'promo_code' => $promoCode,
+            'discount_applied' => $discountApplied
         ]
     );
 

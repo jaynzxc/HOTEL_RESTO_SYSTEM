@@ -15,7 +15,6 @@ $current_page = 'kitchen_orders';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin · Kitchen Orders (KOT)</title>
-    <!-- Tailwind via CDN + Font Awesome 6 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -84,32 +83,6 @@ $current_page = 'kitchen_orders';
         transform: translateX(0);
       }
 
-      .toast.error {
-        border-left-color: #ef4444;
-      }
-
-      .toast.success {
-        border-left-color: #10b981;
-      }
-
-      .toast.info {
-        border-left-color: #3b82f6;
-      }
-
-      @keyframes highlight {
-        0% {
-          background-color: #fef3c7;
-        }
-
-        100% {
-          background-color: transparent;
-        }
-      }
-
-      .highlight {
-        animation: highlight 2s ease;
-      }
-
       .status-badge {
         transition: all 0.2s;
       }
@@ -122,6 +95,28 @@ $current_page = 'kitchen_orders';
       .filter-btn.active {
         background-color: #d97706;
         color: white;
+      }
+
+      /* Kitchen Inventory Styles */
+      .inventory-card {
+        transition: all 0.2s ease;
+      }
+
+      .inventory-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .stock-low {
+        background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+      }
+
+      .stock-out {
+        background: linear-gradient(135deg, #fee2e2 0%, #fff5f5 100%);
+      }
+
+      .stock-good {
+        background: linear-gradient(135deg, #f0fdf4 0%, #f9fef9 100%);
       }
     </style>
   </head>
@@ -198,6 +193,101 @@ $current_page = 'kitchen_orders';
       </div>
     </div>
 
+    <!-- Adjust Stock Modal -->
+    <div id="adjustStockModal" class="modal">
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Adjust Kitchen Stock</h3>
+          <button onclick="closeAdjustStockModal()" class="text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+          </button>
+        </div>
+        <form id="adjustStockForm">
+          <input type="hidden" id="adjustItemId">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Item</label>
+              <p id="adjustItemName" class="font-medium text-lg"></p>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Current Stock</label>
+              <p id="adjustCurrentStock" class="font-medium text-2xl text-amber-600"></p>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Adjustment (+/-)</label>
+              <input type="number" id="adjustAmount" class="w-full border rounded-xl p-2" placeholder="e.g., +10 or -5"
+                value="0" step="1" required>
+              <p class="text-xs text-slate-400 mt-1">Use positive numbers to add stock, negative to deduct</p>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Reason</label>
+              <input type="text" id="adjustReason" class="w-full border rounded-xl p-2"
+                placeholder="e.g., New delivery, Spoilage, Usage">
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="button" onclick="closeAdjustStockModal()"
+              class="flex-1 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50">Cancel</button>
+            <button type="submit" class="flex-1 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700">Update
+              Stock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add Food Item Modal -->
+    <div id="addFoodItemModal" class="modal">
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Add Food Item to Inventory</h3>
+          <button onclick="closeAddFoodItemModal()" class="text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+          </button>
+        </div>
+        <form id="addFoodItemForm">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Item Name *</label>
+              <input type="text" id="newItemName" class="w-full border rounded-xl p-2" required>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Category</label>
+              <select id="newItemCategory" class="w-full border rounded-xl p-2">
+                <option value="Food">Food</option>
+                <option value="Meat">Meat</option>
+                <option value="Beverage">Beverage</option>
+                <option value="Vegetable">Vegetable</option>
+                <option value="Fruit">Fruit</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Spice">Spice</option>
+                <option value="Sauce">Sauce</option>
+                <option value="Oil">Oil</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Initial Stock</label>
+              <input type="number" id="newItemStock" class="w-full border rounded-xl p-2" value="0" min="0">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Unit</label>
+              <input type="text" id="newItemUnit" class="w-full border rounded-xl p-2" value="kg"
+                placeholder="e.g., kg, pcs, bottles">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Reorder Level</label>
+              <input type="number" id="newItemReorderLevel" class="w-full border rounded-xl p-2" value="10" min="0">
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="button" onclick="closeAddFoodItemModal()"
+              class="flex-1 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50">Cancel</button>
+            <button type="submit" class="flex-1 bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700">Add
+              Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- APP CONTAINER -->
     <div class="min-h-screen flex flex-col lg:flex-row">
 
@@ -211,14 +301,17 @@ $current_page = 'kitchen_orders';
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div>
             <h1 class="text-2xl lg:text-3xl font-light text-slate-800">Kitchen Orders (KOT)</h1>
-            <p class="text-sm text-slate-500 mt-0.5">real-time kitchen display system · manage food preparation</p>
+            <p class="text-sm text-slate-500 mt-0.5">real-time kitchen display system · manage food preparation and
+              inventory</p>
           </div>
           <div class="flex gap-3 text-sm">
             <span class="bg-white border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
               <i class="fas fa-calendar text-slate-400"></i> <?php echo $today; ?>
             </span>
-            <?php require_once '../components/notification_component.php'; ?>
-
+            <span class="bg-white border rounded-full px-4 py-2 shadow-sm cursor-pointer hover:bg-slate-50 relative"
+              id="notificationBell">
+              <i class="fa-regular fa-bell"></i>
+            </span>
           </div>
         </div>
 
@@ -228,60 +321,185 @@ $current_page = 'kitchen_orders';
             class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
             onclick="filterByStatus('new')">
             <p class="text-xs text-slate-500">New orders</p>
-            <p class="text-2xl font-semibold text-blue-600" id="newOrdersCount"><?php echo $stats['new_orders']; ?></p>
+            <p class="text-2xl font-semibold text-blue-600"><?php echo $stats['new_orders']; ?></p>
           </div>
           <div
             class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
             onclick="filterByStatus('preparing')">
             <p class="text-xs text-slate-500">Preparing</p>
-            <p class="text-2xl font-semibold text-amber-600" id="preparingCount">
-              <?php echo $stats['preparing_orders']; ?>
-            </p>
+            <p class="text-2xl font-semibold text-amber-600"><?php echo $stats['preparing_orders']; ?></p>
           </div>
           <div
             class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:shadow-md transition"
             onclick="filterByStatus('ready')">
             <p class="text-xs text-slate-500">Ready to serve</p>
-            <p class="text-2xl font-semibold text-green-600" id="readyCount"><?php echo $stats['ready_orders']; ?></p>
+            <p class="text-2xl font-semibold text-green-600"><?php echo $stats['ready_orders']; ?></p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Completed (today)</p>
-            <p class="text-2xl font-semibold" id="completedTodayCount"><?php echo $stats['completed_today']; ?></p>
+            <p class="text-2xl font-semibold"><?php echo $stats['completed_today']; ?></p>
           </div>
           <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p class="text-xs text-slate-500">Avg prep time</p>
-            <p class="text-2xl font-semibold" id="avgPrepTime"><?php echo $stats['avg_prep_time']; ?> min</p>
+            <p class="text-2xl font-semibold"><?php echo $stats['avg_prep_time']; ?> min</p>
+          </div>
+        </div>
+
+        <!-- LOW STOCK WARNING - Only for food items -->
+        <?php if (!empty($lowStockFoodItems)): ?>
+          <div class="bg-white rounded-2xl border border-amber-200 p-4 mb-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-amber-700">Kitchen Low Stock Alert</h4>
+                  <p class="text-sm text-slate-600">Some food items are running low. Please check inventory.</p>
+                </div>
+              </div>
+              <button onclick="document.getElementById('kitchenInventory').scrollIntoView({behavior: 'smooth'})"
+                class="bg-amber-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-amber-700">
+                View Kitchen Inventory
+              </button>
+            </div>
+            <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+              <?php foreach ($lowStockFoodItems as $item): ?>
+                <?php
+                $stockPercent = ($item['stock'] / $item['reorder_level']) * 100;
+                $barColor = $stockPercent <= 25 ? 'bg-red-500' : 'bg-amber-500';
+                ?>
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-medium"><?php echo htmlspecialchars($item['item_name']); ?></span>
+                    <span class="<?php echo $item['stock'] <= 0 ? 'text-red-600' : 'text-amber-600'; ?>">
+                      <?php echo $item['stock']; ?> / <?php echo $item['reorder_level']; ?>     <?php echo $item['unit']; ?>
+                    </span>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-1.5">
+                    <div class="<?php echo $barColor; ?> h-1.5 rounded-full"
+                      style="width: <?php echo min(100, $stockPercent); ?>%"></div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <!-- KITCHEN INVENTORY SECTION -->
+        <div id="kitchenInventory" class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-lg flex items-center gap-2">
+              <i class="fas fa-utensils text-amber-600"></i> Kitchen Food Inventory
+            </h2>
+            <div class="flex gap-2">
+              <button onclick="openAddFoodItemModal()"
+                class="bg-amber-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-amber-700">
+                <i class="fas fa-plus mr-1"></i> Add Item
+              </button>
+              <button onclick="refreshInventory()"
+                class="border border-slate-200 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-50">
+                <i class="fas fa-sync-alt mr-1"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <?php foreach ($foodInventory as $item): ?>
+              <?php
+              $stockClass = '';
+              $stockStatus = '';
+              if ($item['stock'] <= 0) {
+                $stockClass = 'stock-out';
+                $stockStatus = 'Out of Stock';
+              } elseif ($item['stock'] <= $item['reorder_level']) {
+                $stockClass = 'stock-low';
+                $stockStatus = 'Low Stock';
+              } else {
+                $stockClass = 'stock-good';
+                $stockStatus = 'In Stock';
+              }
+              $stockPercent = ($item['reorder_level'] > 0) ? ($item['stock'] / $item['reorder_level']) * 100 : 100;
+              $barColor = $item['stock'] <= 0 ? 'bg-red-500' : ($item['stock'] <= $item['reorder_level'] ? 'bg-amber-500' : 'bg-green-500');
+              ?>
+              <div
+                class="inventory-card <?php echo $stockClass; ?> rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 class="font-semibold text-slate-800">
+                      <?php echo htmlspecialchars($item['item_name']); ?>
+                    </h3>
+                    <p class="text-xs text-slate-500">
+                      <?php echo $item['category']; ?>
+                    </p>
+                  </div>
+                  <span
+                    class="text-xs px-2 py-1 rounded-full <?php echo $item['stock'] <= 0 ? 'bg-red-100 text-red-700' : ($item['stock'] <= $item['reorder_level'] ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'); ?>">
+                    <?php echo $stockStatus; ?>
+                  </span>
+                </div>
+                <div class="mt-3">
+                  <div class="flex justify-between text-sm mb-1">
+                    <span class="text-slate-600">Stock:</span>
+                    <span
+                      class="font-semibold <?php echo $item['stock'] <= $item['reorder_level'] ? 'text-amber-600' : 'text-green-600'; ?>">
+                      <?php echo $item['stock']; ?>
+                      <?php echo $item['unit']; ?>
+                    </span>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div class="<?php echo $barColor; ?> h-2 rounded-full"
+                      style="width: <?php echo min(100, $stockPercent); ?>%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>Reorder at:
+                      <?php echo $item['reorder_level']; ?>
+                      <?php echo $item['unit']; ?>
+                    </span>
+                  </div>
+                </div>
+                <div class="mt-3 flex gap-2">
+                  <button
+                    onclick="openAdjustStockModal(<?php echo $item['id']; ?>, '<?php echo htmlspecialchars($item['item_name']); ?>', <?php echo $item['stock']; ?>)"
+                    class="flex-1 text-amber-600 border border-amber-600 rounded-lg px-2 py-1 text-xs hover:bg-amber-50">
+                    <i class="fas fa-chart-line mr-1"></i> Adjust
+                  </button>
+                  <?php if ($item['stock'] <= $item['reorder_level'] && $item['stock'] > 0): ?>
+                    <button
+                      onclick="quickReorder(<?php echo $item['id']; ?>, '<?php echo htmlspecialchars($item['item_name']); ?>')"
+                      class="flex-1 text-blue-600 border border-blue-600 rounded-lg px-2 py-1 text-xs hover:bg-blue-50">
+                      <i class="fas fa-truck mr-1"></i> Reorder
+                    </button>
+                  <?php endif; ?>
+                </div>
+              </div>
+            <?php endforeach; ?>
+            <?php if (empty($foodInventory)): ?>
+              <div class="col-span-full text-center py-8 text-slate-500">
+                No food items found in inventory. Click "Add Item" to add some.
+              </div>
+            <?php endif; ?>
           </div>
         </div>
 
         <!-- FILTER TABS -->
         <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-6">
           <button onclick="filterOrders('all')"
-            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">
-            all orders
-          </button>
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'all' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">all
+            orders</button>
           <button onclick="filterOrders('new')"
-            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'new' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">
-            new
-          </button>
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'new' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">new</button>
           <button onclick="filterOrders('preparing')"
-            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'preparing' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">
-            preparing
-          </button>
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'preparing' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">preparing</button>
           <button onclick="filterOrders('ready')"
-            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'ready' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">
-            ready
-          </button>
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'ready' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">ready</button>
           <button onclick="filterOrders('urgent')"
-            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'urgent' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">
-            urgent
-          </button>
+            class="filter-btn px-4 py-2 <?php echo $statusFilter == 'urgent' ? 'bg-amber-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50'; ?> rounded-full text-sm">urgent</button>
         </div>
 
         <!-- CUSTOMER ORDERS TABLE -->
-        <div id="ordersTableContainer"
-          class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto mb-8">
-          <table class="min-w-full text-sm" id="ordersTable">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto mb-8">
+          <table class="min-w-full text-sm">
             <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
               <tr>
                 <th class="px-5 py-3 text-left font-medium">Order #</th>
@@ -294,7 +512,7 @@ $current_page = 'kitchen_orders';
                 <th class="px-5 py-3 text-left font-medium">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100" id="ordersTableBody">
+            <tbody class="divide-y divide-slate-100">
               <?php if (empty($kitchenOrders)): ?>
                 <tr>
                   <td colspan="8" class="px-5 py-8 text-center text-slate-500">No kitchen orders found</td>
@@ -355,7 +573,6 @@ $current_page = 'kitchen_orders';
             <i class="fas fa-rectangle-list text-amber-600"></i> preparation queue
           </h2>
 
-          <!-- Expanded queue table -->
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
@@ -371,7 +588,7 @@ $current_page = 'kitchen_orders';
                   <th class="px-4 py-3 text-left font-medium">Action</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100" id="queueTableBody">
+              <tbody class="divide-y divide-slate-100">
                 <?php if (empty($prepQueue)): ?>
                   <tr>
                     <td colspan="9" class="px-4 py-8 text-center text-slate-500">No orders in preparation queue</td>
@@ -391,8 +608,7 @@ $current_page = 'kitchen_orders';
                     $statusColor = $statusColors[$item['status']] ?? 'bg-slate-100 text-slate-700';
                     $statusDisplay = strtoupper($item['status']);
                     ?>
-                    <tr class="hover:bg-slate-50" data-queue-status="<?php echo $item['status']; ?>"
-                      data-order-id="<?php echo $item['order_reference']; ?>">
+                    <tr class="hover:bg-slate-50">
                       <td class="px-4 py-3 font-medium">#<?php echo $item['order_reference']; ?></td>
                       <td class="px-4 py-3"><?php echo htmlspecialchars($customerDisplay); ?></td>
                       <td class="px-4 py-3"><?php echo ucfirst($item['order_type']); ?></td>
@@ -419,23 +635,17 @@ $current_page = 'kitchen_orders';
             </table>
           </div>
 
-          <!-- Queue summary footer -->
           <div
             class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap justify-between items-center text-sm text-slate-500">
             <div class="flex gap-4">
-              <span><span class="font-medium text-slate-700"
-                  id="ordersInProgress"><?php echo $ordersInProgress; ?></span> orders in progress</span>
-              <span><span class="font-medium text-slate-700" id="avgWaitTime"><?php echo $avgWaitTime; ?></span> avg min
-                wait</span>
+              <span><span class="font-medium text-slate-700"><?php echo $ordersInProgress; ?></span> orders in
+                progress</span>
+              <span><span class="font-medium text-slate-700"><?php echo $avgWaitTime; ?></span> avg min wait</span>
             </div>
             <div class="flex gap-2">
-              <button id="refreshQueueBtn" class="text-amber-600 hover:text-amber-800 text-xs flex items-center gap-1"
+              <button class="text-amber-600 hover:text-amber-800 text-xs flex items-center gap-1"
                 onclick="refreshQueue()">
                 <i class="fas fa-clock"></i> refresh queue
-              </button>
-              <button id="viewAllBtn" class="text-amber-600 hover:text-amber-800 text-xs flex items-center gap-1"
-                onclick="viewAllOrders()">
-                <i class="fas fa-file-lines"></i> view all
               </button>
             </div>
           </div>
@@ -452,7 +662,6 @@ $current_page = 'kitchen_orders';
         } else {
           url.searchParams.delete('status');
         }
-        url.searchParams.set('page', '1');
         window.location.href = url.toString();
       }
 
@@ -466,9 +675,7 @@ $current_page = 'kitchen_orders';
           title: 'Loading...',
           text: 'Please wait',
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+          didOpen: () => { Swal.showLoading(); }
         });
 
         const formData = new FormData();
@@ -486,7 +693,6 @@ $current_page = 'kitchen_orders';
               const order = data.order;
               const items = order.items || [];
 
-              // Populate modal fields
               document.getElementById('editOrderId').value = order.id;
               document.getElementById('editOrderRef').value = order.order_reference;
               document.getElementById('editCustomer').value = order.customer_name || 'Guest';
@@ -494,7 +700,6 @@ $current_page = 'kitchen_orders';
               document.getElementById('editStatus').value = order.status || 'new';
               document.getElementById('editInstructions').value = order.special_instructions || '';
 
-              // Populate items list
               const itemsList = document.getElementById('editItemsList');
               itemsList.innerHTML = '';
               if (items.length > 0) {
@@ -502,24 +707,18 @@ $current_page = 'kitchen_orders';
                   const itemDiv = document.createElement('div');
                   itemDiv.className = 'flex justify-between text-sm py-1 border-b last:border-0';
                   itemDiv.innerHTML = `
-                <span>${item.name || 'Item'}</span>
-                <span class="font-medium">x${item.quantity || 1}</span>
-              `;
+                                <span>${item.name || 'Item'}</span>
+                                <span class="font-medium">x${item.quantity || 1}</span>
+                            `;
                   itemsList.appendChild(itemDiv);
                 });
               } else {
                 itemsList.innerHTML = '<p class="text-sm text-slate-400">No items</p>';
               }
 
-              // Show modal
               document.getElementById('editModal').classList.add('show');
             } else {
-              Swal.fire({
-                title: 'Error',
-                text: data.message,
-                icon: 'error',
-                confirmButtonColor: '#d97706'
-              });
+              Swal.fire({ title: 'Error', text: data.message, icon: 'error', confirmButtonColor: '#d97706' });
             }
           })
           .catch(error => {
@@ -542,9 +741,7 @@ $current_page = 'kitchen_orders';
           title: 'Updating Status...',
           text: 'Please wait',
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+          didOpen: () => { Swal.showLoading(); }
         });
 
         const formData = new FormData();
@@ -560,21 +757,11 @@ $current_page = 'kitchen_orders';
           .then(data => {
             Swal.close();
             if (data.success) {
-              Swal.fire({
-                title: 'Success!',
-                text: data.message,
-                icon: 'success',
-                confirmButtonColor: '#d97706'
-              }).then(() => {
+              Swal.fire({ title: 'Success!', text: data.message, icon: 'success', confirmButtonColor: '#d97706' }).then(() => {
                 location.reload();
               });
             } else {
-              Swal.fire({
-                title: 'Error',
-                text: data.message,
-                icon: 'error',
-                confirmButtonColor: '#d97706'
-              });
+              Swal.fire({ title: 'Error', text: data.message, icon: 'error', confirmButtonColor: '#d97706' });
             }
           })
           .catch(error => {
@@ -583,6 +770,115 @@ $current_page = 'kitchen_orders';
           });
 
         closeModal();
+      }
+
+      // ========== INVENTORY MANAGEMENT FUNCTIONS ==========
+      function openAdjustStockModal(itemId, itemName, currentStock) {
+        document.getElementById('adjustItemId').value = itemId;
+        document.getElementById('adjustItemName').textContent = itemName;
+        document.getElementById('adjustCurrentStock').textContent = currentStock;
+        document.getElementById('adjustAmount').value = 0;
+        document.getElementById('adjustReason').value = '';
+        document.getElementById('adjustStockModal').classList.add('show');
+      }
+
+      function closeAdjustStockModal() {
+        document.getElementById('adjustStockModal').classList.remove('show');
+      }
+
+      document.getElementById('adjustStockForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('action', 'update_kitchen_stock');
+        formData.append('item_id', document.getElementById('adjustItemId').value);
+        formData.append('adjustment', document.getElementById('adjustAmount').value);
+        formData.append('reason', document.getElementById('adjustReason').value);
+
+        Swal.fire({
+          title: 'Updating Stock...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        const response = await fetch('../../../controller/admin/post/restaurant/kitchen_actions.php', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({ title: 'Success!', text: data.message, icon: 'success', confirmButtonColor: '#d97706' }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({ title: 'Error', text: data.message, icon: 'error', confirmButtonColor: '#d97706' });
+        }
+        closeAdjustStockModal();
+      });
+
+      function openAddFoodItemModal() {
+        document.getElementById('addFoodItemModal').classList.add('show');
+      }
+
+      function closeAddFoodItemModal() {
+        document.getElementById('addFoodItemModal').classList.remove('show');
+        document.getElementById('addFoodItemForm').reset();
+      }
+
+      document.getElementById('addFoodItemForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('action', 'add_food_item');
+        formData.append('item_name', document.getElementById('newItemName').value);
+        formData.append('category', document.getElementById('newItemCategory').value);
+        formData.append('stock', document.getElementById('newItemStock').value);
+        formData.append('unit', document.getElementById('newItemUnit').value);
+        formData.append('reorder_level', document.getElementById('newItemReorderLevel').value);
+
+        Swal.fire({
+          title: 'Adding Item...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        const response = await fetch('../../../controller/admin/post/restaurant/kitchen_actions.php', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({ title: 'Success!', text: data.message, icon: 'success', confirmButtonColor: '#d97706' }).then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire({ title: 'Error', text: data.message, icon: 'error', confirmButtonColor: '#d97706' });
+        }
+        closeAddFoodItemModal();
+      });
+
+      function quickReorder(itemId, itemName) {
+        Swal.fire({
+          title: 'Reorder Item',
+          text: `Create purchase order for ${itemName}?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#d97706',
+          confirmButtonText: 'Yes, create PO'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '../operations/inventory_&_stocks.php?action=create_po&item=' + itemId;
+          }
+        });
+      }
+
+      function refreshInventory() {
+        showToast('Refreshing inventory...', 'info');
+        setTimeout(() => location.reload(), 1000);
       }
 
       // ========== MARK AS URGENT ==========
@@ -601,9 +897,7 @@ $current_page = 'kitchen_orders';
               title: 'Processing...',
               text: 'Please wait',
               allowOutsideClick: false,
-              didOpen: () => {
-                Swal.showLoading();
-              }
+              didOpen: () => { Swal.showLoading(); }
             });
 
             const formData = new FormData();
@@ -618,21 +912,11 @@ $current_page = 'kitchen_orders';
               .then(data => {
                 Swal.close();
                 if (data.success) {
-                  Swal.fire({
-                    title: 'Success!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonColor: '#d97706'
-                  }).then(() => {
+                  Swal.fire({ title: 'Success!', text: data.message, icon: 'success', confirmButtonColor: '#d97706' }).then(() => {
                     location.reload();
                   });
                 } else {
-                  Swal.fire({
-                    title: 'Error',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonColor: '#d97706'
-                  });
+                  Swal.fire({ title: 'Error', text: data.message, icon: 'error', confirmButtonColor: '#d97706' });
                 }
               });
           }
@@ -642,13 +926,7 @@ $current_page = 'kitchen_orders';
       // ========== QUEUE FUNCTIONS ==========
       function refreshQueue() {
         showToast('Refreshing queue...', 'info');
-        setTimeout(() => {
-          location.reload();
-        }, 1000);
-      }
-
-      function viewAllOrders() {
-        filterOrders('all');
+        setTimeout(() => location.reload(), 1000);
       }
 
       // ========== TOAST NOTIFICATION ==========
@@ -669,20 +947,29 @@ $current_page = 'kitchen_orders';
         }, 3000);
       }
 
-
-      // Close modal when clicking outside
+      // Close modals when clicking outside
       window.addEventListener('click', function (event) {
-        const modal = document.getElementById('editModal');
-        if (event.target === modal) {
-          closeModal();
+        const modals = ['editModal', 'adjustStockModal', 'addFoodItemModal'];
+        modals.forEach(modalId => {
+          const modal = document.getElementById(modalId);
+          if (event.target === modal) {
+            modal.classList.remove('show');
+          }
+        });
+      });
+
+      // Close modals with Escape key
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          document.getElementById('editModal')?.classList.remove('show');
+          document.getElementById('adjustStockModal')?.classList.remove('show');
+          document.getElementById('addFoodItemModal')?.classList.remove('show');
         }
       });
 
-      // Close modal with Escape key
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-          closeModal();
-        }
+      // Notification bell
+      document.getElementById('notificationBell').addEventListener('click', function () {
+        window.location.href = '../notifications.php';
       });
     </script>
   </body>

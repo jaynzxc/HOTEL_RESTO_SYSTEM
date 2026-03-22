@@ -407,6 +407,49 @@
               </div>
             </div>
 
+            <!-- Add this after the booking summary div -->
+            <div class="mt-4 p-4 bg-slate-50 rounded-xl" id="promoSection">
+              <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Have a promo code?</label>
+                  <div class="flex gap-2">
+                    <input type="text" id="promoCodeInput" placeholder="Enter promo code"
+                      class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 outline-none">
+                    <button onclick="applyPromoCode()" id="applyPromoBtn"
+                      class="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-700">
+                      Apply
+                    </button>
+                  </div>
+                  <p id="promoMessage" class="text-xs mt-1 hidden"></p>
+                </div>
+                <div id="activePromos" class="text-right">
+                  <p class="text-xs text-slate-500 mb-1">Active promos:</p>
+                  <div class="flex gap-2 flex-wrap">
+                    <?php foreach ($activePromos as $promo): ?>
+                      <button
+                        onclick="document.getElementById('promoCodeInput').value='<?php echo $promo['code']; ?>'; applyPromoCode();"
+                        class="text-xs bg-white border border-amber-200 text-amber-700 px-2 py-1 rounded-full hover:bg-amber-50">
+                        <?php echo $promo['code']; ?>
+                      </button>
+                    <?php endforeach; ?>
+                  </div>
+                </div>
+              </div>
+              <div id="discountDisplay" class="mt-3 hidden bg-green-50 p-3 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <i class="fas fa-tag text-green-600 mr-1"></i>
+                    <span class="text-sm font-medium text-green-700">Promo Applied!</span>
+                    <p class="text-xs text-green-600" id="promoName"></p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-semibold text-green-700">-₱<span id="discountAmount">0</span></p>
+                    <button onclick="removePromoCode()" class="text-xs text-red-500 hover:text-red-700">Remove</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="flex gap-3 mt-6">
               <button onclick="attemptBackToStep(1)" class="flex-1 btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Back
@@ -426,397 +469,621 @@
     </div>
 
     <script>
-      (function () {
-        // ---------- global state ----------
-        let currentStep = 1;
-        let step1Completed = false;
-        let selectedRoomId = null,
-          selectedRoomName = null,
-          selectedRoomPrice = 0;
+      // ========== GLOBAL STATE ==========
+      let currentStep = 1;
+      let step1Completed = false;
+      let selectedRoomId = null,
+        selectedRoomName = null,
+        selectedRoomPrice = 0;
 
-        // Form data from step 1
-        let step1Data = {
-          firstName: '<?php echo addslashes($user['first_name'] ?? ''); ?>',
-          lastName: '<?php echo addslashes($user['last_name'] ?? ''); ?>',
-          email: '<?php echo addslashes($user['email'] ?? ''); ?>',
-          phone: '<?php echo addslashes($user['phone'] ?? ''); ?>',
-          checkIn: '',
-          checkOut: '',
-          adults: 2,
-          children: 0,
-          specialRequests: ''
-        };
+      // Promo code variables
+      let appliedPromo = null;
+      let promoDiscount = 0;
+      let promoCodeId = null;
 
-        // ---------- helpers ----------
-        function updateDateTime() {
-          const now = new Date();
-          document.getElementById('currentDateTime').innerText = now.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+      // Form data from step 1
+      let step1Data = {
+        firstName: '<?php echo addslashes($user['first_name'] ?? ''); ?>',
+        lastName: '<?php echo addslashes($user['last_name'] ?? ''); ?>',
+        email: '<?php echo addslashes($user['email'] ?? ''); ?>',
+        phone: '<?php echo addslashes($user['phone'] ?? ''); ?>',
+        checkIn: '',
+        checkOut: '',
+        adults: 2,
+        children: 0,
+        specialRequests: ''
+      };
+
+      // ========== HELPER FUNCTIONS ==========
+      function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentDateTime').innerText = now.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+
+      function isValidEmail(e) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+      }
+
+      function isValidPhone(p) {
+        return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(p);
+      }
+
+      function showToast(message, type = 'success') {
+        // Create toast element if it doesn't exist
+        let toast = document.getElementById('customToast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'customToast';
+          toast.className = 'fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 border-l-4';
+          document.body.appendChild(toast);
+        }
+
+        // Set toast style based on type
+        if (type === 'success') {
+          toast.className = 'fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 border-l-4 border-green-500';
+        } else if (type === 'error') {
+          toast.className = 'fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 border-l-4 border-red-500';
+        } else {
+          toast.className = 'fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 transform translate-x-full transition-transform duration-300 z-50 border-l-4 border-amber-500';
+        }
+
+        toast.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full ${type === 'success' ? 'bg-green-100' : type === 'error' ? 'bg-red-100' : 'bg-amber-100'} flex items-center justify-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle text-green-600' : type === 'error' ? 'fa-exclamation-circle text-red-600' : 'fa-info-circle text-amber-600'}"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-slate-800">${message}</p>
+                    <p class="text-xs text-slate-400">just now</p>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+          toast.classList.remove('translate-x-full');
+          toast.classList.add('translate-x-0');
+        }, 10);
+
+        setTimeout(() => {
+          toast.classList.remove('translate-x-0');
+          toast.classList.add('translate-x-full');
+          setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
+
+      function showError(title, message) {
+        Swal.fire({
+          title: title,
+          text: message,
+          icon: 'warning',
+          confirmButtonColor: '#d97706'
+        });
+      }
+
+      // Clear field errors
+      function clearFieldError(fieldId) {
+        const input = document.getElementById(fieldId);
+        const errorEl = document.getElementById(fieldId + 'Error');
+        if (input) input.classList.remove('input-error');
+        if (errorEl) {
+          errorEl.classList.add('hidden');
+          errorEl.innerText = '';
+        }
+      }
+
+      // Show field error
+      function showFieldError(fieldId, message) {
+        const input = document.getElementById(fieldId);
+        const errorEl = document.getElementById(fieldId + 'Error');
+        if (input) input.classList.add('input-error');
+        if (errorEl) {
+          errorEl.innerText = message;
+          errorEl.classList.remove('hidden');
+        }
+      }
+
+      // Calculate nights between dates
+      function calculateNights(checkInDate, checkOutDate) {
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        const diffTime = Math.abs(checkOut - checkIn);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+
+      // Update booking summary
+      function updateBookingSummary() {
+        if (!selectedRoomPrice || !step1Data.checkIn || !step1Data.checkOut) return;
+
+        const checkIn = new Date(step1Data.checkIn);
+        const checkOut = new Date(step1Data.checkOut);
+        const nights = Math.max(1, calculateNights(checkIn, checkOut));
+        const subtotal = selectedRoomPrice * nights;
+        const tax = Math.round(subtotal * 0.12 * 100) / 100;
+        let total = subtotal + tax;
+        let pointsEarned = Math.floor(total / 100) * 5;
+
+        // Apply promo discount if any
+        if (appliedPromo && promoDiscount > 0) {
+          total = total - promoDiscount;
+          pointsEarned = Math.floor(total / 100) * 5;
+
+          document.getElementById('summarySubtotal').innerText = (subtotal - promoDiscount).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
           });
-          document.getElementById('currentDateDisplay').innerText = now.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-          });
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 60000);
-
-        function isValidEmail(e) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-        }
-
-        function isValidPhone(p) {
-          return /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(p);
-        }
-
-        function showError(title, message) {
-          Swal.fire({
-            title: title,
-            text: message,
-            icon: 'warning',
-            confirmButtonColor: '#d97706'
-          });
-        }
-
-        function showSuccess(message) {
-          Swal.fire({
-            title: 'Success!',
-            text: message,
-            icon: 'success',
-            confirmButtonColor: '#d97706',
-            timer: 2000
-          });
-        }
-
-        // Clear field errors
-        function clearFieldError(fieldId) {
-          const input = document.getElementById(fieldId);
-          const errorEl = document.getElementById(fieldId + 'Error');
-          if (input) input.classList.remove('input-error');
-          if (errorEl) {
-            errorEl.classList.add('hidden');
-            errorEl.innerText = '';
-          }
-        }
-
-        // Show field error
-        function showFieldError(fieldId, message) {
-          const input = document.getElementById(fieldId);
-          const errorEl = document.getElementById(fieldId + 'Error');
-          if (input) input.classList.add('input-error');
-          if (errorEl) {
-            errorEl.innerText = message;
-            errorEl.classList.remove('hidden');
-          }
-        }
-
-        // ---------- step navigation ----------
-        window.attemptStepChange = function (targetStep) {
-          if (targetStep === currentStep) return;
-          if (targetStep < currentStep) {
-            goToStep(targetStep);
-            return;
-          }
-          if (targetStep > currentStep) {
-            if (!step1Completed) {
-              showError('Cannot proceed', 'Please complete step 1 first');
-              return;
-            }
-            goToStep(targetStep);
-          }
-        };
-
-        window.attemptBackToStep = function (t) {
-          if (t < currentStep) goToStep(t);
-        };
-
-        function goToStep(step) {
-          for (let i = 1; i <= 2; i++) {
-            document.getElementById(`step${i}-content`).classList.add('hidden');
-          }
-          document.getElementById(`step${step}-content`).classList.remove('hidden');
-
-          for (let i = 1; i <= 2; i++) {
-            let el = document.getElementById(`step${i}`);
-            el.classList.remove('active', 'completed');
-            if (i === 1 && step1Completed) el.classList.add('completed');
-            if (i === step) el.classList.add('active');
-          }
-
-          let progress = step === 2 ? 100 : 50;
-          if (step1Completed) progress = step === 1 ? 50 : 100;
-          document.getElementById('progressFill').style.width = progress + '%';
-          currentStep = step;
-        }
-
-        // ---------- step 1 validation ----------
-        window.validateStep1 = function () {
-          // Clear previous errors
-          const errorFields = ['firstName', 'lastName', 'email', 'phone', 'step1Checkin', 'step1Checkout'];
-          errorFields.forEach(f => clearFieldError(f));
-
-          // Get values
-          const firstName = document.getElementById('firstName').value.trim();
-          const lastName = document.getElementById('lastName').value.trim();
-          const email = document.getElementById('email').value.trim();
-          const phone = document.getElementById('phone').value.trim();
-          const checkIn = document.getElementById('step1Checkin').value;
-          const checkOut = document.getElementById('step1Checkout').value;
-          const adults = document.getElementById('adults').value;
-          const children = document.getElementById('children').value;
-          const specialRequests = document.getElementById('specialRequests').value;
-
-          let isValid = true;
-
-          // Validate each field
-          if (!firstName) {
-            showFieldError('firstName', 'First name is required');
-            isValid = false;
-          }
-
-          if (!lastName) {
-            showFieldError('lastName', 'Last name is required');
-            isValid = false;
-          }
-
-          if (!email) {
-            showFieldError('email', 'Email is required');
-            isValid = false;
-          } else if (!isValidEmail(email)) {
-            showFieldError('email', 'Please enter a valid email address');
-            isValid = false;
-          }
-
-          if (!phone) {
-            showFieldError('phone', 'Phone number is required');
-            isValid = false;
-          } else if (!isValidPhone(phone)) {
-            showFieldError('phone', 'Please enter a valid phone number');
-            isValid = false;
-          }
-
-          if (!checkIn) {
-            showFieldError('step1Checkin', 'Check-in date is required');
-            isValid = false;
-          }
-
-          if (!checkOut) {
-            showFieldError('step1Checkout', 'Check-out date is required');
-            isValid = false;
-          }
-
-          if (checkIn && checkOut) {
-            const checkInDate = new Date(checkIn);
-            const checkOutDate = new Date(checkOut);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (checkInDate < today) {
-              showFieldError('step1Checkin', 'Check-in date cannot be in the past');
-              isValid = false;
-            }
-
-            if (checkOutDate <= checkInDate) {
-              showFieldError('step1Checkout', 'Check-out must be after check-in');
-              isValid = false;
-            }
-
-            // Calculate minimum nights
-            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-            if (nights < 1) {
-              showFieldError('step1Checkout', 'Minimum stay is 1 night');
-              isValid = false;
-            }
-          }
-
-          if (!isValid) return;
-
-          // Save step 1 data
-          step1Data = {
-            firstName,
-            lastName,
-            email,
-            phone,
-            checkIn,
-            checkOut,
-            adults,
-            children,
-            specialRequests
-          };
-
-          step1Completed = true;
-          goToStep(2);
-        };
-
-        // ---------- step 2 functions ----------
-        window.selectRoom = function (id, name, price) {
-          document.querySelectorAll('.room-card').forEach(el => el.classList.remove('selected'));
-          document.getElementById(`room${id}`).classList.add('selected');
-          selectedRoomId = id;
-          selectedRoomName = name;
-          selectedRoomPrice = price;
-
-          // Enable proceed button
-          document.getElementById('proceedBtn').disabled = false;
-
-          // Calculate and show summary
-          const checkIn = new Date(step1Data.checkIn);
-          const checkOut = new Date(step1Data.checkOut);
-          const nights = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
-          const subtotal = price * nights;
-          const tax = Math.round(subtotal * 0.12 * 100) / 100;
-          const total = subtotal + tax;
-
-          // Calculate points (5 points per ₱100 spent)
-          const pointsEarned = Math.floor(total / 100) * 5;
-
-          document.getElementById('summaryRoomName').innerText = name;
-          document.getElementById('summaryPricePerNight').innerText = price.toLocaleString();
-          document.getElementById('summaryNights').innerText = nights;
+        } else {
           document.getElementById('summarySubtotal').innerText = subtotal.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           });
-          document.getElementById('summaryTax').innerText = tax.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-          document.getElementById('summaryTotal').innerText = total.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          });
-          document.getElementById('summaryPoints').innerText = pointsEarned.toLocaleString();
+        }
 
-          document.getElementById('bookingSummary').classList.remove('hidden');
-        };
+        document.getElementById('summaryRoomName').innerText = selectedRoomName;
+        document.getElementById('summaryPricePerNight').innerText = selectedRoomPrice.toLocaleString();
+        document.getElementById('summaryNights').innerText = nights;
+        document.getElementById('summaryTax').innerText = tax.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        document.getElementById('summaryTotal').innerText = total.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        document.getElementById('summaryPoints').innerText = pointsEarned.toLocaleString();
+      }
 
-        // ---------- create booking via AJAX ----------
-        // ---------- create booking via AJAX ----------
-        window.createBooking = function () {
-          if (!selectedRoomId) {
-            showError('No room selected', 'Please select a room to continue');
+      // Update summary with discount from promo validation
+      function updateSummaryWithDiscount(data) {
+        document.getElementById('summarySubtotal').innerText = data.new_subtotal.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        document.getElementById('summaryTax').innerText = data.new_tax.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        document.getElementById('summaryTotal').innerText = data.new_total.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        const pointsEarned = Math.floor(data.new_total / 100) * 5;
+        document.getElementById('summaryPoints').innerText = pointsEarned.toLocaleString();
+      }
+
+      // ========== PROMO CODE FUNCTIONS ==========
+      function applyPromoCode() {
+        const promoCode = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+        if (!promoCode) {
+          showToast('Please enter a promo code', 'error');
+          return;
+        }
+
+        // Get current totals
+        if (!selectedRoomPrice) {
+          showToast('Please select a room first', 'error');
+          return;
+        }
+
+        const checkIn = new Date(step1Data.checkIn);
+        const checkOut = new Date(step1Data.checkOut);
+        const nights = Math.max(1, calculateNights(checkIn, checkOut));
+        const subtotal = selectedRoomPrice * nights;
+
+        Swal.fire({
+          title: 'Applying Promo Code...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        const formData = new FormData();
+        formData.append('promo_code', promoCode);
+        formData.append('subtotal', subtotal);
+
+        fetch('../../controller/customer/post/validate_promo.php', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            Swal.close();
+
+            if (data.success) {
+              appliedPromo = data;
+              promoDiscount = data.discount;
+              promoCodeId = data.promo_code_id;
+
+              // Update summary with discount
+              updateSummaryWithDiscount(data);
+
+              // Show discount display
+              const discountDisplay = document.getElementById('discountDisplay');
+              discountDisplay.classList.remove('hidden');
+              document.getElementById('discountAmount').innerText = data.discount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+              document.getElementById('promoName').innerHTML = `<i class="fas fa-tag"></i> ${data.promo_code} - ${data.discount_type === 'percentage' ? data.discount_value + '% off' : '₱' + data.discount_value.toLocaleString() + ' off'}`;
+
+              const promoMessage = document.getElementById('promoMessage');
+              promoMessage.innerHTML = `<i class="fas fa-check-circle text-green-500"></i> ${data.message}`;
+              promoMessage.classList.remove('hidden', 'text-red-600');
+              promoMessage.classList.add('text-green-600');
+
+              showToast(data.message, 'success');
+            } else {
+              const promoMessage = document.getElementById('promoMessage');
+              promoMessage.innerHTML = `<i class="fas fa-exclamation-circle text-red-500"></i> ${data.message}`;
+              promoMessage.classList.remove('hidden', 'text-green-600');
+              promoMessage.classList.add('text-red-600');
+              showToast(data.message, 'error');
+            }
+          })
+          .catch(error => {
+            Swal.close();
+            console.error('Error:', error);
+            showToast('Failed to apply promo code', 'error');
+          });
+      }
+
+      function removePromoCode() {
+        appliedPromo = null;
+        promoDiscount = 0;
+        promoCodeId = null;
+
+        // Recalculate summary without discount
+        updateBookingSummary();
+
+        // Hide discount display
+        document.getElementById('discountDisplay').classList.add('hidden');
+        document.getElementById('promoMessage').classList.add('hidden');
+        document.getElementById('promoCodeInput').value = '';
+
+        showToast('Promo code removed', 'info');
+      }
+
+      // ========== STEP NAVIGATION ==========
+      window.attemptStepChange = function (targetStep) {
+        if (targetStep === currentStep) return;
+        if (targetStep < currentStep) {
+          goToStep(targetStep);
+          return;
+        }
+        if (targetStep > currentStep) {
+          if (!step1Completed) {
+            showError('Cannot proceed', 'Please complete guest details first');
             return;
           }
+          goToStep(targetStep);
+        }
+      };
 
-          // Prepare data
-          const bookingData = {
-            first_name: step1Data.firstName,
-            last_name: step1Data.lastName,
-            email: step1Data.email,
-            phone: step1Data.phone,
-            check_in: step1Data.checkIn,
-            check_out: step1Data.checkOut,
-            adults: step1Data.adults,
-            children: step1Data.children,
-            special_requests: step1Data.specialRequests,
-            room_id: selectedRoomId,
-            room_name: selectedRoomName,
-            room_price: selectedRoomPrice
-          };
+      window.attemptBackToStep = function (t) {
+        if (t < currentStep) goToStep(t);
+      };
 
-          // Show loading
-          Swal.fire({
-            title: 'Creating your booking...',
-            html: 'Please wait',
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            }
-          });
+      function goToStep(step) {
+        for (let i = 1; i <= 2; i++) {
+          document.getElementById(`step${i}-content`).classList.add('hidden');
+        }
+        document.getElementById(`step${step}-content`).classList.remove('hidden');
 
-          // Send AJAX request
-          fetch('../../controller/customer/post/create_booking.php', {
+        for (let i = 1; i <= 2; i++) {
+          let el = document.getElementById(`step${i}`);
+          el.classList.remove('active', 'completed');
+          if (i === 1 && step1Completed) el.classList.add('completed');
+          if (i === step) el.classList.add('active');
+        }
+
+        let progress = step === 2 ? 100 : 50;
+        if (step1Completed) progress = step === 1 ? 50 : 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+        currentStep = step;
+      }
+
+      // ========== STEP 1 VALIDATION ==========
+      window.validateStep1 = function () {
+        // Clear previous errors
+        const errorFields = ['firstName', 'lastName', 'email', 'phone', 'step1Checkin', 'step1Checkout'];
+        errorFields.forEach(f => clearFieldError(f));
+
+        // Get values
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const checkIn = document.getElementById('step1Checkin').value;
+        const checkOut = document.getElementById('step1Checkout').value;
+        const adults = document.getElementById('adults').value;
+        const children = document.getElementById('children').value;
+        const specialRequests = document.getElementById('specialRequests').value;
+
+        let isValid = true;
+
+        // Validate each field
+        if (!firstName) {
+          showFieldError('firstName', 'First name is required');
+          isValid = false;
+        }
+
+        if (!lastName) {
+          showFieldError('lastName', 'Last name is required');
+          isValid = false;
+        }
+
+        if (!email) {
+          showFieldError('email', 'Email is required');
+          isValid = false;
+        } else if (!isValidEmail(email)) {
+          showFieldError('email', 'Please enter a valid email address');
+          isValid = false;
+        }
+
+        if (!phone) {
+          showFieldError('phone', 'Phone number is required');
+          isValid = false;
+        } else if (!isValidPhone(phone)) {
+          showFieldError('phone', 'Please enter a valid phone number');
+          isValid = false;
+        }
+
+        if (!checkIn) {
+          showFieldError('step1Checkin', 'Check-in date is required');
+          isValid = false;
+        }
+
+        if (!checkOut) {
+          showFieldError('step1Checkout', 'Check-out date is required');
+          isValid = false;
+        }
+
+        if (checkIn && checkOut) {
+          const checkInDate = new Date(checkIn);
+          const checkOutDate = new Date(checkOut);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          if (checkInDate < today) {
+            showFieldError('step1Checkin', 'Check-in date cannot be in the past');
+            isValid = false;
+          }
+
+          if (checkOutDate <= checkInDate) {
+            showFieldError('step1Checkout', 'Check-out must be after check-in');
+            isValid = false;
+          }
+
+          // Calculate minimum nights
+          const nights = calculateNights(checkIn, checkOut);
+          if (nights < 1) {
+            showFieldError('step1Checkout', 'Minimum stay is 1 night');
+            isValid = false;
+          }
+        }
+
+        if (!isValid) return;
+
+        // Save step 1 data
+        step1Data = {
+          firstName,
+          lastName,
+          email,
+          phone,
+          checkIn,
+          checkOut,
+          adults,
+          children,
+          specialRequests
+        };
+
+        step1Completed = true;
+        goToStep(2);
+      };
+
+      // ========== STEP 2 FUNCTIONS ==========
+      window.selectRoom = function (id, name, price) {
+        // Remove selected class from all rooms
+        document.querySelectorAll('.room-card').forEach(el => el.classList.remove('selected'));
+        document.getElementById(`room${id}`).classList.add('selected');
+
+        selectedRoomId = id;
+        selectedRoomName = name;
+        selectedRoomPrice = price;
+
+        // Enable proceed button
+        document.getElementById('proceedBtn').disabled = false;
+
+        // Update summary
+        updateBookingSummary();
+
+        // Show booking summary
+        document.getElementById('bookingSummary').classList.remove('hidden');
+
+        // If a promo code was applied, recalculate with it
+        if (appliedPromo && appliedPromo.promo_code) {
+          const checkIn = new Date(step1Data.checkIn);
+          const checkOut = new Date(step1Data.checkOut);
+          const nights = calculateNights(checkIn, checkOut);
+          const subtotal = price * nights;
+
+          const formData = new FormData();
+          formData.append('promo_code', appliedPromo.promo_code);
+          formData.append('subtotal', subtotal);
+
+          fetch('../../controller/customer/post/validate_promo.php', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(bookingData)
+            body: formData
           })
             .then(response => response.json())
             .then(data => {
-              console.log('Server response:', data); // Debug log
-
               if (data.success) {
-                // Save to sessionStorage for payment page
-                sessionStorage.setItem('pendingBooking', JSON.stringify(data.booking));
+                updateSummaryWithDiscount(data);
+                promoDiscount = data.discount;
+                document.getElementById('discountAmount').innerText = data.discount.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                });
+              }
+            })
+            .catch(error => console.error('Error recalculating promo:', error));
+        }
+      };
 
-                const pointsFormatted = data.booking.points_earned.toLocaleString();
-                const totalFormatted = new Intl.NumberFormat('en-PH', {
+      // ========== CREATE BOOKING ==========
+      window.createBooking = function () {
+        if (!selectedRoomId) {
+          showError('No room selected', 'Please select a room to continue');
+          return;
+        }
+
+        // Prepare data
+        const bookingData = {
+          first_name: step1Data.firstName,
+          last_name: step1Data.lastName,
+          email: step1Data.email,
+          phone: step1Data.phone,
+          check_in: step1Data.checkIn,
+          check_out: step1Data.checkOut,
+          adults: step1Data.adults,
+          children: step1Data.children,
+          special_requests: step1Data.specialRequests,
+          room_id: selectedRoomId,
+          room_name: selectedRoomName,
+          room_price: selectedRoomPrice
+        };
+
+        // Add promo code data if applied
+        if (promoCodeId && promoDiscount > 0) {
+          bookingData.promo_code_id = promoCodeId;
+          bookingData.discount_applied = promoDiscount;
+        }
+
+        // Show loading
+        Swal.fire({
+          title: 'Creating your booking...',
+          html: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Send AJAX request
+        fetch('../../controller/customer/post/create_booking.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(bookingData)
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Server response:', data);
+
+            if (data.success) {
+              // Save to sessionStorage for payment page
+              sessionStorage.setItem('pendingBooking', JSON.stringify(data.booking));
+
+              const pointsFormatted = data.booking.points_earned.toLocaleString();
+              const totalFormatted = new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP',
+                minimumFractionDigits: 2
+              }).format(data.booking.total);
+
+              let discountHtml = '';
+              if (data.booking.discount_applied > 0) {
+                discountHtml = `
+                        <div class="bg-green-50 p-3 rounded-lg mb-3">
+                            <p class="text-sm text-green-700">
+                                <i class="fas fa-tag mr-1"></i>
+                                Promo code applied: ${data.booking.promo_code || 'N/A'}
+                            </p>
+                            <p class="text-sm font-semibold text-green-700">
+                                Discount: -₱${data.booking.discount_applied.toLocaleString()}
+                            </p>
+                        </div>
+                    `;
+              }
+
+              Swal.fire({
+                title: 'Booking Created!',
+                html: `
+                        <div class="text-left">
+                            <div class="bg-green-50 p-4 rounded-lg mb-4">
+                                <p class="text-green-700 mb-2"><i class="fas fa-circle-check mr-2"></i>Booking confirmed!</p>
+                                <p class="text-sm"><strong>Reference:</strong> ${data.booking.reference}</p>
+                                <p class="text-sm"><strong>Room:</strong> ${data.booking.room_name}</p>
+                                <p class="text-sm"><strong>Check-in:</strong> ${data.booking.check_in}</p>
+                                <p class="text-sm"><strong>Check-out:</strong> ${data.booking.check_out}</p>
+                                <p class="text-sm"><strong>Nights:</strong> ${data.booking.nights}</p>
+                            </div>
+                            
+                            ${discountHtml}
+                            
+                            <div class="bg-amber-50 p-4 rounded-lg mb-4">
+                                <p class="font-semibold text-amber-800 mb-2">Payment Summary</p>
+                                <p class="text-sm"><strong>Total Amount:</strong> ${totalFormatted}</p>
+                                <div class="mt-2 pt-2 border-t border-amber-200">
+                                    <p class="text-sm text-amber-700">
+                                        <i class="fas fa-star mr-1"></i>
+                                        <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
+                                    </p>
+                                    <p class="text-xs text-amber-600 mt-1">
+                                        (Points will be added by admin after payment confirmation)
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <p class="text-xs text-slate-500 text-center">
+                                You'll be redirected to payment to complete your booking.
+                            </p>
+                        </div>
+                    `,
+                icon: 'success',
+                confirmButtonColor: '#d97706',
+                confirmButtonText: 'Proceed to Payment',
+                showCancelButton: true,
+                cancelButtonText: 'Later',
+                cancelButtonColor: '#6b7280'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.location.href = './payments.php?type=hotel&id=' + data.booking.id;
+                } else {
+                  window.location.href = './my_reservation.php';
+                }
+              });
+            }
+            else if (data.has_pending) {
+              Swal.close();
+
+              let pendingHtml = '';
+              if (data.type === 'booking' || data.type === 'reservation') {
+                const pending = data.pending_item;
+                const amount = data.type === 'booking' ? pending.total_amount : pending.down_payment;
+                const formattedAmount = new Intl.NumberFormat('en-PH', {
                   style: 'currency',
                   currency: 'PHP',
                   minimumFractionDigits: 2
-                }).format(data.booking.total);
+                }).format(amount || 0);
 
-                Swal.fire({
-                  title: 'Booking Created!',
-                  html: `
-            <div class="text-left">
-                <div class="bg-green-50 p-4 rounded-lg mb-4">
-                    <p class="text-green-700 mb-2"><i class="fas fa-circle-check mr-2"></i>Booking confirmed!</p>
-                    <p class="text-sm"><strong>Reference:</strong> ${data.booking.reference}</p>
-                    <p class="text-sm"><strong>Room:</strong> ${data.booking.room_name}</p>
-                    <p class="text-sm"><strong>Check-in:</strong> ${data.booking.check_in}</p>
-                    <p class="text-sm"><strong>Check-out:</strong> ${data.booking.check_out}</p>
-                    <p class="text-sm"><strong>Nights:</strong> ${data.booking.nights}</p>
-                </div>
-                
-                <div class="bg-amber-50 p-4 rounded-lg mb-4">
-                    <p class="font-semibold text-amber-800 mb-2">Payment Summary</p>
-                    <p class="text-sm"><strong>Total Amount:</strong> ${totalFormatted}</p>
-                    <div class="mt-2 pt-2 border-t border-amber-200">
-                        <p class="text-sm text-amber-700">
-                            <i class="fas fa-star mr-1"></i>
-                            <strong>Points to Earn:</strong> +${pointsFormatted} loyalty points
-                        </p>
-                        <p class="text-xs text-amber-600 mt-1">
-                            (Points will be added by admin after payment confirmation)
-                        </p>
-                    </div>
-                </div>
-                
-                <p class="text-xs text-slate-500 text-center">
-                    You'll be redirected to payment to complete your booking.
-                </p>
-            </div>
-        `,
-                  icon: 'success',
-                  confirmButtonColor: '#d97706',
-                  confirmButtonText: 'Proceed to Payment',
-                  showCancelButton: true,
-                  cancelButtonText: 'Later',
-                  cancelButtonColor: '#6b7280'
-                }).then((result) => {
-                  if (result.isConfirmed) {
-                    window.location.href = './payments.php?type=hotel&id=' + data.booking.id;
-                  } else {
-                    window.location.href = './my_reservation.php';
-                  }
-                });
-              }
-              else if (data.has_pending) {
-                // User has pending booking/reservation
-                Swal.close();
-
-                // Handle different types of pending items
-                let pendingHtml = '';
-
-                if (data.type === 'booking' || data.type === 'reservation') {
-                  // Handle booking or reservation
-                  const pending = data.pending_item;
-                  const amount = data.type === 'booking' ? pending.total_amount : pending.down_payment;
-                  const formattedAmount = new Intl.NumberFormat('en-PH', {
-                    style: 'currency',
-                    currency: 'PHP',
-                    minimumFractionDigits: 2
-                  }).format(amount || 0);
-
-                  pendingHtml = `
+                pendingHtml = `
                         <div class="bg-amber-50 p-4 rounded-lg">
                             <p class="font-medium mb-2">Pending ${data.type === 'booking' ? 'Booking' : 'Reservation'} Details:</p>
                             <p class="text-sm"><strong>Reference:</strong> ${pending.booking_reference || pending.reservation_reference || 'N/A'}</p>
@@ -826,9 +1093,8 @@
                             <p class="text-sm font-semibold mt-2">Amount Due: ${formattedAmount}</p>
                         </div>
                     `;
-                } else if (data.type === 'balance_pending' || data.type === 'balance_rejected') {
-                  // Handle balance issues
-                  pendingHtml = `
+              } else if (data.type === 'balance_pending' || data.type === 'balance_rejected') {
+                pendingHtml = `
                         <div class="bg-amber-50 p-4 rounded-lg">
                             <p class="font-medium mb-2">Balance Status:</p>
                             <p class="text-sm">${data.message}</p>
@@ -836,10 +1102,9 @@
                             ${data.pending_item?.reason ? `<p class="text-sm text-red-600"><strong>Reason:</strong> ${data.pending_item.reason}</p>` : ''}
                         </div>
                     `;
-                } else if (data.type === 'payment_pending') {
-                  // Handle pending payment
-                  const pending = data.pending_item;
-                  pendingHtml = `
+              } else if (data.type === 'payment_pending') {
+                const pending = data.pending_item;
+                pendingHtml = `
                         <div class="bg-amber-50 p-4 rounded-lg">
                             <p class="font-medium mb-2">Pending Payment:</p>
                             <p class="text-sm"><strong>Reference:</strong> ${pending.payment_reference}</p>
@@ -847,85 +1112,158 @@
                             <p class="text-sm"><strong>Method:</strong> ${pending.payment_method}</p>
                         </div>
                     `;
-                } else {
-                  // Generic pending item
-                  pendingHtml = `<p class="mb-3">${data.message || 'You have a pending item that needs attention.'}</p>`;
-                }
+              } else {
+                pendingHtml = `<p class="mb-3">${data.message || 'You have a pending item that needs attention.'}</p>`;
+              }
 
-                Swal.fire({
-                  title: 'Cannot Create Booking',
-                  html: `
+              Swal.fire({
+                title: 'Cannot Create Booking',
+                html: `
                         <div class="text-left">
                             <p class="mb-3">${data.message || 'You have a pending item that needs attention before creating a new booking.'}</p>
                             ${pendingHtml}
                         </div>
                     `,
-                  icon: 'warning',
-                  confirmButtonColor: '#d97706',
-                  confirmButtonText: 'OK',
-                  showCancelButton: true,
-                  cancelButtonText: 'View My Reservations',
-                  cancelButtonColor: '#6b7280'
-                }).then((result) => {
-                  if (result.dismiss === Swal.DismissReason.cancel) {
-                    window.location.href = './my_reservation.php';
-                  }
-                });
-              }
-              else {
-                // Handle validation errors or other errors
-                let errorMessage = data.message || 'An error occurred';
-                if (data.errors && Array.isArray(data.errors)) {
-                  errorMessage = '<ul class="list-disc list-inside">';
-                  data.errors.forEach(err => {
-                    errorMessage += `<li>${err}</li>`;
-                  });
-                  errorMessage += '</ul>';
+                icon: 'warning',
+                confirmButtonColor: '#d97706',
+                confirmButtonText: 'OK',
+                showCancelButton: true,
+                cancelButtonText: 'View My Reservations',
+                cancelButtonColor: '#6b7280'
+              }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                  window.location.href = './my_reservation.php';
                 }
-                Swal.fire({
-                  title: 'Error',
-                  html: errorMessage,
-                  icon: 'error',
-                  confirmButtonColor: '#d97706'
+              });
+            } else {
+              let errorMessage = data.message || 'An error occurred';
+              if (data.errors && Array.isArray(data.errors)) {
+                errorMessage = '<ul class="list-disc list-inside">';
+                data.errors.forEach(err => {
+                  errorMessage += `<li>${err}</li>`;
                 });
+                errorMessage += '</ul>';
               }
-            })
-            .catch(error => {
-              console.error('Fetch Error:', error);
               Swal.fire({
                 title: 'Error',
-                text: 'Failed to connect to server. Please check your internet connection and try again.',
+                html: errorMessage,
                 icon: 'error',
                 confirmButtonColor: '#d97706'
               });
+            }
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'Failed to connect to server. Please check your internet connection and try again.',
+              icon: 'error',
+              confirmButtonColor: '#d97706'
             });
-        };
-        // ---------- initialize ----------
-        document.addEventListener('DOMContentLoaded', function () {
-          // Set default dates if empty
-          const today = new Date();
-          const tomorrow = new Date(today);
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const nextWeek = new Date(today);
-          nextWeek.setDate(nextWeek.getDate() + 3);
+          });
+      };
 
-          if (!document.getElementById('step1Checkin').value) {
-            document.getElementById('step1Checkin').value = tomorrow.toISOString().split('T')[0];
-          }
-          if (!document.getElementById('step1Checkout').value) {
-            document.getElementById('step1Checkout').value = nextWeek.toISOString().split('T')[0];
-          }
+      // ========== DATE CHANGE HANDLERS ==========
+      function onDateChange() {
+        const checkIn = document.getElementById('step1Checkin').value;
+        const checkOut = document.getElementById('step1Checkout').value;
 
-          // Clear session form data after 1 second (to prevent showing old messages)
-          setTimeout(() => {
-            <?php
-            // Clear session messages
-            unset($_SESSION['form_data']);
-            ?>
-          }, 1000);
+        if (checkIn && checkOut) {
+          const checkInDate = new Date(checkIn);
+          const checkOutDate = new Date(checkOut);
+
+          if (checkOutDate <= checkInDate) {
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            document.getElementById('step1Checkout').value = nextDay.toISOString().split('T')[0];
+          }
+        }
+
+        if (selectedRoomId && step1Data.checkIn && step1Data.checkOut) {
+          updateBookingSummary();
+
+          // Reapply promo if exists
+          if (appliedPromo && appliedPromo.promo_code) {
+            const nights = calculateNights(step1Data.checkIn, step1Data.checkOut);
+            const subtotal = selectedRoomPrice * nights;
+
+            const formData = new FormData();
+            formData.append('promo_code', appliedPromo.promo_code);
+            formData.append('subtotal', subtotal);
+
+            fetch('../../controller/customer/post/validate_promo.php', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  updateSummaryWithDiscount(data);
+                  promoDiscount = data.discount;
+                  document.getElementById('discountAmount').innerText = data.discount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  });
+                }
+              })
+              .catch(error => console.error('Error:', error));
+          }
+        }
+      }
+
+      // ========== INITIALIZATION ==========
+      document.addEventListener('DOMContentLoaded', function () {
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
+        // Set default dates if empty
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 3);
+
+        const checkinInput = document.getElementById('step1Checkin');
+        const checkoutInput = document.getElementById('step1Checkout');
+
+        if (!checkinInput.value) {
+          checkinInput.value = tomorrow.toISOString().split('T')[0];
+        }
+        if (!checkoutInput.value) {
+          checkoutInput.value = nextWeek.toISOString().split('T')[0];
+        }
+
+        // Set step1Data with default dates
+        step1Data.checkIn = checkinInput.value;
+        step1Data.checkOut = checkoutInput.value;
+
+        // Add date change listeners
+        checkinInput.addEventListener('change', function () {
+          step1Data.checkIn = this.value;
+          onDateChange();
         });
 
-      })();
+        checkoutInput.addEventListener('change', function () {
+          step1Data.checkOut = this.value;
+          onDateChange();
+        });
+
+        // Add promo code input enter key handler
+        document.getElementById('promoCodeInput').addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') {
+            applyPromoCode();
+          }
+        });
+
+        // Clear session form data after 1 second
+        setTimeout(() => {
+          <?php
+          // Clear session messages
+          unset($_SESSION['form_data']);
+          ?>
+        }, 1000);
+      });
+
     </script>
   </body>
 

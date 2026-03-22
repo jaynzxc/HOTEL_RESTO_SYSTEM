@@ -54,6 +54,7 @@ $_SESSION['old'] ??= [];
             <?php endforeach; ?>
           </ul>
         </div>
+        <?php unset($_SESSION['error']); ?>
       <?php endif; ?>
 
       <!-- LOGIN FORM -->
@@ -65,14 +66,11 @@ $_SESSION['old'] ??= [];
               <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <div class="relative">
                 <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="email" name="email"
+                <input type="email" name="email" id="email"
                   value="<?php echo htmlspecialchars($_SESSION['old']['email'] ?? ''); ?>" placeholder="you@example.com"
-                  class="w-full border <?php echo isset($_SESSION['error']['email']) || isset($_SESSION['error']['login']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
+                  class="w-full border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
                   required>
               </div>
-              <?php if (isset($_SESSION['error']['email'])): ?>
-                <p class="text-xs text-red-600 mt-1"><?php echo htmlspecialchars($_SESSION['error']['email']); ?></p>
-              <?php endif; ?>
             </div>
 
             <!-- Password -->
@@ -80,23 +78,21 @@ $_SESSION['old'] ??= [];
               <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
               <div class="relative">
                 <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="password" name="password" placeholder="••••••••"
-                  class="w-full border <?php echo isset($_SESSION['error']['password']) || isset($_SESSION['error']['login']) ? 'border-red-500' : 'border-slate-200'; ?> rounded-xl pl-9 pr-10 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
+                <input type="password" name="password" id="password" placeholder="••••••••"
+                  class="w-full border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:ring-1 focus:ring-amber-500 outline-none"
                   required>
                 <button type="button"
                   class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   <i class="fas fa-eye-slash text-sm"></i>
                 </button>
               </div>
-              <?php if (isset($_SESSION['error']['password'])): ?>
-                <p class="text-xs text-red-600 mt-1"><?php echo htmlspecialchars($_SESSION['error']['password']); ?></p>
-              <?php endif; ?>
             </div>
 
             <!-- Remember Me & Forgot Password -->
             <div class="flex items-center justify-between text-sm">
               <label class="flex items-center gap-2">
-                <input type="checkbox" name="remember_me" class="rounded text-amber-600 focus:ring-amber-500">
+                <input type="checkbox" name="remember_me" id="remember_me"
+                  class="rounded text-amber-600 focus:ring-amber-500">
                 <span class="text-slate-600">Remember me</span>
               </label>
               <a href="#" id="forgotPassword" class="text-amber-600 hover:underline">Forgot password?</a>
@@ -110,6 +106,14 @@ $_SESSION['old'] ??= [];
           </div>
         </form>
 
+        <!-- Security Info -->
+        <div class="mt-4 text-center">
+          <p class="text-xs text-slate-400">
+            <i class="fas fa-shield-alt mr-1"></i>
+            Your login activity is monitored for security
+          </p>
+        </div>
+
         <!-- Register Link -->
         <p class="text-center text-sm text-slate-500 mt-5">
           Don't have an account? <a href="./register_form.php"
@@ -120,7 +124,6 @@ $_SESSION['old'] ??= [];
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-
         // Password visibility toggle
         const toggleButtons = document.querySelectorAll('.toggle-password');
 
@@ -143,20 +146,25 @@ $_SESSION['old'] ??= [];
 
         // Check for remembered email from cookie
         <?php if (isset($_COOKIE['user_email'])): ?>
-          document.querySelector('input[name="email"]').value = '<?php echo $_COOKIE['user_email']; ?>';
-          document.querySelector('input[name="remember_me"]').checked = true;
+          document.getElementById('email').value = '<?php echo $_COOKIE['user_email']; ?>';
+          document.getElementById('remember_me').checked = true;
         <?php endif; ?>
 
         // Forgot password link
         document.getElementById('forgotPassword').addEventListener('click', function (e) {
           e.preventDefault();
-          const email = document.querySelector('input[name="email"]').value.trim();
+          const email = document.getElementById('email').value.trim();
 
           if (email && isValidEmail(email)) {
             window.location.href = 'forgot-password.php?email=' + encodeURIComponent(email);
           } else {
-            alert('Please enter your email address first');
-            document.querySelector('input[name="email"]').focus();
+            Swal.fire({
+              title: 'Email Required',
+              text: 'Please enter your email address first',
+              icon: 'info',
+              confirmButtonColor: '#d97706'
+            });
+            document.getElementById('email').focus();
           }
         });
 
@@ -182,6 +190,5 @@ $_SESSION['old'] ??= [];
 </html>
 
 <?php
-unset($_SESSION['error']);
 unset($_SESSION['old']);
 ?>

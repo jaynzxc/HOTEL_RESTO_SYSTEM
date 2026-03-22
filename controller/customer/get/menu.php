@@ -234,6 +234,22 @@ $defaultRoom = $db->query(
     ['user_id' => $_SESSION['user_id']]
 )->fetch_one();
 
+$activeFoodPromos = $db->query(
+    "SELECT pc.*, c.campaign_name 
+     FROM promo_codes pc
+     LEFT JOIN campaigns c ON pc.campaign_id = c.id
+     WHERE pc.is_active = 1 
+     AND pc.valid_from <= NOW() 
+     AND pc.valid_to >= NOW()
+     AND (pc.usage_limit IS NULL OR pc.used_count < pc.usage_limit)
+     AND (c.campaign_type IS NULL OR c.campaign_type IN ('discount', 'flash_sale', 'seasonal'))
+     ORDER BY pc.discount_value DESC
+     LIMIT 5",
+    []
+)->find() ?: [];
+
+$viewData['activeFoodPromos'] = $activeFoodPromos;
+
 // Set points variable for easy access
 $points = $user['loyalty_points'] ?? 0;
 $member_tier = $user['member_tier'] ?? 'bronze';
@@ -245,7 +261,7 @@ $viewData = [
     'activeOrder' => $activeOrder,
     'orderHistory' => $orderHistory,
     'balance' => $balance,
-    
+
     'initials' => $initials,
     'defaultTable' => $defaultTable,
     'defaultRoom' => $defaultRoom,

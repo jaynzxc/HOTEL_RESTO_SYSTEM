@@ -475,7 +475,6 @@
           }
         });
 
-        // For demo/testing: double-click to add points (remove in production)
         pointsBalanceSpan.addEventListener('dblclick', () => {
           if (hasOutstandingBalance) {
             showBalanceWarning();

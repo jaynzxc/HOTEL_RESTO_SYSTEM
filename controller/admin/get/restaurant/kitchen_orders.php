@@ -1,7 +1,7 @@
 <?php
 /**
  * GET Controller - Admin Kitchen Orders (KOT)
- * Handles fetching kitchen orders, queue, and statistics
+ * Handles fetching kitchen orders, queue, statistics, and food inventory
  */
 
 session_start();
@@ -50,7 +50,7 @@ if ($statusFilter !== 'all') {
     $queryParams['status'] = $statusFilter;
 }
 
-// Priority filter (you can add a priority column if needed, for now using status as proxy)
+// Priority filter
 if ($priorityFilter === 'high') {
     $whereConditions[] = "fo.status = 'urgent'";
 } elseif ($priorityFilter === 'medium') {
@@ -180,6 +180,31 @@ $prepQueue = $db->query(
     []
 )->find() ?: [];
 
+// Get FOOD INVENTORY ONLY (for kitchen stock management)
+$foodInventory = $db->query(
+    "SELECT id, item_name, category, stock, reorder_level, unit, created_at, updated_at
+     FROM inventory 
+     WHERE category IN ('Food', 'Meat', 'Beverage', 'Vegetable', 'Fruit', 'Dairy', 'Spice', 'Sauce', 'Oil')
+     ORDER BY 
+        CASE 
+            WHEN stock <= reorder_level THEN 1
+            ELSE 2
+        END,
+        item_name ASC",
+    []
+)->find() ?: [];
+
+// Get low stock food items for kitchen warning
+$lowStockFoodItems = $db->query(
+    "SELECT id, item_name, stock, reorder_level, unit 
+     FROM inventory 
+     WHERE category IN ('Food', 'Meat', 'Beverage', 'Vegetable', 'Fruit', 'Dairy', 'Spice', 'Sauce', 'Oil')
+     AND stock <= reorder_level 
+     ORDER BY (stock / reorder_level) ASC 
+     LIMIT 10",
+    []
+)->find() ?: [];
+
 // Calculate orders in progress
 $ordersInProgress = count(array_filter($kitchenOrders, function ($o) {
     return in_array($o['status'], ['new', 'preparing', 'urgent']);
@@ -210,8 +235,6 @@ if ($admin) {
     }
 }
 
-
-
 // Store data for view
 $viewData = [
     'admin' => $admin,
@@ -224,7 +247,8 @@ $viewData = [
     'statusFilter' => $statusFilter,
     'priorityFilter' => $priorityFilter,
     'searchFilter' => $searchFilter,
-
+    'foodInventory' => $foodInventory,
+    'lowStockFoodItems' => $lowStockFoodItems,
     'today' => date('F j, Y')
 ];
 

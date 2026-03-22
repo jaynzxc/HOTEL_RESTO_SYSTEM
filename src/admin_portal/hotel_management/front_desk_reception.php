@@ -829,7 +829,6 @@ $current_page = 'front_desk_reception';
         currentGuestName = guestName;
         currentRoomNumber = roomNumber;
 
-        // Random additional charges for demo
         const miniBar = Math.floor(Math.random() * 1000) + 200;
         const restaurant = Math.floor(Math.random() * 1500) + 300;
         const total = totalAmount + miniBar + restaurant;

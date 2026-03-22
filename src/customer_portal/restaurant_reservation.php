@@ -209,8 +209,6 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 <span><span class="inline-block w-3 h-3 bg-red-100 border border-red-300 rounded"></span>
                   occupied</span>
               </div>
-              <p class="text-xs text-slate-400 mt-2"><i class="fas fa-comment"></i> click table to toggle status
-                (demo)</p>
             </div>
 
             <!-- staff notification panel (empty at start) -->
@@ -225,7 +223,6 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
                 id="refreshNotifications"><i class="fas fa-rotate"></i> refresh notifications</button>
             </div>
 
-            <!-- seating time demo (dynamic seating recorded separately) -->
             <div class="bg-slate-100 border border-slate-300 rounded-2xl p-5">
               <h4 class="font-medium flex items-center gap-2"><i class="fas fa-clock text-amber-600"></i> seating
                 time recording</h4>
@@ -818,7 +815,7 @@ require_once '../../controller/customer/get/restaurant_reservation.php';
             });
           }
 
-          // Refresh notifications button (demo)
+
           const refreshBtn = document.getElementById('refreshNotifications');
           if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {

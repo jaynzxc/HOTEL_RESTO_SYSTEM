@@ -422,15 +422,15 @@ require_once '../../controller/admin/get/dashboard.php';
               <h3 class="font-semibold flex items-center gap-2 text-slate-700"><i
                   class="fas fa-calendar-plus text-amber-600"></i> Events today</h3>
               <ul class="mt-3 space-y-2 text-sm">
-                <?php if (empty($todayEvents)): ?>
-                  <li class="text-slate-400 text-center py-2">No events scheduled today</li>
+                        <?php if (empty($todayEvents)): ?>
+                    <li class="text-slate-400 text-center py-2">No events scheduled today</li>
                 <?php else: ?>
-                  <?php foreach ($todayEvents as $event): ?>
-                    <li>🎤 <?php echo htmlspecialchars($event['event_name']); ?> ·
-                      <?php echo date('g:i A', strtotime($event['event_time'])); ?>
-                      (<?php echo htmlspecialchars($event['location'] ?? 'TBD'); ?>)
-                    </li>
-                  <?php endforeach; ?>
+                    <?php foreach ($todayEvents as $event): ?>
+                        <li>🎤 <?php echo htmlspecialchars($event['event_name']); ?> ·
+                          <?php echo date('g:i A', strtotime($event['event_time'])); ?>
+                          (<?php echo htmlspecialchars($event['location'] ?? 'Venue TBD'); ?>)
+                        </li>
+                    <?php endforeach; ?>
                 <?php endif; ?>
               </ul>
             </div>
@@ -476,11 +476,11 @@ require_once '../../controller/admin/get/dashboard.php';
                       $colorClass = 'bg-amber-300';
                   }
                   ?>
-                  <div class="w-1/6 flex flex-col items-center">
-                    <div class="<?php echo $colorClass; ?> w-full rounded-t" style="height: <?php echo $height; ?>px;">
+                    <div class="w-1/6 flex flex-col items-center">
+                      <div class="<?php echo $colorClass; ?> w-full rounded-t" style="height: <?php echo $height; ?>px;">
+                      </div>
+                      <span class="text-[10px] mt-1 text-slate-500"><?php echo $days[$i]; ?></span>
                     </div>
-                    <span class="text-[10px] mt-1 text-slate-500"><?php echo $days[$i]; ?></span>
-                  </div>
                 <?php endfor; ?>
               </div>
               <p class="text-xs text-slate-400 mt-2">
@@ -489,7 +489,7 @@ require_once '../../controller/admin/get/dashboard.php';
                   echo $salesGrowth >= 0 ? '+' : '';
                   echo number_format($salesGrowth, 1); ?>% vs last week
                 <?php else: ?>
-                  No sales data this week
+                    No sales data this week
                 <?php endif; ?>
               </p>
             </div>
@@ -548,22 +548,22 @@ require_once '../../controller/admin/get/dashboard.php';
               </thead>
               <tbody class="divide-y">
                 <?php if (empty($recentBookings)): ?>
-                  <tr>
-                    <td colspan="4" class="py-4 text-center text-slate-400">No recent bookings</td>
-                  </tr>
-                <?php else: ?>
-                  <?php foreach ($recentBookings as $booking): ?>
                     <tr>
-                      <td class="py-2"><?php echo htmlspecialchars($booking['guest_name'] ?? 'Guest'); ?></td>
-                      <td><?php echo htmlspecialchars($booking['room_name'] ?? 'N/A'); ?></td>
-                      <td><?php echo date('M d', strtotime($booking['check_in'])); ?></td>
-                      <td>
-                        <span class="status-<?php echo $booking['status']; ?> px-2 py-0.5 rounded-full text-xs">
-                          <?php echo $booking['status']; ?>
-                        </span>
-                      </td>
+                      <td colspan="4" class="py-4 text-center text-slate-400">No recent bookings</td>
                     </tr>
-                  <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach ($recentBookings as $booking): ?>
+                        <tr>
+                          <td class="py-2"><?php echo htmlspecialchars($booking['guest_name'] ?? 'Guest'); ?></td>
+                          <td><?php echo htmlspecialchars($booking['room_name'] ?? 'N/A'); ?></td>
+                          <td><?php echo date('M d', strtotime($booking['check_in'])); ?></td>
+                          <td>
+                            <span class="status-<?php echo $booking['status']; ?> px-2 py-0.5 rounded-full text-xs">
+                              <?php echo $booking['status']; ?>
+                            </span>
+                          </td>
+                        </tr>
+                    <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
             </table>
@@ -587,22 +587,22 @@ require_once '../../controller/admin/get/dashboard.php';
               </thead>
               <tbody class="divide-y">
                 <?php if (empty($recentOrders)): ?>
-                  <tr>
-                    <td colspan="4" class="py-4 text-center text-slate-400">No recent orders</td>
-                  </tr>
-                <?php else: ?>
-                  <?php foreach ($recentOrders as $order): ?>
                     <tr>
-                      <td class="py-2"><?php echo htmlspecialchars($order['table_info'] ?? 'Takeaway'); ?></td>
-                      <td><?php echo $order['item_count']; ?> items</td>
-                      <td>₱<?php echo number_format($order['total_amount']); ?></td>
-                      <td>
-                        <span class="status-<?php echo $order['status']; ?> px-2 py-0.5 rounded-full text-xs">
-                          <?php echo $order['status']; ?>
-                        </span>
-                      </td>
+                      <td colspan="4" class="py-4 text-center text-slate-400">No recent orders</td>
                     </tr>
-                  <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach ($recentOrders as $order): ?>
+                        <tr>
+                          <td class="py-2"><?php echo htmlspecialchars($order['table_info'] ?? 'Takeaway'); ?></td>
+                          <td><?php echo $order['item_count']; ?> items</td>
+                          <td>₱<?php echo number_format($order['total_amount']); ?></td>
+                          <td>
+                            <span class="status-<?php echo $order['status']; ?> px-2 py-0.5 rounded-full text-xs">
+                              <?php echo $order['status']; ?>
+                            </span>
+                          </td>
+                        </tr>
+                    <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
             </table>

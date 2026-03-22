@@ -13,12 +13,6 @@ if (!isset($_SESSION['user_id']) || !$_SESSION['logged_in']) {
     exit();
 }
 
-// // Check if user has admin role
-// if (($_SESSION['user_role'] ?? 'customer') !== 'admin') {
-//     header('Location: ../../view/customer_portal/dashboard.php');
-//     exit();
-// }
-
 $config = require __DIR__ . '/../../../config/config.php';
 $db = new Database($config['database']);
 
@@ -39,22 +33,22 @@ $totalRooms = $db->query(
     "SELECT COUNT(*) as count FROM rooms WHERE is_available = 1"
 )->fetch_one()['count'] ?? 48;
 
-// Occupied rooms today
+// Occupied rooms today (rooms with active bookings)
 $occupiedRooms = $db->query(
     "SELECT COUNT(DISTINCT room_id) as count 
      FROM bookings 
      WHERE status IN ('confirmed', 'checked_in') 
      AND check_in <= :today AND check_out >= :today",
     ['today' => $today]
-)->fetch_one()['count'] ?? 32;
+)->fetch_one()['count'] ?? 0;
 
-// Today's bookings (new bookings for today)
+// Today's bookings (new bookings created today)
 $todayBookings = $db->query(
     "SELECT COUNT(*) as count 
      FROM bookings 
      WHERE DATE(created_at) = :today",
     ['today' => $today]
-)->fetch_one()['count'] ?? 12;
+)->fetch_one()['count'] ?? 0;
 
 // Today's restaurant orders
 $todayOrders = $db->query(
@@ -62,38 +56,38 @@ $todayOrders = $db->query(
      FROM food_orders 
      WHERE DATE(created_at) = :today",
     ['today' => $today]
-)->fetch_one()['count'] ?? 47;
+)->fetch_one()['count'] ?? 0;
 
-// Today's sales
+// Today's sales from completed orders
 $todaySales = $db->query(
     "SELECT COALESCE(SUM(total_amount), 0) as total 
      FROM food_orders 
      WHERE DATE(created_at) = :today AND status = 'completed'",
     ['today' => $today]
-)->fetch_one()['total'] ?? 64200;
+)->fetch_one()['total'] ?? 0;
 
-// Low stock items (assuming you have an inventory table)
+// Low stock items
 $lowStockItems = $db->query(
     "SELECT COUNT(*) as count FROM inventory WHERE stock <= reorder_level"
-)->fetch_one()['count'] ?? 3;
+)->fetch_one()['count'] ?? 0;
 
-// Today's check-ins
+// Today's check-ins (bookings starting today with confirmed status)
 $todayCheckins = $db->query(
     "SELECT COUNT(*) as count 
      FROM bookings 
      WHERE check_in = :today AND status = 'confirmed'",
     ['today' => $today]
-)->fetch_one()['count'] ?? 8;
+)->fetch_one()['count'] ?? 0;
 
-// Pending check-ins
+// Pending check-ins (bookings starting today with pending status)
 $pendingCheckins = $db->query(
     "SELECT COUNT(*) as count 
      FROM bookings 
      WHERE check_in = :today AND status = 'pending'",
     ['today' => $today]
-)->fetch_one()['count'] ?? 2;
+)->fetch_one()['count'] ?? 0;
 
-// UPCOMING CHECK-INS (next 5) - FIXED: removed check_in_time
+// UPCOMING CHECK-INS (next 5)
 $upcomingCheckins = $db->query(
     "SELECT 
         b.id,
@@ -139,12 +133,13 @@ $tableReservations = $db->query(
         rr.status
      FROM restaurant_reservations rr
      WHERE rr.reservation_date = :today
+        AND rr.status IN ('confirmed', 'pending')
      ORDER BY rr.reservation_time ASC
      LIMIT 5",
     ['today' => $today]
 )->find() ?: [];
 
-// TODAY'S EVENTS
+// TODAY'S EVENTS - FIXED: added location column
 $todayEvents = $db->query(
     "SELECT id, event_name, event_time, location, description
      FROM events 
@@ -178,22 +173,39 @@ $lastWeekSales = $db->query(
 )->fetch_one()['total'] ?? 0;
 
 $thisWeekSales = array_sum(array_column($weeklySales, 'total'));
-$salesGrowth = $lastWeekSales > 0 ? (($thisWeekSales - $lastWeekSales) / $lastWeekSales) * 100 : 12.4;
+$salesGrowth = $lastWeekSales > 0 ? (($thisWeekSales - $lastWeekSales) / $lastWeekSales) * 100 : 0;
 
 // Occupancy rate
-$occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100) : 67;
+$occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100) : 0;
 
-// Order category distribution
-$orderCategories = $db->query(
-    "SELECT 
-        category,
-        COUNT(*) as count
-     FROM menu_items mi
-     JOIN food_orders fo ON JSON_CONTAINS(fo.items, JSON_OBJECT('name', mi.name))
-     WHERE DATE(fo.created_at) = :today
-     GROUP BY category",
+// Order category distribution - FIXED: More reliable approach
+$orderCategories = [];
+$recentOrdersData = $db->query(
+    "SELECT items FROM food_orders WHERE DATE(created_at) = :today LIMIT 50",
     ['today' => $today]
 )->find() ?: [];
+
+// Process order categories from JSON data
+$categoryCounts = ['appetizers' => 0, 'mains' => 0, 'desserts' => 0, 'beverages' => 0];
+
+foreach ($recentOrdersData as $order) {
+    if ($order && isset($order['items'])) {
+        $items = is_string($order['items']) ? json_decode($order['items'], true) : $order['items'];
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                if (isset($item['category'])) {
+                    $categoryCounts[$item['category']] = ($categoryCounts[$item['category']] ?? 0) + 1;
+                }
+            }
+        }
+    }
+}
+
+foreach ($categoryCounts as $category => $count) {
+    if ($count > 0) {
+        $orderCategories[] = ['category' => $category, 'count' => $count];
+    }
+}
 
 // RECENT BOOKINGS (last 5)
 $recentBookings = $db->query(
@@ -205,30 +217,35 @@ $recentBookings = $db->query(
         b.status
      FROM bookings b
      ORDER BY b.created_at DESC
-     LIMIT 5",
-    []
+     LIMIT 5"
 )->find() ?: [];
 
-// RECENT ORDERS (last 5)
+// RECENT ORDERS (last 5) - FIXED: proper table_info handling
 $recentOrders = $db->query(
     "SELECT 
         fo.id,
         fo.order_reference,
-        CASE 
-            WHEN fo.order_type LIKE 'dine-in%' THEN CONCAT('Table ', SUBSTRING_INDEX(fo.order_type, ' ', -1))
-            ELSE fo.order_type
-        END as table_info,
+        fo.order_type,
         fo.total_amount,
         fo.status,
         JSON_LENGTH(fo.items) as item_count
      FROM food_orders fo
      ORDER BY fo.created_at DESC
-     LIMIT 5",
-    []
+     LIMIT 5"
 )->find() ?: [];
 
+// Format recent orders with proper table info
+foreach ($recentOrders as &$order) {
+    if (strpos($order['order_type'], 'dine-in') !== false) {
+        // Extract table number from order_type if needed
+        $order['table_info'] = 'Dine-in';
+    } else {
+        $order['table_info'] = ucfirst($order['order_type']);
+    }
+}
+
 // Get admin initials
-$initials = 'A';
+$initials = 'AD';
 if ($admin) {
     $first_name = $admin['first_name'] ?? '';
     $last_name = $admin['last_name'] ?? '';
@@ -263,7 +280,9 @@ $viewData = [
     'todayEvents' => $todayEvents,
     'weeklySales' => $weeklySales,
     'salesGrowth' => $salesGrowth,
+    'thisWeekSales' => $thisWeekSales,
     'occupancyRate' => $occupancyRate,
+    'orderCategories' => $orderCategories,
     'recentBookings' => $recentBookings,
     'recentOrders' => $recentOrders,
     'today' => $today

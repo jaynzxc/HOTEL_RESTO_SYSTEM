@@ -1,8 +1,7 @@
 <?php
 /**
- * POST Controller - Create Hotel Booking
- * Handles hotel booking creation with points calculation (for tracking only)
- * Checks for pending/unpaid bookings and balance approval status
+ * POST Controller - Create Hotel Booking with Promo Code
+ * Handles hotel booking creation with promo code discount
  */
 
 session_start();
@@ -37,14 +36,13 @@ try {
     $user_id = $_SESSION['user_id'];
 
     // ========== CHECK FOR ACTIVE PENDING/UNPAID BOOKINGS ==========
-    // Only block if there's an ACTIVE pending booking (not completed/cancelled)
     $pendingBooking = $db->query(
         "SELECT id, booking_reference, room_name, check_in, check_out, total_amount, status, payment_status
          FROM bookings 
          WHERE user_id = :user_id 
          AND status IN ('pending', 'confirmed')
          AND payment_status = 'unpaid'
-         AND check_out >= CURDATE()  -- Only future bookings
+         AND check_out >= CURDATE()
          ORDER BY created_at DESC 
          LIMIT 1",
         ['user_id' => $user_id]
@@ -68,7 +66,7 @@ try {
          WHERE user_id = :user_id 
          AND status IN ('pending', 'confirmed')
          AND payment_status = 'unpaid'
-         AND reservation_date >= CURDATE()  -- Only future reservations
+         AND reservation_date >= CURDATE()
          ORDER BY created_at DESC 
          LIMIT 1",
         ['user_id' => $user_id]
@@ -87,70 +85,46 @@ try {
 
     // ========== CHECK BALANCE APPROVAL STATUS ==========
     $balance = $db->query(
-        "SELECT * FROM current_balance 
-         WHERE user_id = :user_id",
+        "SELECT * FROM current_balance WHERE user_id = :user_id",
         ['user_id' => $user_id]
     )->fetch_one();
 
-    if ($balance) {
-        // Only block if there's a PENDING approval (actively waiting)
-        if ($balance['admin_approval'] === 'pending') {
-            echo json_encode([
-                'success' => false,
-                'has_pending' => true,
-                'type' => 'balance_pending',
-                'message' => 'You have a payment pending admin approval. Please wait for approval before making new bookings.',
-                'pending_item' => [
-                    'amount' => $balance['pending_balance'],
-                    'total' => $balance['total_balance']
-                ]
-            ]);
-            exit();
-        }
-
-        // Block if there's a REJECTED balance with active pending amount
-        if ($balance['admin_approval'] === 'rejected' && $balance['pending_balance'] > 0) {
-            echo json_encode([
-                'success' => false,
-                'has_pending' => true,
-                'type' => 'balance_rejected',
-                'message' => 'Your previous payment was rejected. Please contact support to resolve this before making new bookings.',
-                'pending_item' => [
-                    'amount' => $balance['pending_balance'],
-                    'total' => $balance['total_balance'],
-                    'reason' => $balance['rejection_reason']
-                ]
-            ]);
-            exit();
-        }
-
-        // NOTE: We DON'T block if total_balance > 0 but no pending approval
-        // This allows users with completed approved balances to book
-    }
-
-    // ========== CHECK FOR PENDING PAYMENTS ==========
-    $pendingPayment = $db->query(
-        "SELECT id, payment_reference, amount, payment_method, approval_status
-         FROM payments 
-         WHERE user_id = :user_id 
-         AND approval_status = 'pending'
-         ORDER BY created_at DESC 
-         LIMIT 1",
-        ['user_id' => $user_id]
-    )->fetch_one();
-
-    if ($pendingPayment) {
+    if ($balance && $balance['admin_approval'] === 'pending') {
         echo json_encode([
             'success' => false,
             'has_pending' => true,
-            'type' => 'payment_pending',
-            'message' => 'You have a payment of ₱' . number_format($pendingPayment['amount'], 2) . ' pending admin approval. Please wait for approval before creating a new booking.',
-            'pending_item' => $pendingPayment
+            'type' => 'balance_pending',
+            'message' => 'You have a payment pending admin approval. Please wait before making new bookings.',
+            'pending_item' => ['amount' => $balance['pending_balance']]
         ]);
         exit();
     }
 
-    // ========== ALL CHECKS PASSED - PROCEED WITH BOOKING CREATION ==========
+    // ========== GET PROMO CODE DATA IF APPLIED ==========
+    $promoCodeId = null;
+    $promoCode = null;
+    $discountApplied = 0;
+
+    if (!empty($_POST['promo_code_id'])) {
+        $promoCodeId = intval($_POST['promo_code_id']);
+        $discountApplied = floatval($_POST['discount_applied'] ?? 0);
+
+        // Get promo code details for validation
+        $promoData = $db->query(
+            "SELECT * FROM promo_codes WHERE id = :id",
+            ['id' => $promoCodeId]
+        )->fetch_one();
+
+        if ($promoData) {
+            $promoCode = $promoData['code'];
+
+            // Update usage count
+            $db->query(
+                "UPDATE promo_codes SET used_count = used_count + 1 WHERE id = :id",
+                ['id' => $promoCodeId]
+            );
+        }
+    }
 
     // Get and validate input data
     $firstName = trim($_POST['first_name'] ?? '');
@@ -217,13 +191,18 @@ try {
         exit();
     }
 
-    // Calculate totals
+    // Calculate totals with promo discount
     $subtotal = $roomPrice * $nights;
-    $tax = $subtotal * 0.12; // 12% tax
+    $tax = $subtotal * 0.12;
     $totalAmount = $subtotal + $tax;
 
-    // Calculate points to earn (5 points per ₱100 spent) - for tracking only
-    $pointsEarned = floor($totalAmount / 100) * 5; // 5 points per ₱100
+    // Apply discount if promo code was used
+    if ($discountApplied > 0) {
+        $totalAmount = $totalAmount - $discountApplied;
+    }
+
+    // Calculate points to earn (5 points per ₱100 spent after discount)
+    $pointsEarned = floor($totalAmount / 100) * 5;
 
     // Generate unique booking reference
     $reference = 'HOT-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
@@ -231,19 +210,21 @@ try {
     // Start transaction
     $db->beginTransaction();
 
-    // Insert booking - points_earned is stored for tracking but NOT added to user account
+    // Insert booking
     $db->query(
         "INSERT INTO bookings (
             booking_reference, user_id, guest_first_name, guest_last_name, 
             guest_email, guest_phone, check_in, check_out, nights,
             room_id, room_name, room_price, adults, children,
             subtotal, tax, total_amount, special_requests,
+            promo_code_id, promo_code, discount_applied,
             points_earned, status, payment_status, created_at
         ) VALUES (
             :reference, :user_id, :first_name, :last_name,
             :email, :phone, :check_in, :check_out, :nights,
             :room_id, :room_name, :room_price, :adults, :children,
             :subtotal, :tax, :total, :special_requests,
+            :promo_code_id, :promo_code, :discount_applied,
             :points, 'pending', 'unpaid', NOW()
         )",
         [
@@ -265,6 +246,9 @@ try {
             'tax' => $tax,
             'total' => $totalAmount,
             'special_requests' => $specialRequests,
+            'promo_code_id' => $promoCodeId,
+            'promo_code' => $promoCode,
+            'discount_applied' => $discountApplied,
             'points' => $pointsEarned
         ]
     );
@@ -274,6 +258,9 @@ try {
 
     // Create notification for user
     $notification_message = "Your booking for $roomName from $checkIn to $checkOut has been created. Total: ₱" . number_format($totalAmount, 2);
+    if ($discountApplied > 0) {
+        $notification_message .= " (₱" . number_format($discountApplied, 2) . " discount applied)";
+    }
     if ($pointsEarned > 0) {
         $notification_message .= " You'll earn $pointsEarned loyalty points after payment.";
     }
@@ -305,6 +292,8 @@ try {
             'check_out' => $checkOut,
             'nights' => $nights,
             'total' => $totalAmount,
+            'discount_applied' => $discountApplied,
+            'promo_code' => $promoCode,
             'points_earned' => $pointsEarned
         ],
         'note' => 'Points will be added after payment confirmation'
@@ -316,12 +305,9 @@ try {
         $db->rollBack();
     }
 
-    // Log error
     error_log("Booking creation error: " . $e->getMessage());
-    error_log("Stack trace: " . $e->getTraceAsString());
     error_log("POST data: " . print_r($_POST, true));
 
-    // Return the actual error message for debugging
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

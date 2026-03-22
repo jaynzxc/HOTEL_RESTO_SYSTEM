@@ -8,7 +8,6 @@ session_start();
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id']) && $_SESSION['logged_in'] === true) {
-    // Fix: Your condition had 'admin' twice, now checks properly
     if ($_SESSION['role'] === 'admin' || $_SESSION['role'] === 'staff') {
         header('Location: ../../src/admin_portal/dashboard.php');
         exit();
@@ -25,17 +24,39 @@ $_SESSION['old'] ??= [];
 
 // Check if it's a POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // Fix: Use null coalescing properly and provide a default
     $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
     header('Location: ' . $redirect);
     exit();
 }
 
 $errors = [];
-
 $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
 $password = $_POST['password'] ?? '';
 $remember_me = isset($_POST['remember_me']) ? true : false;
+
+// Get client IP address
+function getClientIP()
+{
+    $ipaddress = '';
+    if (isset($_SERVER['HTTP_CLIENT_IP']))
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    else if (isset($_SERVER['HTTP_X_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    else if (isset($_SERVER['HTTP_FORWARDED']))
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    else if (isset($_SERVER['REMOTE_ADDR']))
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+    else
+        $ipaddress = 'UNKNOWN';
+    return $ipaddress;
+}
+
+$ip_address = getClientIP();
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
 
 // Validation
 if (empty($email)) {
@@ -51,14 +72,28 @@ if (empty($password)) {
 if (!empty($errors)) {
     $_SESSION['error'] = $errors;
     $_SESSION['old']['email'] = $email;
-    // Fix: Use proper redirect with default
+
+    // Log failed login attempt
+    try {
+        $db->query(
+            "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+             VALUES (NULL, :email, :ip, :agent, 'failed', NOW())",
+            [
+                'email' => $email,
+                'ip' => $ip_address,
+                'agent' => $user_agent
+            ]
+        );
+    } catch (Exception $e) {
+        error_log("Failed to log login attempt: " . $e->getMessage());
+    }
+
     $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
     header('Location: ' . $redirect);
     exit();
 }
 
 try {
-    // Fix: Added status check to ensure account is active
     $user = $db->query(
         "SELECT id, full_name, email, phone, role, password, status 
          FROM users WHERE email = :email",
@@ -68,6 +103,18 @@ try {
     if (!$user) {
         $_SESSION['error']['login'] = 'Invalid email or password';
         $_SESSION['old']['email'] = $email;
+
+        // Log failed login attempt
+        $db->query(
+            "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+             VALUES (NULL, :email, :ip, :agent, 'failed', NOW())",
+            [
+                'email' => $email,
+                'ip' => $ip_address,
+                'agent' => $user_agent
+            ]
+        );
+
         $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
         header('Location: ' . $redirect);
         exit();
@@ -77,6 +124,19 @@ try {
     if ($user['status'] !== 'active') {
         $_SESSION['error']['login'] = 'Your account is not active. Please contact support.';
         $_SESSION['old']['email'] = $email;
+
+        // Log failed login attempt (account inactive)
+        $db->query(
+            "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+             VALUES (:user_id, :user_name, :ip, :agent, 'failed', NOW())",
+            [
+                'user_id' => $user['id'],
+                'user_name' => $user['full_name'],
+                'ip' => $ip_address,
+                'agent' => $user_agent
+            ]
+        );
+
         $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
         header('Location: ' . $redirect);
         exit();
@@ -85,11 +145,25 @@ try {
     if (!password_verify($password, $user['password'])) {
         $_SESSION['error']['login'] = 'Invalid email or password';
         $_SESSION['old']['email'] = $email;
+
+        // Log failed login attempt (wrong password)
+        $db->query(
+            "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+             VALUES (:user_id, :user_name, :ip, :agent, 'failed', NOW())",
+            [
+                'user_id' => $user['id'],
+                'user_name' => $user['full_name'],
+                'ip' => $ip_address,
+                'agent' => $user_agent
+            ]
+        );
+
         $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
         header('Location: ' . $redirect);
         exit();
     }
 
+    // Rehash password if needed
     if (password_needs_rehash($user['password'], PASSWORD_DEFAULT, ['cost' => 12])) {
         $new_hashed_password = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
 
@@ -108,6 +182,18 @@ try {
         ['id' => $user['id']]
     );
 
+    // Log successful login
+    $db->query(
+        "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+         VALUES (:user_id, :user_name, :ip, :agent, 'success', NOW())",
+        [
+            'user_id' => $user['id'],
+            'user_name' => $user['full_name'],
+            'ip' => $ip_address,
+            'agent' => $user_agent
+        ]
+    );
+
     // Set session variables
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['user_name'] = $user['full_name'];
@@ -116,6 +202,7 @@ try {
     $_SESSION['role'] = $user['role'];
     $_SESSION['logged_in'] = true;
     $_SESSION['login_time'] = time();
+    $_SESSION['login_ip'] = $ip_address;
 
     // Handle remember me
     if ($remember_me) {
@@ -151,7 +238,24 @@ try {
 
     $_SESSION['error']['database'] = 'Login failed. Please try again later.';
     $_SESSION['old']['email'] = $email;
+
+    // Log database error as failed login
+    try {
+        $db->query(
+            "INSERT INTO login_history (user_id, user_name, ip_address, user_agent, status, created_at) 
+             VALUES (NULL, :email, :ip, :agent, 'failed', NOW())",
+            [
+                'email' => $email,
+                'ip' => $ip_address,
+                'agent' => $user_agent
+            ]
+        );
+    } catch (Exception $e) {
+        error_log("Failed to log login attempt: " . $e->getMessage());
+    }
+
     $redirect = $_SERVER['HTTP_REFERER'] ?? '../../view/auth/login.php';
     header('Location: ' . $redirect);
     exit();
 }
+?>
