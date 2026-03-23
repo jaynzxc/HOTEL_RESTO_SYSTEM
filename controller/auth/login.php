@@ -1,22 +1,8 @@
 <?php
 require_once '../../Class/Database.php';
 
-// Load configuration (automatically detects Railway or local)
 $config = require_once '../../config/config.php';
-
-// Create database connection with error handling
-try {
-    $db = new Database($config['database']);
-} catch (PDOException $e) {
-    // Log the error and show user-friendly message
-    error_log("Login: Database connection failed - " . $e->getMessage());
-    
-    if ($config['debug']) {
-        die("Database connection error: " . $e->getMessage());
-    } else {
-        die("Unable to connect to the database. Please try again later.");
-    }
-}
+$db = new Database($config['database']);
 
 session_start();
 
