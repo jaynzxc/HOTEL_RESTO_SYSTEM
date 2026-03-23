@@ -1,36 +1,50 @@
 <?php
 /**
- * Configuration File
- * Works both locally and on Railway
+ * Configuration File - Robust version with better error handling
  */
 
 // Detect if we're running on Railway
 $isRailway = !empty(getenv('RAILWAY_ENVIRONMENT')) || !empty(getenv('MYSQLHOST'));
 
 if ($isRailway) {
-    // Railway production configuration
+    // Try multiple possible host sources for Railway
+    $host = getenv('MYSQLHOST');
+    $port = getenv('MYSQLPORT');
+    
+    // If MYSQLHOST is not set, try RAILWAY_PRIVATE_DOMAIN
+    if (empty($host)) {
+        $host = getenv('RAILWAY_PRIVATE_DOMAIN');
+        $port = '3306';
+    }
+    
+    // If still empty, try TCP proxy
+    if (empty($host)) {
+        $host = getenv('RAILWAY_TCP_PROXY_DOMAIN');
+        $port = getenv('RAILWAY_TCP_PROXY_PORT');
+    }
+    
+    // Final fallback
+    if (empty($host)) {
+        $host = 'mysql';
+        $port = '3306';
+    }
+    
     $config = [
         'database' => [
-            'host' => getenv('MYSQLHOST'),
-            'port' => getenv('MYSQLPORT'),
-            'dbname' => getenv('MYSQL_DATABASE'),
+            'host' => $host,
+            'port' => $port,
+            'dbname' => getenv('MYSQL_DATABASE') ?: 'railway',
             'charset' => 'utf8mb4',
-            'username' => getenv('MYSQLUSER'),
-            'password' => getenv('MYSQLPASSWORD')
+            'username' => getenv('MYSQLUSER') ?: 'root',
+            'password' => getenv('MYSQLPASSWORD') ?: ''
         ],
         'environment' => 'production',
-        'debug' => false
+        'debug' => true // Set to true temporarily for debugging
     ];
     
-    // Validate Railway database configuration
-    if (empty($config['database']['host']) || empty($config['database']['dbname'])) {
-        error_log("Railway: Missing database configuration. Check environment variables.");
-        $config['database']['host'] = 'mysql';
-        $config['database']['port'] = '3306';
-        $config['database']['dbname'] = 'railway';
-        $config['database']['username'] = 'root';
-        $config['database']['password'] = '';
-    }
+    // Log the connection attempt
+    error_log("Railway Database Config - Host: {$host}, Port: {$port}, DB: " . $config['database']['dbname']);
+    
 } else {
     // Local development configuration
     $config = [
