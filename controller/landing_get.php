@@ -9,8 +9,11 @@ session_start();
 require_once __DIR__ . '../../Class/Database.php';
 
 $config = require __DIR__ . '../../config/config.php';
-$db = new Database($config['database']);
 
+// Pass the full config array (including username/password)
+$db = new Database($config);
+
+// Rest of your code remains exactly the same...
 // Get featured rooms (limit to 3)
 $featuredRooms = $db->query(
     "SELECT id, name, description, price, beds, view, amenities, image_url, max_occupancy 
@@ -20,6 +23,8 @@ $featuredRooms = $db->query(
      LIMIT 3",
     []
 )->find() ?: [];
+
+// ... (keep all the rest of your code unchanged)
 
 // If no rooms in DB, use default featured rooms
 if (empty($featuredRooms)) {

@@ -5,15 +5,34 @@ class Database
     private $statement;
     private $connection;
 
-    public function __construct($config, $username = 'root', $password = '')
+    public function __construct($config, $username = null, $password = null)
     {
-        // Build DSN with port and charset
-        $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['dbname']};charset={$config['charset']}";
+        // If username/password not provided, try to get from config
+        if ($username === null && isset($config['username'])) {
+            $username = $config['username'];
+        } elseif ($username === null) {
+            $username = 'root';
+        }
+        
+        if ($password === null && isset($config['password'])) {
+            $password = $config['password'];
+        } elseif ($password === null) {
+            $password = '';
+        }
+        
+        // Extract database connection details
+        $host = $config['database']['host'] ?? '127.0.0.1';
+        $port = $config['database']['port'] ?? '3306';
+        $dbname = $config['database']['dbname'] ?? 'hotelrestaurant';
+        $charset = $config['database']['charset'] ?? 'utf8mb4';
+        
+        // Build DSN
+        $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
         
         try {
             $this->connection = new PDO($dsn, $username, $password, [
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION  // Add this for better error handling
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
             ]);
         } catch (PDOException $e) {
             // For debugging - remove in production
