@@ -5,33 +5,43 @@ class Database
     private $statement;
     private $connection;
 
-    public function __construct($config, $username = 'root', $password = '')
+    public function __construct($config, $username = null, $password = null)
     {
-        // Handle the connection parameters properly
+        // Handle connection parameters with proper fallbacks
         $host = $config['host'] ?? 'localhost';
-        $port = isset($config['port']) ? ';port=' . $config['port'] : '';
+        $port = isset($config['port']) && !empty($config['port']) ? ';port=' . $config['port'] : '';
         $dbname = $config['dbname'] ?? '';
+        $charset = $config['charset'] ?? 'utf8mb4';
+        
+        // Use provided credentials or fallback to config values
+        $username = $username ?? ($config['username'] ?? 'root');
+        $password = $password ?? ($config['password'] ?? '');
         
         // Build DSN - use host and port, avoid socket issues
-        $dsn = "mysql:host={$host}{$port};dbname={$dbname}";
+        $dsn = "mysql:host={$host}{$port};dbname={$dbname};charset={$charset}";
         
-        // Add charset for better compatibility
+        // PDO options
         $options = [
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Add this for better error reporting
-            PDO::ATTR_EMULATE_PREPARES => false
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_PERSISTENT => false
         ];
         
         try {
             $this->connection = new PDO($dsn, $username, $password, $options);
         } catch (PDOException $e) {
-            // Log the error properly
+            // Log the error
             error_log("Database connection failed: " . $e->getMessage());
+            error_log("DSN attempted: " . $dsn);
+            error_log("Host: " . $host);
+            error_log("Port: " . $port);
+            
+            // Re-throw the exception
             throw $e;
         }
     }
 
-    // Rest of your methods remain the same...
     public function query($query, $param = [])
     {
         $this->statement = $this->connection->prepare($query);
